@@ -376,22 +376,22 @@ const FeaturedCategories = () => {
     {
       name: "Rosas Rojas",
       desc: "El símbolo clásico del amor y la pasión. Rosas de tallo largo seleccionadas por su color y fragancia.",
-      image: "https://images.unsplash.com/photo-1548610762-7c6abc25c28e?q=80&w=2072&auto=format&fit=crop"
+      image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTzTjXosrNpDic79eqybv-O5EslfXS6wlgpLg&s"
     },
     {
       name: "Tulipanes",
       desc: "Elegancia y frescura en una variedad de colores vibrantes. Perfectos para iluminar cualquier espacio.",
-      image: "https://images.unsplash.com/photo-1520323232427-6b620030f124?q=80&w=2070&auto=format&fit=crop"
+      image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQaBkHMX2ZKrElpc1NXO7fNglXzVp-DWrX2wg&s"
     },
     {
       name: "Arreglos Mixtos",
       desc: "Combinaciones artísticas de flores de temporada que crean texturas y aromas únicos.",
-      image: "https://images.unsplash.com/photo-1523694559144-4ec08b9e114c?q=80&w=2070&auto=format&fit=crop"
+      image: "https://floreriamayela.com/wp-content/uploads/2019/12/A314.jpg"
     },
     {
       name: "Ocasiones Especiales",
       desc: "Diseños exclusivos para bodas, aniversarios y momentos que merecen ser celebrados con flores.",
-      image: "https://images.unsplash.com/photo-1519340241574-2dec3963672a?q=80&w=2070&auto=format&fit=crop"
+      image: "https://i.pinimg.com/736x/e2/99/05/e2990573cdd3c1d03468a5cb62542990.jpg"
     }
   ];
 
