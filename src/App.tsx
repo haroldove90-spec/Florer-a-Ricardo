@@ -392,6 +392,11 @@ const FeaturedCategories = () => {
       name: "Ocasiones Especiales",
       desc: "Diseños exclusivos para bodas, aniversarios y momentos que merecen ser celebrados con flores.",
       image: "https://i.pinimg.com/736x/e2/99/05/e2990573cdd3c1d03468a5cb62542990.jpg"
+    },
+    {
+      name: "Selección Especial",
+      desc: "Nuestra colección más exclusiva de arreglos premium y detalles únicos para los gustos más exigentes.",
+      image: "https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcSJ4YWuFqLKrPpSlUgLC5yi-J5IkFKFhF3jcW1h21CkDnUUjVmQi8AvwdNNrrmTzqas2gvXEC4UbP_ZMLVR5SMxHTGP5K7Fm2dcviaHclJjZUorRjH7S1TOpZw"
     }
   ];
 
@@ -486,6 +491,8 @@ const ProductsSection = () => {
   const { addToCart } = useCart();
   const { products } = useProducts();
   
+  const specialSelection = products.filter(p => p.category === "Selección Especial");
+  
   return (
     <section id="tienda" className="py-24 px-4 md:px-12 max-w-7xl mx-auto">
       <div className="text-center mb-12 md:mb-16">
@@ -495,7 +502,7 @@ const ProductsSection = () => {
       </div>
       
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-8">
-        {products.map(product => (
+        {specialSelection.map(product => (
           <div key={product.id} className="flex flex-col items-center text-center group">
             <Link to={`/producto/${product.id}`} className="w-full relative overflow-hidden mb-4 md:mb-6">
               <img src={product.image} alt={product.name} className="w-full h-40 md:h-64 object-cover transition-transform duration-700 group-hover:scale-105 rounded-md" />
