@@ -16,10 +16,10 @@ const mockSalesData = [
 ];
 
 const mockCategoryData = [
-  { name: 'Quesos', value: 400 },
-  { name: 'Jamones', value: 300 },
-  { name: 'Salchichas', value: 200 },
-  { name: 'Embutidos', value: 278 },
+  { name: 'Rosas', value: 450 },
+  { name: 'Tulipanes', value: 320 },
+  { name: 'Orquídeas', value: 580 },
+  { name: 'Arreglos Mixtos', value: 410 },
 ];
 
 const AdminLayout = ({ children }: { children: React.ReactNode }) => {
@@ -274,7 +274,7 @@ const AdminProducts = () => {
   const [formData, setFormData] = useState({
     name: '',
     description: '',
-    category: 'Quesos Nacionales',
+    category: 'Rosas Rojas',
     price: '',
     image: '',
     secondaryImages: [] as string[]
@@ -318,7 +318,7 @@ const AdminProducts = () => {
     });
     
     setIsAdding(false);
-    setFormData({ name: '', description: '', category: 'Quesos Nacionales', price: '', image: '', secondaryImages: [] });
+    setFormData({ name: '', description: '', category: 'Rosas Rojas', price: '', image: '', secondaryImages: [] });
     alert("¡Producto añadido con éxito!");
   };
 
@@ -351,7 +351,7 @@ const AdminProducts = () => {
                   value={formData.name}
                   onChange={e => setFormData({...formData, name: e.target.value})}
                   className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-lightblue focus:border-transparent"
-                  placeholder="Ej. Queso Brie"
+                  placeholder="Ej. Ramo de Rosas"
                 />
               </div>
               <div>
@@ -361,11 +361,12 @@ const AdminProducts = () => {
                   onChange={e => setFormData({...formData, category: e.target.value})}
                   className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-lightblue focus:border-transparent"
                 >
-                  <option value="Quesos Nacionales">Quesos Nacionales</option>
-                  <option value="Quesos Importados">Quesos Importados</option>
-                  <option value="Jamones Selectos">Jamones Selectos</option>
-                  <option value="Salchichas Premium">Salchichas Premium</option>
-                  <option value="Embutidos">Embutidos</option>
+                  <option value="Rosas Rojas">Rosas Rojas</option>
+                  <option value="Tulipanes">Tulipanes</option>
+                  <option value="Orquídeas">Orquídeas</option>
+                  <option value="Arreglos Mixtos">Arreglos Mixtos</option>
+                  <option value="Ocasiones Especiales">Ocasiones Especiales</option>
+                  <option value="Selección Especial">Selección Especial</option>
                 </select>
               </div>
               <div>
@@ -503,11 +504,11 @@ const mockOrders = [
     phone: '+52 55 1234 5678',
     email: 'carlos@example.com',
     date: '2026-03-23 10:30 AM',
-    total: 32.00,
+    total: 70.00,
     status: 'Completado',
     products: [
-      { name: 'Queso Manchego Curado', qty: 2, price: 11.00 },
-      { name: 'Salchicha Ahumada Premium', qty: 1, price: 10.00 }
+      { name: 'Ramo de 24 Rosas Rojas', qty: 1, price: 45.00 },
+      { name: 'Ramo de Girasoles Brillantes', qty: 1, price: 25.00 }
     ]
   },
   {
@@ -516,10 +517,10 @@ const mockOrders = [
     phone: '+52 55 8765 4321',
     email: 'ana.sofia@example.com',
     date: '2026-03-23 11:15 AM',
-    total: 45.50,
+    total: 65.00,
     status: 'Pendiente',
     products: [
-      { name: 'Jamón Ibérico de Bellota', qty: 1, price: 45.50 }
+      { name: 'Caja de Rosas y Orquídeas', qty: 1, price: 65.00 }
     ]
   },
   {
@@ -528,10 +529,10 @@ const mockOrders = [
     phone: '+52 33 9876 5432',
     email: 'roberto.g@example.com',
     date: '2026-03-23 02:45 PM',
-    total: 38.00,
+    total: 110.00,
     status: 'Enviado',
     products: [
-      { name: 'Prosciutto di Parma', qty: 1, price: 38.00 }
+      { name: 'Arreglo de Orquídeas Exóticas', qty: 1, price: 110.00 }
     ]
   },
 ];
