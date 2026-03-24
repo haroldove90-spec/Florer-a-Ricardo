@@ -465,7 +465,7 @@ const Footer = () => {
           <h4 className="font-serif text-lg mb-6 uppercase tracking-[0.15em] text-white/60">Contacto</h4>
           <ul className="space-y-4 text-white/80 font-light text-sm">
             <li>contacto@floreriaricardo.com</li>
-            <li>+52 443 137 3266</li>
+            <li>+52 55 4514 4797</li>
             <li className="pt-4">
               <button className="flex items-center justify-center space-x-3 bg-white text-black px-6 py-3 rounded-sm transition-colors w-full sm:w-auto font-bold">
                 <MessageCircle size={18} />
@@ -628,7 +628,7 @@ const CartModal = () => {
     message += `\n*Total: $${cartTotal.toFixed(2)}*`;
     
     const encodedMessage = encodeURIComponent(message);
-    window.open(`https://wa.me/524431373266?text=${encodedMessage}`, '_blank');
+    window.open(`https://wa.me/525545144797?text=${encodedMessage}`, '_blank');
   };
 
   return (
@@ -720,7 +720,7 @@ const ContactSection = () => {
               </div>
               <div>
                 <p className="text-sm font-bold text-black">WhatsApp / Teléfono</p>
-                <p className="text-sm font-light">+52 443 137 3266</p>
+                <p className="text-sm font-light">+52 55 4514 4797</p>
               </div>
             </div>
             <div className="flex items-center space-x-4">
