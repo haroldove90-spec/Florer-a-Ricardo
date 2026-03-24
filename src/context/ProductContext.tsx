@@ -15,7 +15,7 @@ export const initialProducts: Product[] = [
     id: 1,
     name: "Ramo de 24 Rosas Rojas",
     price: 45.00,
-    image: "https://images.unsplash.com/photo-1548610762-7c6abc25c28e?q=80&w=2072&auto=format&fit=crop",
+    image: "https://encrypted-tbn2.gstatic.com/shopping?q=tbn:ANd9GcSvpbPt9J3nR4KlXv2McMmf_vr5ACVwnX-N7cbU5MZ_1gp-LRUOej8-tatF1VPpbber1YxPGhtJ4dt6XIykhWvxGinQXAQREuHSyx2xqXgysYCbHsjtyUT90Zc",
     description: "Un ramo clásico y elegante de 24 rosas rojas frescas de tallo largo. El símbolo perfecto del amor y la pasión, presentado con follaje decorativo y papel de seda.",
     category: "Rosas Rojas"
   },
@@ -23,7 +23,7 @@ export const initialProducts: Product[] = [
     id: 2,
     name: "Arreglo de Tulipanes Holandeses",
     price: 35.00,
-    image: "https://images.unsplash.com/photo-1520323232427-6b620030f124?q=80&w=2070&auto=format&fit=crop",
+    image: "https://encrypted-tbn0.gstatic.com/shopping?q=tbn:ANd9GcTs-t4cqNQqucnnbmhhiPDh1hbrq08YCtTnOVeKATLr5LJC3lBkfje4SsbLLfLTSWDf88At9_7LKWjm7srBVQZuybs0HEHDCB9TWf8op0uQcc-7qY1dJIUSOXo",
     description: "Hermoso arreglo de 15 tulipanes de colores variados en un jarrón de cristal. Aporta frescura y alegría a cualquier espacio con su elegancia natural.",
     category: "Tulipanes"
   },
@@ -31,7 +31,7 @@ export const initialProducts: Product[] = [
     id: 3,
     name: "Caja de Rosas y Orquídeas",
     price: 65.00,
-    image: "https://images.unsplash.com/photo-1519340241574-2dec3963672a?q=80&w=2070&auto=format&fit=crop",
+    image: "https://encrypted-tbn0.gstatic.com/shopping?q=tbn:ANd9GcRpnK5BsbPHzYIr8eXEWhrV2AWhCpVVT0FMwCkBLuaJmmN3pHsj43jU7xZs7mglmWoaI2GuBkjXUSFQ1AH2MzZtRKW1soe2Eovm5iPgNXG3T_qh8759n1VaBQ",
     description: "Una combinación sofisticada de rosas premium y orquídeas en una caja de lujo. Ideal para aniversarios o momentos inolvidables.",
     category: "Ocasiones Especiales"
   },
@@ -39,7 +39,7 @@ export const initialProducts: Product[] = [
     id: 4,
     name: "Arreglo Mixto 'Primavera'",
     price: 40.00,
-    image: "https://images.unsplash.com/photo-1523694559144-4ec08b9e114c?q=80&w=2070&auto=format&fit=crop",
+    image: "https://encrypted-tbn0.gstatic.com/shopping?q=tbn:ANd9GcRpnK5BsbPHzYIr8eXEWhrV2AWhCpVVT0FMwCkBLuaJmmN3pHsj43jU7xZs7mglmWoaI2GuBkjXUSFQ1AH2MzZtRKW1soe2Eovm5iPgNXG3T_qh8759n1VaBQ",
     description: "Un vibrante arreglo que combina flores de temporada como gerberas, lirios y margaritas. Lleno de color y vida para cualquier ocasión.",
     category: "Arreglos Mixtos"
   },
@@ -47,7 +47,7 @@ export const initialProducts: Product[] = [
     id: 5,
     name: "Orquídea Phalaenopsis Blanca",
     price: 50.00,
-    image: "https://images.unsplash.com/photo-1566393028639-d108a42c46a7?q=80&w=2043&auto=format&fit=crop",
+    image: "https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcTm9PBzvZPvfwyUapJHReFnWx47ImRmfj66HlJn5DVRh3m1ljPdlKxG8IMiKv3NSm2wHPVxqKvZujtvx-I7D4E1kCUWHUkoc361ACagsH5tC9gQntNJV9yF3w",
     description: "Elegante orquídea blanca de dos varas en maceta decorativa. Un regalo duradero que simboliza pureza y sofisticación.",
     category: "Ocasiones Especiales"
   },

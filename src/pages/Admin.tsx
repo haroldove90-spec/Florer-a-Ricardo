@@ -84,35 +84,35 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
             <nav className="flex flex-col space-y-4 relative z-10">
               <Link 
                 to="/admin/ventas" 
-                onClick={() => setIsMobileMenuOpen(false)}
                 className={`group flex items-center space-x-4 p-4 rounded-2xl bg-white shadow-sm border border-gray-100 active:scale-95 transition-all ${location.pathname.includes('/ventas') ? 'ring-2 ring-gold/50' : ''}`}
+                onClick={() => setIsMobileMenuOpen(false)}
               >
                 <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-colors ${location.pathname.includes('/ventas') ? 'bg-gold text-white shadow-md shadow-gold/20' : 'bg-gold/10 text-gold group-hover:bg-gold group-hover:text-white'}`}>
                   <LayoutDashboard size={24} strokeWidth={1.5} />
                 </div>
-                <span className="text-xl font-serif text-navy font-medium">Ventas y Métricas</span>
+                <span className="text-xl font-serif text-navy font-medium group-hover:text-gold">Ventas y Métricas</span>
               </Link>
               
               <Link 
                 to="/admin/pedidos" 
-                onClick={() => setIsMobileMenuOpen(false)}
                 className={`group flex items-center space-x-4 p-4 rounded-2xl bg-white shadow-sm border border-gray-100 active:scale-95 transition-all ${location.pathname.includes('/pedidos') ? 'ring-2 ring-lightblue/50' : ''}`}
+                onClick={() => setIsMobileMenuOpen(false)}
               >
                 <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-colors ${location.pathname.includes('/pedidos') ? 'bg-lightblue text-white shadow-md shadow-lightblue/20' : 'bg-lightblue/10 text-lightblue group-hover:bg-lightblue group-hover:text-white'}`}>
                   <ClipboardList size={24} strokeWidth={1.5} />
                 </div>
-                <span className="text-xl font-serif text-navy font-medium">Pedidos Recientes</span>
+                <span className="text-xl font-serif text-navy font-medium group-hover:text-gold">Pedidos Recientes</span>
               </Link>
               
               <Link 
                 to="/admin/productos" 
-                onClick={() => setIsMobileMenuOpen(false)}
                 className={`group flex items-center space-x-4 p-4 rounded-2xl bg-white shadow-sm border border-gray-100 active:scale-95 transition-all ${location.pathname.includes('/productos') ? 'ring-2 ring-navy/50' : ''}`}
+                onClick={() => setIsMobileMenuOpen(false)}
               >
                 <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-colors ${location.pathname.includes('/productos') ? 'bg-navy text-white shadow-md shadow-navy/20' : 'bg-navy/10 text-navy group-hover:bg-navy group-hover:text-white'}`}>
                   <PackagePlus size={24} strokeWidth={1.5} />
                 </div>
-                <span className="text-xl font-serif text-navy font-medium">Gestión de Productos</span>
+                <span className="text-xl font-serif text-navy font-medium group-hover:text-gold">Gestión de Productos</span>
               </Link>
               
               <div className="h-px bg-gray-200 my-4"></div>
@@ -122,10 +122,10 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
                 className="group flex items-center space-x-4 p-4 rounded-2xl bg-white shadow-sm border border-gray-100 active:scale-95 transition-all" 
                 onClick={() => setIsMobileMenuOpen(false)}
               >
-                <div className="w-12 h-12 rounded-xl bg-gray-100 text-gray-500 flex items-center justify-center group-hover:bg-gray-200 transition-colors">
+                <div className="w-12 h-12 rounded-xl bg-gray-100 text-gray-500 flex items-center justify-center group-hover:bg-gold group-hover:text-white transition-colors">
                   <Home size={24} strokeWidth={1.5} />
                 </div>
-                <span className="text-xl font-serif text-gray-600 font-medium">Volver a la Tienda</span>
+                <span className="text-xl font-serif text-gray-600 font-medium group-hover:text-gold">Volver a la Tienda</span>
               </Link>
             </nav>
             
@@ -147,7 +147,7 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
           <Link 
             to="/admin/ventas" 
             onClick={() => setIsMobileMenuOpen(false)}
-            className={`flex items-center space-x-3 px-4 py-3 rounded-md transition-colors ${location.pathname.includes('/ventas') ? 'bg-lightblue text-navy font-medium' : 'hover:bg-white/10 text-white/80'}`}
+            className={`flex items-center space-x-3 px-4 py-3 rounded-md transition-colors ${location.pathname.includes('/ventas') ? 'bg-lightblue text-navy font-medium' : 'hover:bg-white/10 hover:text-gold text-white/80'}`}
           >
             <LayoutDashboard size={20} />
             <span>Ventas y Métricas</span>
@@ -155,7 +155,7 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
           <Link 
             to="/admin/pedidos" 
             onClick={() => setIsMobileMenuOpen(false)}
-            className={`flex items-center space-x-3 px-4 py-3 rounded-md transition-colors ${location.pathname.includes('/pedidos') ? 'bg-lightblue text-navy font-medium' : 'hover:bg-white/10 text-white/80'}`}
+            className={`flex items-center space-x-3 px-4 py-3 rounded-md transition-colors ${location.pathname.includes('/pedidos') ? 'bg-lightblue text-navy font-medium' : 'hover:bg-white/10 hover:text-gold text-white/80'}`}
           >
             <ClipboardList size={20} />
             <span>Pedidos Recientes</span>
@@ -163,14 +163,14 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
           <Link 
             to="/admin/productos" 
             onClick={() => setIsMobileMenuOpen(false)}
-            className={`flex items-center space-x-3 px-4 py-3 rounded-md transition-colors ${location.pathname.includes('/productos') ? 'bg-lightblue text-navy font-medium' : 'hover:bg-white/10 text-white/80'}`}
+            className={`flex items-center space-x-3 px-4 py-3 rounded-md transition-colors ${location.pathname.includes('/productos') ? 'bg-lightblue text-navy font-medium' : 'hover:bg-white/10 hover:text-gold text-white/80'}`}
           >
             <PackagePlus size={20} />
             <span>Gestión de Productos</span>
           </Link>
         </nav>
         <div className="p-4 border-t border-white/10 mt-auto">
-          <Link to="/" className="flex items-center space-x-3 px-4 py-3 rounded-md hover:bg-white/10 text-white/80 transition-colors">
+          <Link to="/" className="flex items-center space-x-3 px-4 py-3 rounded-md hover:bg-white/10 hover:text-gold text-white/80 transition-colors">
             <LogOut size={20} />
             <span>Volver a la Tienda</span>
           </Link>
@@ -331,7 +331,7 @@ const AdminProducts = () => {
         </div>
         <button 
           onClick={() => setIsAdding(!isAdding)}
-          className="flex items-center space-x-2 bg-navy text-white px-4 py-2 rounded-md hover:bg-lightblue hover:text-navy transition-colors"
+          className="flex items-center space-x-2 bg-navy text-white px-4 py-2 rounded-md hover:bg-lightblue hover:text-gold transition-colors"
         >
           {isAdding ? <X size={18} /> : <PlusCircle size={18} />}
           <span>{isAdding ? 'Cancelar' : 'Nuevo Producto'}</span>
@@ -454,7 +454,7 @@ const AdminProducts = () => {
             <div className="flex justify-end">
               <button 
                 type="submit"
-                className="bg-[#85A854] text-white px-6 py-2 rounded-md hover:bg-[#6b8743] transition-colors font-medium"
+                className="bg-[#85A854] text-white px-6 py-2 rounded-md hover:bg-[#6b8743] hover:text-gold transition-colors font-medium"
               >
                 Guardar Producto
               </button>
@@ -486,7 +486,7 @@ const AdminProducts = () => {
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-600">{product.category || 'Sin categoría'}</td>
                   <td className="px-6 py-4 text-sm font-medium text-[#85A854]">${product.price.toFixed(2)}</td>
-                  <td className="px-6 py-4 text-sm text-lightblue hover:text-navy cursor-pointer">Editar</td>
+                  <td className="px-6 py-4 text-sm text-lightblue hover:text-gold cursor-pointer">Editar</td>
                 </tr>
               ))}
             </tbody>

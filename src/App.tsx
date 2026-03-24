@@ -112,14 +112,14 @@ const Header = () => {
 
         {/* Desktop Nav */}
         <nav className="hidden md:flex space-x-10 items-center">
-          <Link to="/" className="text-xs uppercase tracking-[0.2em] text-white transition-colors hover:text-gray-300">Inicio</Link>
-          <a href="/#tienda" className="text-xs uppercase tracking-[0.2em] text-white transition-colors hover:text-gray-300">Tienda</a>
-          <a href="#contacto" className="text-xs uppercase tracking-[0.2em] text-white transition-colors hover:text-gray-300">Contacto</a>
-          <Link to="/admin" className="text-xs uppercase tracking-[0.2em] text-white font-bold transition-colors hover:text-gray-300">Admin</Link>
+          <Link to="/" className="text-xs uppercase tracking-[0.2em] text-white transition-colors hover:text-gold">Inicio</Link>
+          <a href="/#tienda" className="text-xs uppercase tracking-[0.2em] text-white transition-colors hover:text-gold">Tienda</a>
+          <a href="#contacto" className="text-xs uppercase tracking-[0.2em] text-white transition-colors hover:text-gold">Contacto</a>
+          <Link to="/admin" className="text-xs uppercase tracking-[0.2em] text-white font-bold transition-colors hover:text-gold">Admin</Link>
         </nav>
 
         {/* Cart */}
-        <button onClick={() => setIsCartOpen(true)} className="relative text-white transition-colors hover:text-gray-300">
+        <button onClick={() => setIsCartOpen(true)} className="relative text-white transition-colors hover:text-gold">
           <ShoppingCart size={22} strokeWidth={1.5} />
           <AnimatePresence>
             {cartCount > 0 && (
@@ -169,10 +169,10 @@ const Header = () => {
                 className="group flex items-center space-x-4 p-4 rounded-2xl bg-white/5 border border-white/10 active:scale-95 transition-all" 
                 onClick={() => setMobileMenuOpen(false)}
               >
-                <div className="w-12 h-12 rounded-xl bg-white/10 text-white flex items-center justify-center group-hover:bg-white group-hover:text-black transition-colors">
+                <div className="w-12 h-12 rounded-xl bg-white/10 text-white flex items-center justify-center group-hover:bg-white group-hover:text-gold transition-colors">
                   <Home size={24} strokeWidth={1.5} />
                 </div>
-                <span className="text-xl font-serif text-white font-medium">Inicio</span>
+                <span className="text-xl font-serif text-white font-medium group-hover:text-gold">Inicio</span>
               </Link>
               
               <a 
@@ -180,10 +180,10 @@ const Header = () => {
                 className="group flex items-center space-x-4 p-4 rounded-2xl bg-black shadow-sm border border-gray-800 active:scale-95 transition-all" 
                 onClick={() => setMobileMenuOpen(false)}
               >
-                <div className="w-12 h-12 rounded-xl bg-white/10 text-white flex items-center justify-center group-hover:bg-white group-hover:text-black transition-colors">
+                <div className="w-12 h-12 rounded-xl bg-white/10 text-white flex items-center justify-center group-hover:bg-white group-hover:text-gold transition-colors">
                   <Store size={24} strokeWidth={1.5} />
                 </div>
-                <span className="text-xl font-serif text-white font-medium">Tienda</span>
+                <span className="text-xl font-serif text-white font-medium group-hover:text-gold">Tienda</span>
               </a>
               
               <a 
@@ -191,10 +191,10 @@ const Header = () => {
                 className="group flex items-center space-x-4 p-4 rounded-2xl bg-black shadow-sm border border-gray-800 active:scale-95 transition-all" 
                 onClick={() => setMobileMenuOpen(false)}
               >
-                <div className="w-12 h-12 rounded-xl bg-white/10 text-white flex items-center justify-center group-hover:bg-white group-hover:text-black transition-colors">
+                <div className="w-12 h-12 rounded-xl bg-white/10 text-white flex items-center justify-center group-hover:bg-white group-hover:text-gold transition-colors">
                   <Phone size={24} strokeWidth={1.5} />
                 </div>
-                <span className="text-xl font-serif text-white font-medium">Contacto</span>
+                <span className="text-xl font-serif text-white font-medium group-hover:text-gold">Contacto</span>
               </a>
               
               <Link 
@@ -202,10 +202,10 @@ const Header = () => {
                 className="group flex items-center space-x-4 p-4 rounded-2xl bg-white shadow-sm border border-gray-100 active:scale-95 transition-all mt-4" 
                 onClick={() => setMobileMenuOpen(false)}
               >
-                <div className="w-12 h-12 rounded-xl bg-black text-white flex items-center justify-center shadow-md">
+                <div className="w-12 h-12 rounded-xl bg-black text-white flex items-center justify-center shadow-md group-hover:bg-gold group-hover:text-black transition-colors">
                   <Shield size={24} strokeWidth={1.5} />
                 </div>
-                <span className="text-xl font-serif text-black font-bold">Admin</span>
+                <span className="text-xl font-serif text-black font-bold group-hover:text-gold">Admin</span>
               </Link>
             </nav>
             
@@ -282,7 +282,7 @@ const HeroSlider = () => {
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.8, duration: 0.8 }}
-              className="mt-12 px-10 py-4 bg-white text-black font-semibold uppercase tracking-[0.2em] text-xs hover:bg-black hover:text-white transition-all duration-500 shadow-lg border border-white"
+              className="mt-12 px-10 py-4 bg-white text-black font-semibold uppercase tracking-[0.2em] text-xs hover:bg-black hover:text-gold transition-all duration-500 shadow-lg border border-white"
             >
               Descubrir Colección
             </motion.a>
@@ -455,9 +455,9 @@ const Footer = () => {
         <div className="md:col-span-3 lg:col-span-2 lg:col-start-7">
           <h4 className="font-serif text-lg mb-6 uppercase tracking-[0.15em] text-white/60">Enlaces</h4>
           <ul className="space-y-4 text-white/80 font-light text-sm">
-            <li><a href="#" className="hover:text-white transition-colors">Inicio</a></li>
-            <li><a href="#tienda" className="hover:text-white transition-colors">Tienda</a></li>
-            <li><a href="#contacto" className="hover:text-white transition-colors">Contacto</a></li>
+            <li><a href="#" className="hover:text-gold transition-colors">Inicio</a></li>
+            <li><a href="#tienda" className="hover:text-gold transition-colors">Tienda</a></li>
+            <li><a href="#contacto" className="hover:text-gold transition-colors">Contacto</a></li>
           </ul>
         </div>
         
@@ -480,7 +480,7 @@ const Footer = () => {
         <p>&copy; {new Date().getFullYear()} Florería Ricardo. Todos los derechos reservados.</p>
         <div className="mt-4 md:mt-0 flex items-center space-x-6">
           <p>Diseño Minimalista & Premium</p>
-          <Link to="/admin" className="hover:text-white transition-colors">Acceso Admin</Link>
+          <Link to="/admin" className="hover:text-gold transition-colors">Acceso Admin</Link>
         </div>
       </div>
     </footer>
@@ -513,7 +513,7 @@ const ProductsSection = () => {
             <p className="text-black font-light text-sm md:text-base mb-4 md:mb-6">${product.price.toFixed(2)}</p>
             <button 
               onClick={() => addToCart(product, 1)}
-              className="px-3 md:px-6 py-2 border border-black text-black text-xs md:text-sm hover:bg-black hover:text-white transition-colors w-full md:w-auto"
+              className="px-3 md:px-6 py-2 border border-black text-black text-xs md:text-sm hover:bg-black hover:text-gold transition-colors w-full md:w-auto"
             >
               Añadir al carrito
             </button>
@@ -577,7 +577,7 @@ const ProductPage = () => {
               </div>
               <button 
                 onClick={() => addToCart(product, quantity)}
-                className="px-8 py-3 bg-white border border-black text-black text-sm hover:bg-black hover:text-white transition-colors"
+                className="px-8 py-3 bg-white border border-black text-black text-sm hover:bg-black hover:text-gold transition-colors"
               >
                 Añadir al carrito
               </button>
@@ -688,7 +688,7 @@ const CartModal = () => {
                 </div>
                 <button 
                   onClick={handleWhatsAppCheckout}
-                  className="w-full py-4 bg-black hover:bg-gray-800 text-white font-medium uppercase tracking-widest text-sm flex items-center justify-center space-x-2 transition-colors rounded-sm shadow-md"
+                  className="w-full py-4 bg-black hover:bg-gray-800 hover:text-gold text-white font-medium uppercase tracking-widest text-sm flex items-center justify-center space-x-2 transition-colors rounded-sm shadow-md"
                 >
                   <MessageCircle size={20} />
                   <span>Pedir por WhatsApp</span>
@@ -754,7 +754,7 @@ const ContactSection = () => {
               <label className="block text-xs uppercase tracking-wider text-black mb-2">Mensaje</label>
               <textarea rows={4} placeholder="¿En qué podemos ayudarte?" className="w-full border border-gray-200 px-4 py-3 outline-none focus:border-black transition-colors bg-white resize-none"></textarea>
             </div>
-            <button className="w-full py-4 bg-black text-white text-sm uppercase tracking-widest hover:bg-gray-800 transition-colors">
+            <button className="w-full py-4 bg-black text-white text-sm uppercase tracking-widest hover:bg-gray-800 hover:text-gold transition-colors">
               Enviar Mensaje
             </button>
           </form>
