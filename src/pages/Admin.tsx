@@ -29,20 +29,20 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col md:flex-row">
       {/* Mobile Header */}
-      <div className="md:hidden bg-white shadow-sm p-4 flex justify-between items-center sticky top-0 z-50">
+      <div className="md:hidden bg-black shadow-sm p-4 flex justify-between items-center sticky top-0 z-50">
         <div className="flex items-center space-x-3">
           <img 
-            src="https://appdesignproyectos.com/palbau.png" 
-            alt="PALBAU" 
+            src="https://appdesignproyectos.com/floreriaricardo.jpg" 
+            alt="Florería Ricardo" 
             className="h-8 object-contain"
             referrerPolicy="no-referrer"
           />
-          <div className="h-6 w-px bg-gray-200"></div>
-          <span className="text-xs font-bold text-gold uppercase tracking-widest">Admin</span>
+          <div className="h-6 w-px bg-white/20"></div>
+          <span className="text-xs font-bold text-white uppercase tracking-widest">Admin</span>
         </div>
         <button 
           onClick={() => setIsMobileMenuOpen(true)} 
-          className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-navy shadow-sm border border-gray-100 active:scale-90 transition-transform"
+          className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center text-white shadow-sm border border-white/10 active:scale-90 transition-transform"
         >
           <Menu size={20} strokeWidth={2} />
         </button>
@@ -56,26 +56,26 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: '-100%' }}
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="fixed inset-0 bg-cream z-50 flex flex-col p-6 overflow-hidden md:hidden"
+            className="fixed inset-0 bg-black z-50 flex flex-col p-6 overflow-hidden md:hidden"
           >
             {/* Decorative background elements */}
-            <div className="absolute top-0 right-0 w-64 h-64 bg-gold/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
-            <div className="absolute bottom-0 left-0 w-80 h-80 bg-navy/5 rounded-full blur-3xl translate-y-1/3 -translate-x-1/3 pointer-events-none"></div>
+            <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
+            <div className="absolute bottom-0 left-0 w-80 h-80 bg-white/5 rounded-full blur-3xl translate-y-1/3 -translate-x-1/3 pointer-events-none"></div>
 
             <div className="flex justify-between items-center mb-12 relative z-10">
               <div className="flex items-center space-x-3">
                 <img 
-                  src="https://appdesignproyectos.com/palbau.png" 
-                  alt="PALBAU" 
+                  src="https://appdesignproyectos.com/floreriaricardo.jpg" 
+                  alt="Florería Ricardo" 
                   className="h-10 object-contain"
                   referrerPolicy="no-referrer"
                 />
-                <div className="h-8 w-px bg-gray-300"></div>
-                <span className="text-sm font-bold text-gold uppercase tracking-widest">Admin</span>
+                <div className="h-8 w-px bg-white/20"></div>
+                <span className="text-sm font-bold text-white uppercase tracking-widest">Admin</span>
               </div>
               <button 
                 onClick={() => setIsMobileMenuOpen(false)} 
-                className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-navy shadow-sm border border-gray-100 active:scale-90 transition-transform"
+                className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center text-white shadow-sm border border-white/10 active:scale-90 transition-transform"
               >
                 <X size={24} strokeWidth={2} />
               </button>
@@ -84,70 +84,75 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
             <nav className="flex flex-col space-y-4 relative z-10">
               <Link 
                 to="/admin/ventas" 
-                className={`group flex items-center space-x-4 p-4 rounded-2xl bg-white shadow-sm border border-gray-100 active:scale-95 transition-all ${location.pathname.includes('/ventas') ? 'ring-2 ring-gold/50' : ''}`}
+                className={`group flex items-center space-x-4 p-4 rounded-2xl bg-white/5 shadow-sm border border-white/10 active:scale-95 transition-all ${location.pathname.includes('/ventas') ? 'ring-2 ring-white/20' : ''}`}
                 onClick={() => setIsMobileMenuOpen(false)}
               >
-                <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-colors ${location.pathname.includes('/ventas') ? 'bg-gold text-white shadow-md shadow-gold/20' : 'bg-gold/10 text-gold group-hover:bg-gold group-hover:text-white'}`}>
+                <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-colors ${location.pathname.includes('/ventas') ? 'bg-white text-black shadow-md shadow-white/20' : 'bg-white/10 text-white group-hover:bg-white group-hover:text-black'}`}>
                   <LayoutDashboard size={24} strokeWidth={1.5} />
                 </div>
-                <span className="text-xl font-serif text-navy font-medium group-hover:text-gold">Ventas y Métricas</span>
+                <span className="text-xl font-serif text-white font-medium group-hover:text-gold">Ventas y Métricas</span>
               </Link>
               
               <Link 
                 to="/admin/pedidos" 
-                className={`group flex items-center space-x-4 p-4 rounded-2xl bg-white shadow-sm border border-gray-100 active:scale-95 transition-all ${location.pathname.includes('/pedidos') ? 'ring-2 ring-lightblue/50' : ''}`}
+                className={`group flex items-center space-x-4 p-4 rounded-2xl bg-white/5 shadow-sm border border-white/10 active:scale-95 transition-all ${location.pathname.includes('/pedidos') ? 'ring-2 ring-white/20' : ''}`}
                 onClick={() => setIsMobileMenuOpen(false)}
               >
-                <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-colors ${location.pathname.includes('/pedidos') ? 'bg-lightblue text-white shadow-md shadow-lightblue/20' : 'bg-lightblue/10 text-lightblue group-hover:bg-lightblue group-hover:text-white'}`}>
+                <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-colors ${location.pathname.includes('/pedidos') ? 'bg-white text-black shadow-md shadow-white/20' : 'bg-white/10 text-white group-hover:bg-white group-hover:text-black'}`}>
                   <ClipboardList size={24} strokeWidth={1.5} />
                 </div>
-                <span className="text-xl font-serif text-navy font-medium group-hover:text-gold">Pedidos Recientes</span>
+                <span className="text-xl font-serif text-white font-medium group-hover:text-gold">Pedidos Recientes</span>
               </Link>
               
               <Link 
                 to="/admin/productos" 
-                className={`group flex items-center space-x-4 p-4 rounded-2xl bg-white shadow-sm border border-gray-100 active:scale-95 transition-all ${location.pathname.includes('/productos') ? 'ring-2 ring-navy/50' : ''}`}
+                className={`group flex items-center space-x-4 p-4 rounded-2xl bg-white/5 shadow-sm border border-white/10 active:scale-95 transition-all ${location.pathname.includes('/productos') ? 'ring-2 ring-white/20' : ''}`}
                 onClick={() => setIsMobileMenuOpen(false)}
               >
-                <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-colors ${location.pathname.includes('/productos') ? 'bg-navy text-white shadow-md shadow-navy/20' : 'bg-navy/10 text-navy group-hover:bg-navy group-hover:text-white'}`}>
+                <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-colors ${location.pathname.includes('/productos') ? 'bg-white text-black shadow-md shadow-white/20' : 'bg-white/10 text-white group-hover:bg-white group-hover:text-black'}`}>
                   <PackagePlus size={24} strokeWidth={1.5} />
                 </div>
-                <span className="text-xl font-serif text-navy font-medium group-hover:text-gold">Gestión de Productos</span>
+                <span className="text-xl font-serif text-white font-medium group-hover:text-gold">Gestión de Productos</span>
               </Link>
               
-              <div className="h-px bg-gray-200 my-4"></div>
+              <div className="h-px bg-white/10 my-4"></div>
               
               <Link 
                 to="/" 
-                className="group flex items-center space-x-4 p-4 rounded-2xl bg-white shadow-sm border border-gray-100 active:scale-95 transition-all" 
+                className="group flex items-center space-x-4 p-4 rounded-2xl bg-white/5 shadow-sm border border-white/10 active:scale-95 transition-all" 
                 onClick={() => setIsMobileMenuOpen(false)}
               >
-                <div className="w-12 h-12 rounded-xl bg-gray-100 text-gray-500 flex items-center justify-center group-hover:bg-gold group-hover:text-white transition-colors">
+                <div className="w-12 h-12 rounded-xl bg-white/10 text-white flex items-center justify-center group-hover:bg-white group-hover:text-black transition-colors">
                   <Home size={24} strokeWidth={1.5} />
                 </div>
-                <span className="text-xl font-serif text-gray-600 font-medium group-hover:text-gold">Volver a la Tienda</span>
+                <span className="text-xl font-serif text-white/80 font-medium group-hover:text-gold">Volver a la Tienda</span>
               </Link>
             </nav>
             
             <div className="mt-auto text-center pb-8 relative z-10">
-              <div className="w-16 h-1 bg-gray-200 mx-auto rounded-full mb-6"></div>
-              <p className="text-navy/50 text-sm font-light uppercase tracking-widest">Panel de Administración</p>
+              <div className="w-16 h-[1px] bg-white/20 mx-auto rounded-full mb-6"></div>
+              <p className="text-white/40 text-sm font-light uppercase tracking-widest">Panel de Administración</p>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
 
       {/* Desktop Sidebar */}
-      <aside className="hidden md:flex w-64 bg-navy text-white flex-col sticky top-0 h-screen z-40">
+      <aside className="hidden md:flex w-64 bg-black text-white flex-col sticky top-0 h-screen z-40">
         <div className="hidden md:block p-6 border-b border-white/10">
-          <h2 className="text-2xl font-serif text-gold tracking-widest uppercase">Palbau</h2>
-          <p className="text-xs text-white/50 mt-1 uppercase tracking-widest">Panel de Control</p>
+          <img 
+            src="https://appdesignproyectos.com/floreriaricardo.jpg" 
+            alt="Florería Ricardo" 
+            className="h-10 object-contain mb-2"
+            referrerPolicy="no-referrer"
+          />
+          <p className="text-xs text-white/50 uppercase tracking-widest">Panel de Control</p>
         </div>
         <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
           <Link 
             to="/admin/ventas" 
             onClick={() => setIsMobileMenuOpen(false)}
-            className={`flex items-center space-x-3 px-4 py-3 rounded-md transition-colors ${location.pathname.includes('/ventas') ? 'bg-lightblue text-navy font-medium' : 'hover:bg-white/10 hover:text-gold text-white/80'}`}
+            className={`flex items-center space-x-3 px-4 py-3 rounded-md transition-colors ${location.pathname.includes('/ventas') ? 'bg-white text-black font-medium' : 'hover:bg-white/10 text-white/80 hover:text-gold'}`}
           >
             <LayoutDashboard size={20} />
             <span>Ventas y Métricas</span>
@@ -155,7 +160,7 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
           <Link 
             to="/admin/pedidos" 
             onClick={() => setIsMobileMenuOpen(false)}
-            className={`flex items-center space-x-3 px-4 py-3 rounded-md transition-colors ${location.pathname.includes('/pedidos') ? 'bg-lightblue text-navy font-medium' : 'hover:bg-white/10 hover:text-gold text-white/80'}`}
+            className={`flex items-center space-x-3 px-4 py-3 rounded-md transition-colors ${location.pathname.includes('/pedidos') ? 'bg-white text-black font-medium' : 'hover:bg-white/10 text-white/80 hover:text-gold'}`}
           >
             <ClipboardList size={20} />
             <span>Pedidos Recientes</span>
@@ -163,14 +168,14 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
           <Link 
             to="/admin/productos" 
             onClick={() => setIsMobileMenuOpen(false)}
-            className={`flex items-center space-x-3 px-4 py-3 rounded-md transition-colors ${location.pathname.includes('/productos') ? 'bg-lightblue text-navy font-medium' : 'hover:bg-white/10 hover:text-gold text-white/80'}`}
+            className={`flex items-center space-x-3 px-4 py-3 rounded-md transition-colors ${location.pathname.includes('/productos') ? 'bg-white text-black font-medium' : 'hover:bg-white/10 text-white/80 hover:text-gold'}`}
           >
             <PackagePlus size={20} />
             <span>Gestión de Productos</span>
           </Link>
         </nav>
         <div className="p-4 border-t border-white/10 mt-auto">
-          <Link to="/" className="flex items-center space-x-3 px-4 py-3 rounded-md hover:bg-white/10 hover:text-gold text-white/80 transition-colors">
+          <Link to="/" className="flex items-center space-x-3 px-4 py-3 rounded-md hover:bg-white/10 text-white/80 hover:text-gold transition-colors">
             <LogOut size={20} />
             <span>Volver a la Tienda</span>
           </Link>
@@ -189,7 +194,7 @@ const AdminSales = () => {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-serif text-navy mb-2">Resumen de Ventas</h1>
+        <h1 className="text-3xl font-serif text-black mb-2">Resumen de Ventas</h1>
         <p className="text-darkgray/70">Métricas y rendimiento de tu tienda en tiempo real.</p>
       </div>
 
@@ -201,7 +206,7 @@ const AdminSales = () => {
           </div>
           <div>
             <p className="text-sm text-gray-500 font-medium">Ventas del Día</p>
-            <p className="text-2xl font-bold text-navy">$2,970.00</p>
+            <p className="text-2xl font-bold text-black">$2,970.00</p>
           </div>
         </div>
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center space-x-4">
@@ -210,7 +215,7 @@ const AdminSales = () => {
           </div>
           <div>
             <p className="text-sm text-gray-500 font-medium">Pedidos Completados</p>
-            <p className="text-2xl font-bold text-navy">42</p>
+            <p className="text-2xl font-bold text-black">42</p>
           </div>
         </div>
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center space-x-4">
@@ -219,7 +224,7 @@ const AdminSales = () => {
           </div>
           <div>
             <p className="text-sm text-gray-500 font-medium">Ticket Promedio</p>
-            <p className="text-2xl font-bold text-navy">$70.71</p>
+            <p className="text-2xl font-bold text-black">$70.71</p>
           </div>
         </div>
       </div>
@@ -227,7 +232,7 @@ const AdminSales = () => {
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-          <h3 className="text-lg font-medium text-navy mb-6">Ventas por Hora (Hoy)</h3>
+          <h3 className="text-lg font-medium text-black mb-6">Ventas por Hora (Hoy)</h3>
           <div className="h-72">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={mockSalesData}>
@@ -238,14 +243,14 @@ const AdminSales = () => {
                   contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
                   formatter={(value) => [`$${value}`, 'Ventas']}
                 />
-                <Line type="monotone" dataKey="sales" stroke="#1A2B4C" strokeWidth={3} dot={{r: 4, fill: '#1A2B4C', strokeWidth: 2, stroke: '#fff'}} activeDot={{r: 6}} />
+                <Line type="monotone" dataKey="sales" stroke="black" strokeWidth={3} dot={{r: 4, fill: 'black', strokeWidth: 2, stroke: '#fff'}} activeDot={{r: 6}} />
               </LineChart>
             </ResponsiveContainer>
           </div>
         </div>
 
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-          <h3 className="text-lg font-medium text-navy mb-6">Ventas por Categoría</h3>
+          <h3 className="text-lg font-medium text-black mb-6">Ventas por Categoría</h3>
           <div className="h-72">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={mockCategoryData}>
@@ -257,7 +262,7 @@ const AdminSales = () => {
                   cursor={{fill: '#f3f4f6'}}
                   formatter={(value) => [`$${value}`, 'Ventas']}
                 />
-                <Bar dataKey="value" fill="#85A854" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="value" fill="black" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -326,12 +331,12 @@ const AdminProducts = () => {
     <div className="space-y-8">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-serif text-navy mb-2">Gestión de Productos</h1>
+          <h1 className="text-3xl font-serif text-black mb-2">Gestión de Productos</h1>
           <p className="text-darkgray/70">Administra el catálogo de tu tienda.</p>
         </div>
         <button 
           onClick={() => setIsAdding(!isAdding)}
-          className="flex items-center space-x-2 bg-navy text-white px-4 py-2 rounded-md hover:bg-lightblue hover:text-gold transition-colors"
+          className="flex items-center space-x-2 bg-black text-white px-4 py-2 rounded-md hover:bg-gray-800 transition-colors"
         >
           {isAdding ? <X size={18} /> : <PlusCircle size={18} />}
           <span>{isAdding ? 'Cancelar' : 'Nuevo Producto'}</span>
@@ -340,7 +345,7 @@ const AdminProducts = () => {
 
       {isAdding && (
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-8">
-          <h3 className="text-lg font-medium text-navy mb-6 border-b pb-4">Añadir Nuevo Producto</h3>
+          <h3 className="text-lg font-medium text-black mb-6 border-b pb-4">Añadir Nuevo Producto</h3>
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
@@ -350,7 +355,7 @@ const AdminProducts = () => {
                   required
                   value={formData.name}
                   onChange={e => setFormData({...formData, name: e.target.value})}
-                  className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-lightblue focus:border-transparent"
+                  className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
                   placeholder="Ej. Ramo de Rosas"
                 />
               </div>
@@ -359,7 +364,7 @@ const AdminProducts = () => {
                 <select 
                   value={formData.category}
                   onChange={e => setFormData({...formData, category: e.target.value})}
-                  className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-lightblue focus:border-transparent"
+                  className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
                 >
                   <option value="Rosas Rojas">Rosas Rojas</option>
                   <option value="Tulipanes">Tulipanes</option>
@@ -377,7 +382,7 @@ const AdminProducts = () => {
                   required
                   value={formData.price}
                   onChange={e => setFormData({...formData, price: e.target.value})}
-                  className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-lightblue focus:border-transparent"
+                  className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
                   placeholder="0.00"
                 />
               </div>
@@ -446,7 +451,7 @@ const AdminProducts = () => {
                   required
                   value={formData.description}
                   onChange={e => setFormData({...formData, description: e.target.value})}
-                  className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-lightblue focus:border-transparent resize-none"
+                  className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent resize-none"
                   placeholder="Describe el producto..."
                 />
               </div>
@@ -454,7 +459,7 @@ const AdminProducts = () => {
             <div className="flex justify-end">
               <button 
                 type="submit"
-                className="bg-[#85A854] text-white px-6 py-2 rounded-md hover:bg-[#6b8743] hover:text-gold transition-colors font-medium"
+                className="bg-black text-white px-6 py-2 rounded-md hover:bg-gray-800 transition-colors font-medium"
               >
                 Guardar Producto
               </button>
@@ -481,12 +486,12 @@ const AdminProducts = () => {
                   <td className="px-6 py-4">
                     <div className="flex items-center space-x-4">
                       <img src={product.image} alt={product.name} className="w-10 h-10 rounded-md object-cover" />
-                      <span className="font-medium text-navy">{product.name}</span>
+                      <span className="font-medium text-black">{product.name}</span>
                     </div>
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-600">{product.category || 'Sin categoría'}</td>
-                  <td className="px-6 py-4 text-sm font-medium text-[#85A854]">${product.price.toFixed(2)}</td>
-                  <td className="px-6 py-4 text-sm text-lightblue hover:text-gold cursor-pointer">Editar</td>
+                  <td className="px-6 py-4 text-sm font-medium text-black">${product.price.toFixed(2)}</td>
+                  <td className="px-6 py-4 text-sm text-black hover:text-gray-600 cursor-pointer">Editar</td>
                 </tr>
               ))}
             </tbody>
@@ -541,7 +546,7 @@ const AdminOrders = () => {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-serif text-navy mb-2">Pedidos Recientes</h1>
+        <h1 className="text-3xl font-serif text-black mb-2">Pedidos Recientes</h1>
         <p className="text-darkgray/70">Revisa las últimas ventas y los detalles de tus clientes.</p>
       </div>
 
@@ -561,7 +566,7 @@ const AdminOrders = () => {
               {mockOrders.map(order => (
                 <tr key={order.id} className="hover:bg-gray-50 transition-colors">
                   <td className="px-6 py-4">
-                    <span className="font-medium text-navy">{order.id}</span>
+                    <span className="font-medium text-black">{order.id}</span>
                     <div className="text-xs text-gray-500 mt-1">{order.date}</div>
                   </td>
                   <td className="px-6 py-4">
@@ -579,7 +584,7 @@ const AdminOrders = () => {
                       ))}
                     </ul>
                   </td>
-                  <td className="px-6 py-4 text-sm font-medium text-[#85A854]">${order.total.toFixed(2)}</td>
+                  <td className="px-6 py-4 text-sm font-medium text-black">${order.total.toFixed(2)}</td>
                   <td className="px-6 py-4">
                     <span className={`px-3 py-1 rounded-full text-xs font-medium ${
                       order.status === 'Completado' ? 'bg-green-100 text-green-700' :
