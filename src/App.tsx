@@ -6,7 +6,7 @@
 import React, { useState, useEffect, createContext, useContext } from 'react';
 import { ShoppingCart, Menu, X, ChevronRight, ChevronLeft, MessageCircle, Award, HeartHandshake, Snowflake, Home, Store, Phone, Shield } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { BrowserRouter as Router, Routes, Route, Link, useParams, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Link, useParams, useLocation, Navigate } from 'react-router-dom';
 import { Product, ProductProvider, useProducts } from './context/ProductContext';
 import { AdminRoutes } from './pages/Admin';
 
@@ -52,6 +52,7 @@ const useCart = () => {
 const CartProvider = ({ children }: { children: React.ReactNode }) => {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [checkoutProduct, setCheckoutProduct] = useState<Product | null>(null);
 
   const addToCart = (product: Product, quantity: number) => {
     setCart(prev => {
@@ -72,9 +73,128 @@ const CartProvider = ({ children }: { children: React.ReactNode }) => {
   const cartTotal = cart.reduce((acc, item) => acc + item.product.price * item.quantity, 0);
 
   return (
-    <CartContext.Provider value={{ cart, addToCart, removeFromCart, cartCount, cartTotal, isCartOpen, setIsCartOpen }}>
+    <CartContext.Provider value={{ 
+      cart, 
+      addToCart, 
+      removeFromCart, 
+      cartCount, 
+      cartTotal, 
+      isCartOpen, 
+      setIsCartOpen,
+      checkoutProduct,
+      setCheckoutProduct
+    }}>
       {children}
     </CartContext.Provider>
+  );
+};
+
+const CheckoutModal = () => {
+  const { checkoutProduct, setCheckoutProduct } = useCart();
+  const [name, setName] = useState('');
+  const [location, setLocation] = useState('');
+  const [isGettingLocation, setIsGettingLocation] = useState(false);
+
+  const handleGetLocation = () => {
+    if (!navigator.geolocation) {
+      alert("La geolocalización no es compatible con tu navegador.");
+      return;
+    }
+    setIsGettingLocation(true);
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        setLocation(`https://www.google.com/maps?q=${latitude},${longitude}`);
+        setIsGettingLocation(false);
+      },
+      (error) => {
+        console.error(error);
+        alert("No se pudo obtener la ubicación. Por favor, ingrésala manualmente.");
+        setIsGettingLocation(false);
+      }
+    );
+  };
+
+  const handleConfirm = () => {
+    if (!name || !location) {
+      alert("Por favor completa tu nombre y ubicación.");
+      return;
+    }
+    const message = `Hola! Me gustaría comprar el siguiente producto:\n\n*Producto:* ${checkoutProduct?.name}\n*Precio:* $${checkoutProduct?.price.toFixed(2)}\n\n*Datos del Cliente:*\n*Nombre:* ${name}\n*Ubicación:* ${location}`;
+    const encodedMessage = encodeURIComponent(message);
+    window.open(`https://wa.me/525545144797?text=${encodedMessage}`, '_blank');
+    setCheckoutProduct(null);
+  };
+
+  if (!checkoutProduct) return null;
+
+  return (
+    <AnimatePresence>
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4"
+      >
+        <motion.div 
+          initial={{ scale: 0.9, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          exit={{ scale: 0.9, opacity: 0 }}
+          className="bg-white w-full max-w-md rounded-lg p-8 shadow-2xl"
+        >
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-2xl font-serif text-black">Finalizar Compra</h2>
+            <button onClick={() => setCheckoutProduct(null)} className="text-black hover:text-gray-600 transition-colors">
+              <X size={24} />
+            </button>
+          </div>
+          
+          <div className="space-y-6">
+            <div>
+              <label className="block text-xs uppercase tracking-widest text-black mb-2 font-semibold">Nombre Completo</label>
+              <input 
+                type="text" 
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Tu nombre" 
+                className="w-full border border-gray-200 px-4 py-3 outline-none focus:border-black transition-colors" 
+              />
+            </div>
+            <div>
+              <label className="block text-xs uppercase tracking-widest text-black mb-2 font-semibold">Ubicación de Entrega</label>
+              <div className="flex space-x-2">
+                <input 
+                  type="text" 
+                  value={location}
+                  onChange={(e) => setLocation(e.target.value)}
+                  placeholder="Dirección o link de mapa" 
+                  className="flex-1 border border-gray-200 px-4 py-3 outline-none focus:border-black transition-colors" 
+                />
+                <button 
+                  onClick={handleGetLocation}
+                  disabled={isGettingLocation}
+                  className="px-4 bg-black text-white rounded-sm hover:bg-gray-800 transition-colors flex items-center justify-center"
+                  title="Obtener mi ubicación actual"
+                >
+                  <MessageCircle size={20} />
+                </button>
+              </div>
+              <p className="text-[10px] text-gray-500 mt-1 italic">Puedes escribir tu dirección o usar el botón para enviar tu ubicación GPS.</p>
+            </div>
+            
+            <div className="pt-4">
+              <button 
+                onClick={handleConfirm}
+                className="w-full py-4 bg-black text-white text-sm uppercase tracking-widest hover:bg-gray-800 hover:text-gold transition-colors font-bold flex items-center justify-center space-x-2"
+              >
+                <MessageCircle size={20} />
+                <span>Confirmar y Pedir por WhatsApp</span>
+              </button>
+            </div>
+          </div>
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>
   );
 };
 
@@ -408,7 +528,7 @@ const FeaturedCategories = () => {
         <div className="w-12 h-[2px] bg-black mx-auto" />
       </div>
       
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-10 lg:gap-16">
+      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-10 lg:gap-16">
         {categories.map((cat, idx) => (
           <motion.div 
             key={idx}
@@ -416,7 +536,7 @@ const FeaturedCategories = () => {
             transition={{ duration: 0.4 }}
             className="group cursor-pointer flex flex-col"
           >
-            <div className="relative h-48 md:h-[450px] overflow-hidden mb-4 md:mb-8">
+            <div className="relative h-64 md:h-[450px] overflow-hidden mb-4 md:mb-8">
               <img 
                 src={cat.image} 
                 alt={cat.name} 
@@ -488,7 +608,7 @@ const Footer = () => {
 };
 
 const ProductsSection = () => {
-  const { addToCart } = useCart();
+  const { setCheckoutProduct } = useCart();
   const { products } = useProducts();
   
   const specialSelection = products.filter(p => p.category === "Selección Especial");
@@ -501,21 +621,21 @@ const ProductsSection = () => {
         <div className="w-12 h-[2px] bg-black mx-auto" />
       </div>
       
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-8 md:gap-8">
         {specialSelection.map(product => (
-          <div key={product.id} className="flex flex-col items-center text-center group">
-            <Link to={`/producto/${product.id}`} className="w-full relative overflow-hidden mb-4 md:mb-6">
-              <img src={product.image} alt={product.name} className="w-full h-40 md:h-64 object-cover transition-transform duration-700 group-hover:scale-105 rounded-md" />
-            </Link>
-            <Link to={`/producto/${product.id}`}>
-              <h4 className="text-sm md:text-xl font-sans text-black mb-1 md:mb-2 hover:text-gray-600 transition-colors">{product.name}</h4>
-            </Link>
-            <p className="text-black font-light text-sm md:text-base mb-4 md:mb-6">${product.price.toFixed(2)}</p>
+          <div key={product.id} className="flex flex-col items-center text-center group bg-white p-4 rounded-sm border border-gray-100">
+            <div className="w-full relative overflow-hidden mb-4 md:mb-6">
+              <img src={product.image} alt={product.name} className="w-full h-64 md:h-64 object-cover transition-transform duration-700 group-hover:scale-105 rounded-md" />
+            </div>
+            <h4 className="text-lg md:text-xl font-sans text-black mb-1 md:mb-2 uppercase tracking-wider">{product.name}</h4>
+            <p className="text-black/60 text-xs md:text-sm font-light mb-2 line-clamp-2">{product.description}</p>
+            <p className="text-black font-bold text-lg md:text-base mb-4 md:mb-6">${product.price.toFixed(2)}</p>
             <button 
-              onClick={() => addToCart(product, 1)}
-              className="px-3 md:px-6 py-2 border border-black text-black text-xs md:text-sm hover:bg-black hover:text-gold transition-colors w-full md:w-auto"
+              onClick={() => setCheckoutProduct(product)}
+              className="px-3 md:px-6 py-3 bg-black text-white text-xs md:text-sm hover:bg-gray-800 hover:text-gold transition-colors w-full uppercase tracking-widest font-bold flex items-center justify-center space-x-2"
             >
-              Añadir al carrito
+              <MessageCircle size={18} />
+              <span>Comprar Ahora</span>
             </button>
           </div>
         ))}
@@ -766,7 +886,7 @@ const ContactSection = () => {
 
 const ProductsPage = () => {
   const { products } = useProducts();
-  const { addToCart } = useCart();
+  const { setCheckoutProduct } = useCart();
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
   const categoryFilter = searchParams.get('categoria');
@@ -790,22 +910,22 @@ const ProductsPage = () => {
 
       {/* Product Grid */}
       <div className="max-w-7xl mx-auto px-6 md:px-12 py-16">
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-10">
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-8 md:gap-10">
           {filteredProducts.length > 0 ? (
             filteredProducts.map(product => (
               <div key={product.id} className="flex flex-col items-center text-center group bg-white p-4 rounded-sm border border-gray-100 hover:border-black transition-all">
-                <Link to={`/producto/${product.id}`} className="w-full relative overflow-hidden mb-4 md:mb-6">
-                  <img src={product.image} alt={product.name} className="w-full h-40 md:h-56 object-cover transition-transform duration-700 group-hover:scale-105 rounded-sm" />
-                </Link>
-                <Link to={`/producto/${product.id}`}>
-                  <h4 className="text-sm md:text-lg font-sans text-black mb-1 md:mb-2 hover:text-gray-600 transition-colors uppercase tracking-wider">{product.name}</h4>
-                </Link>
-                <p className="text-black font-medium text-sm md:text-base mb-4 md:mb-6">${product.price.toFixed(2)}</p>
+                <div className="w-full relative overflow-hidden mb-4 md:mb-6">
+                  <img src={product.image} alt={product.name} className="w-full h-64 md:h-56 object-cover transition-transform duration-700 group-hover:scale-105 rounded-sm" />
+                </div>
+                <h4 className="text-lg md:text-lg font-sans text-black mb-1 md:mb-2 uppercase tracking-wider">{product.name}</h4>
+                <p className="text-black/60 text-xs md:text-sm font-light mb-2 line-clamp-2">{product.description}</p>
+                <p className="text-black font-bold text-lg md:text-base mb-4 md:mb-6">${product.price.toFixed(2)}</p>
                 <button 
-                  onClick={() => addToCart(product, 1)}
-                  className="px-3 md:px-6 py-2 border border-black text-black text-xs md:text-sm hover:bg-black hover:text-white transition-colors w-full uppercase tracking-widest"
+                  onClick={() => setCheckoutProduct(product)}
+                  className="px-3 md:px-6 py-3 bg-black text-white text-xs md:text-sm hover:bg-gray-800 hover:text-gold transition-colors w-full uppercase tracking-widest font-bold flex items-center justify-center space-x-2"
                 >
-                  Añadir al carrito
+                  <MessageCircle size={18} />
+                  <span>Comprar Ahora</span>
                 </button>
               </div>
             ))
@@ -849,11 +969,13 @@ export default function App() {
                   <Routes>
                     <Route path="/" element={<HomePage />} />
                     <Route path="/productos" element={<ProductsPage />} />
-                    <Route path="/producto/:id" element={<ProductPage />} />
+                    {/* Product page disabled per user request */}
+                    <Route path="/producto/:id" element={<Navigate to="/productos" replace />} />
                   </Routes>
                 </main>
                 <Footer />
                 <CartModal />
+                <CheckoutModal />
               </div>
             } />
           </Routes>
