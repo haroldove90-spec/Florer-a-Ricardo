@@ -948,7 +948,7 @@ const HomePage = () => (
     <HeroSlider />
     <WelcomeSection />
     <ValuesSection />
-    <FeaturedCategories />
+    {/* <FeaturedCategories /> - Hidden per user request */}
     <ProductsSection />
     <ContactSection />
   </>
