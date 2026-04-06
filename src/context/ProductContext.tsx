@@ -144,6 +144,7 @@ export const initialProducts: Product[] = [
 type ProductContextType = {
   products: Product[];
   addProduct: (product: Omit<Product, 'id'>) => void;
+  deleteProducts: (ids: number[]) => void;
 };
 
 const ProductContext = createContext<ProductContextType | null>(null);
@@ -162,8 +163,12 @@ export const ProductProvider = ({ children }: { children: React.ReactNode }) => 
     setProducts(prev => [...prev, newProduct]);
   };
 
+  const deleteProducts = (ids: number[]) => {
+    setProducts(prev => prev.filter(p => !ids.includes(p.id)));
+  };
+
   return (
-    <ProductContext.Provider value={{ products, addProduct }}>
+    <ProductContext.Provider value={{ products, addProduct, deleteProducts }}>
       {children}
     </ProductContext.Provider>
   );

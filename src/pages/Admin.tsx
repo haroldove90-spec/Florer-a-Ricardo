@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Routes, Route, Link, useLocation, Navigate } from 'react-router-dom';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
-import { LayoutDashboard, PackagePlus, DollarSign, ShoppingBag, TrendingUp, PlusCircle, LogOut, ClipboardList, UploadCloud, X, Menu, Home } from 'lucide-react';
+import { LayoutDashboard, PackagePlus, DollarSign, ShoppingBag, TrendingUp, PlusCircle, LogOut, ClipboardList, UploadCloud, X, Menu, Home, Trash2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useProducts } from '../context/ProductContext';
 
@@ -273,8 +273,9 @@ const AdminSales = () => {
 };
 
 const AdminProducts = () => {
-  const { products, addProduct } = useProducts();
+  const { products, addProduct, deleteProducts } = useProducts();
   const [isAdding, setIsAdding] = useState(false);
+  const [selectedProducts, setSelectedProducts] = useState<number[]>([]);
   
   const [formData, setFormData] = useState({
     name: '',
@@ -327,6 +328,27 @@ const AdminProducts = () => {
     alert("¡Producto añadido con éxito!");
   };
 
+  const toggleSelectAll = () => {
+    if (selectedProducts.length === products.length) {
+      setSelectedProducts([]);
+    } else {
+      setSelectedProducts(products.map(p => p.id));
+    }
+  };
+
+  const toggleSelectProduct = (id: number) => {
+    setSelectedProducts(prev => 
+      prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
+    );
+  };
+
+  const handleDeleteSelected = () => {
+    if (window.confirm(`¿Estás seguro de que deseas borrar ${selectedProducts.length} producto(s)?`)) {
+      deleteProducts(selectedProducts);
+      setSelectedProducts([]);
+    }
+  };
+
   return (
     <div className="space-y-8">
       <div className="flex justify-between items-center">
@@ -334,13 +356,24 @@ const AdminProducts = () => {
           <h1 className="text-3xl font-serif text-black mb-2">Gestión de Productos</h1>
           <p className="text-darkgray/70">Administra el catálogo de tu tienda.</p>
         </div>
-        <button 
-          onClick={() => setIsAdding(!isAdding)}
-          className="flex items-center space-x-2 bg-black text-white px-4 py-2 rounded-md hover:bg-gray-800 transition-colors"
-        >
-          {isAdding ? <X size={18} /> : <PlusCircle size={18} />}
-          <span>{isAdding ? 'Cancelar' : 'Nuevo Producto'}</span>
-        </button>
+        <div className="flex items-center space-x-4">
+          {selectedProducts.length > 0 && (
+            <button 
+              onClick={handleDeleteSelected}
+              className="flex items-center space-x-2 bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition-colors"
+            >
+              <Trash2 size={18} />
+              <span>Borrar ({selectedProducts.length})</span>
+            </button>
+          )}
+          <button 
+            onClick={() => setIsAdding(!isAdding)}
+            className="flex items-center space-x-2 bg-black text-white px-4 py-2 rounded-md hover:bg-gray-800 transition-colors"
+          >
+            {isAdding ? <X size={18} /> : <PlusCircle size={18} />}
+            <span>{isAdding ? 'Cancelar' : 'Nuevo Producto'}</span>
+          </button>
+        </div>
       </div>
 
       {isAdding && (
@@ -474,6 +507,14 @@ const AdminProducts = () => {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-gray-50 border-b border-gray-100">
+                <th className="px-6 py-4 w-10">
+                  <input 
+                    type="checkbox" 
+                    className="w-4 h-4 rounded border-gray-300 text-black focus:ring-black"
+                    checked={products.length > 0 && selectedProducts.length === products.length}
+                    onChange={toggleSelectAll}
+                  />
+                </th>
                 <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Producto</th>
                 <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Categoría</th>
                 <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Precio</th>
@@ -482,7 +523,15 @@ const AdminProducts = () => {
             </thead>
             <tbody className="divide-y divide-gray-100">
               {products.map(product => (
-                <tr key={product.id} className="hover:bg-gray-50 transition-colors">
+                <tr key={product.id} className={`hover:bg-gray-50 transition-colors ${selectedProducts.includes(product.id) ? 'bg-gray-50' : ''}`}>
+                  <td className="px-6 py-4">
+                    <input 
+                      type="checkbox" 
+                      className="w-4 h-4 rounded border-gray-300 text-black focus:ring-black"
+                      checked={selectedProducts.includes(product.id)}
+                      onChange={() => toggleSelectProduct(product.id)}
+                    />
+                  </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center space-x-4">
                       <img src={product.image} alt={product.name} className="w-10 h-10 rounded-md object-cover" />
