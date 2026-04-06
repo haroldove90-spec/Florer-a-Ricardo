@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Routes, Route, Link, useLocation, Navigate } from 'react-router-dom';
+import { Routes, Route, Link, useLocation, Navigate, useNavigate } from 'react-router-dom';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
-import { LayoutDashboard, PackagePlus, DollarSign, ShoppingBag, TrendingUp, PlusCircle, LogOut, ClipboardList, UploadCloud, X, Menu, Home, Trash2 } from 'lucide-react';
+import { LayoutDashboard, PackagePlus, DollarSign, ShoppingBag, TrendingUp, PlusCircle, LogOut, ClipboardList, UploadCloud, X, Menu, Home, Trash2, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useProducts } from '../context/ProductContext';
+import { useAuth } from '../context/AuthContext';
 
 const mockSalesData = [
   { time: '08:00', sales: 120 },
@@ -25,6 +26,13 @@ const mockCategoryData = [
 const AdminLayout = ({ children }: { children: React.ReactNode }) => {
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { signOut, user } = useAuth();
+  const navigate = useNavigate();
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/login');
+  };
   
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col md:flex-row">
@@ -174,11 +182,18 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
             <span>Gestión de Productos</span>
           </Link>
         </nav>
-        <div className="p-4 border-t border-white/10 mt-auto">
+        <div className="p-4 border-t border-white/10 mt-auto space-y-2">
           <Link to="/" className="flex items-center space-x-3 px-4 py-3 rounded-md hover:bg-white/10 text-white/80 hover:text-gold transition-colors">
-            <LogOut size={20} />
+            <Home size={20} />
             <span>Volver a la Tienda</span>
           </Link>
+          <button 
+            onClick={handleSignOut}
+            className="w-full flex items-center space-x-3 px-4 py-3 rounded-md hover:bg-red-600/20 text-red-400 hover:text-red-300 transition-colors"
+          >
+            <LogOut size={20} />
+            <span>Cerrar Sesión</span>
+          </button>
         </div>
       </aside>
 
@@ -726,6 +741,23 @@ const AdminOrders = () => {
 };
 
 export const AdminRoutes = () => {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <Loader2 className="w-12 h-12 animate-spin text-black mx-auto mb-4" />
+          <p className="text-gray-500 font-serif">Verificando sesión...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
   return (
     <AdminLayout>
       <Routes>

@@ -8,7 +8,9 @@ import { ShoppingCart, Menu, X, ChevronRight, ChevronLeft, MessageCircle, Award,
 import { motion, AnimatePresence } from 'motion/react';
 import { BrowserRouter as Router, Routes, Route, Link, useParams, useLocation, Navigate } from 'react-router-dom';
 import { Product, ProductProvider, useProducts } from './context/ProductContext';
+import { AuthProvider } from './context/AuthContext';
 import { AdminRoutes } from './pages/Admin';
+import Login from './pages/Login';
 
 const ScrollToTop = () => {
   const { pathname, hash } = useLocation();
@@ -992,30 +994,33 @@ export default function App() {
   return (
     <Router>
       <ScrollToTop />
-      <ProductProvider>
-        <CartProvider>
-          <Routes>
-            <Route path="/admin/*" element={<AdminRoutes />} />
-            <Route path="*" element={
-              <div className="min-h-screen bg-white selection:bg-black/10 selection:text-black flex flex-col">
-                <Header />
-                <main className="flex-1">
-                  <Routes>
-                    <Route path="/" element={<HomePage />} />
-                    <Route path="/productos" element={<ProductsPage />} />
-                    {/* Product page disabled per user request */}
-                    <Route path="/producto/:id" element={<Navigate to="/productos" replace />} />
-                  </Routes>
-                </main>
-                <Footer />
-                <CartModal />
-                <CheckoutModal />
-                <FloatingWhatsAppButton />
-              </div>
-            } />
-          </Routes>
-        </CartProvider>
-      </ProductProvider>
+      <AuthProvider>
+        <ProductProvider>
+          <CartProvider>
+            <Routes>
+              <Route path="/login" element={<Login />} />
+              <Route path="/admin/*" element={<AdminRoutes />} />
+              <Route path="*" element={
+                <div className="min-h-screen bg-white selection:bg-black/10 selection:text-black flex flex-col">
+                  <Header />
+                  <main className="flex-1">
+                    <Routes>
+                      <Route path="/" element={<HomePage />} />
+                      <Route path="/productos" element={<ProductsPage />} />
+                      {/* Product page disabled per user request */}
+                      <Route path="/producto/:id" element={<Navigate to="/productos" replace />} />
+                    </Routes>
+                  </main>
+                  <Footer />
+                  <CartModal />
+                  <CheckoutModal />
+                  <FloatingWhatsAppButton />
+                </div>
+              } />
+            </Routes>
+          </CartProvider>
+        </ProductProvider>
+      </AuthProvider>
     </Router>
   );
 }
