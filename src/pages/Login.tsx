@@ -28,7 +28,13 @@ const Login = () => {
     });
 
     if (error) {
-      setError(error.message);
+      let friendlyMessage = error.message;
+      if (error.message.includes('Database error querying schema')) {
+        friendlyMessage = 'Error de base de datos. Esto suele ocurrir si el proyecto de Supabase está pausado o hay un problema de conexión. Por favor, revisa tu panel de Supabase.';
+      } else if (error.message === 'Invalid login credentials') {
+        friendlyMessage = 'Credenciales inválidas. Por favor, verifica tu correo y contraseña.';
+      }
+      setError(friendlyMessage);
       setLoading(false);
     } else {
       navigate('/admin');
