@@ -1055,7 +1055,10 @@ const HomePage = () => (
 );
 
 export default function App() {
+  console.log("App rendering, isSupabaseConfigured:", isSupabaseConfigured);
+
   if (!isSupabaseConfigured) {
+    console.log("Rendering ConfigMissingScreen");
     return <ConfigMissingScreen />;
   }
 
