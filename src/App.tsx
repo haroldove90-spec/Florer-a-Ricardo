@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect, createContext, useContext } from 'react';
+import React, { useState, useEffect, createContext, useContext, Component } from 'react';
 import { ShoppingCart, Menu, X, ChevronRight, ChevronLeft, MessageCircle, Award, HeartHandshake, Snowflake, Home, Store, Phone, Shield } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { BrowserRouter as Router, Routes, Route, Link, useParams, useLocation, Navigate } from 'react-router-dom';
@@ -11,6 +11,70 @@ import { Product, ProductProvider, useProducts } from './context/ProductContext'
 import { AuthProvider } from './context/AuthContext';
 import { AdminRoutes } from './pages/Admin';
 import Login from './pages/Login';
+import { isSupabaseConfigured } from './lib/supabase';
+
+class ErrorBoundary extends (Component as any) {
+  constructor(props: any) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error: any) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: any, errorInfo: any) {
+    console.error("ErrorBoundary caught an error", error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="min-h-screen flex items-center justify-center bg-gray-50 p-6 text-center">
+          <div className="max-w-md w-full bg-white p-8 rounded-xl shadow-lg border border-red-100">
+            <h2 className="text-2xl font-serif text-red-600 mb-4">Algo salió mal</h2>
+            <p className="text-gray-600 mb-6">La aplicación encontró un error inesperado.</p>
+            <pre className="bg-gray-50 p-4 rounded text-xs text-left overflow-auto mb-6 max-h-40">
+              {this.state.error?.message || "Error desconocido"}
+            </pre>
+            <button 
+              onClick={() => window.location.reload()}
+              className="px-6 py-3 bg-black text-white rounded-md hover:bg-gray-800 transition-colors"
+            >
+              Recargar Página
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
+
+const ConfigMissingScreen = () => (
+  <div className="min-h-screen flex items-center justify-center bg-gray-50 p-6 text-center">
+    <div className="max-w-md w-full bg-white p-8 rounded-xl shadow-lg border border-orange-100">
+      <div className="w-16 h-16 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center mx-auto mb-6">
+        <Shield size={32} />
+      </div>
+      <h2 className="text-2xl font-serif text-black mb-4">Configuración Faltante</h2>
+      <p className="text-gray-600 mb-6">
+        Parece que faltan las variables de entorno de Supabase (<code className="bg-gray-100 px-1 rounded">VITE_SUPABASE_URL</code> y <code className="bg-gray-100 px-1 rounded">VITE_SUPABASE_ANON_KEY</code>).
+      </p>
+      <div className="text-sm text-left bg-gray-50 p-4 rounded mb-6 space-y-2">
+        <p className="font-bold">Pasos para solucionar:</p>
+        <ol className="list-decimal list-inside space-y-1 text-gray-500">
+          <li>Ve al dashboard de Vercel.</li>
+          <li>Entra en Settings &gt; Environment Variables.</li>
+          <li>Añade las dos variables mencionadas arriba.</li>
+          <li>Realiza un nuevo despliegue (Redeploy).</li>
+        </ol>
+      </div>
+      <p className="text-xs text-gray-400 italic">Si estás en local, asegúrate de tener un archivo .env configurado.</p>
+    </div>
+  </div>
+);
 
 const ScrollToTop = () => {
   const { pathname, hash } = useLocation();
@@ -991,36 +1055,42 @@ const HomePage = () => (
 );
 
 export default function App() {
+  if (!isSupabaseConfigured) {
+    return <ConfigMissingScreen />;
+  }
+
   return (
-    <Router>
-      <ScrollToTop />
-      <AuthProvider>
-        <ProductProvider>
-          <CartProvider>
-            <Routes>
-              <Route path="/login" element={<Login />} />
-              <Route path="/admin/*" element={<AdminRoutes />} />
-              <Route path="*" element={
-                <div className="min-h-screen bg-white selection:bg-black/10 selection:text-black flex flex-col">
-                  <Header />
-                  <main className="flex-1">
-                    <Routes>
-                      <Route path="/" element={<HomePage />} />
-                      <Route path="/productos" element={<ProductsPage />} />
-                      {/* Product page disabled per user request */}
-                      <Route path="/producto/:id" element={<Navigate to="/productos" replace />} />
-                    </Routes>
-                  </main>
-                  <Footer />
-                  <CartModal />
-                  <CheckoutModal />
-                  <FloatingWhatsAppButton />
-                </div>
-              } />
-            </Routes>
-          </CartProvider>
-        </ProductProvider>
-      </AuthProvider>
-    </Router>
+    <ErrorBoundary>
+      <Router>
+        <ScrollToTop />
+        <AuthProvider>
+          <ProductProvider>
+            <CartProvider>
+              <Routes>
+                <Route path="/login" element={<Login />} />
+                <Route path="/admin/*" element={<AdminRoutes />} />
+                <Route path="*" element={
+                  <div className="min-h-screen bg-white selection:bg-black/10 selection:text-black flex flex-col">
+                    <Header />
+                    <main className="flex-1">
+                      <Routes>
+                        <Route path="/" element={<HomePage />} />
+                        <Route path="/productos" element={<ProductsPage />} />
+                        {/* Product page disabled per user request */}
+                        <Route path="/producto/:id" element={<Navigate to="/productos" replace />} />
+                      </Routes>
+                    </main>
+                    <Footer />
+                    <CartModal />
+                    <CheckoutModal />
+                    <FloatingWhatsAppButton />
+                  </div>
+                } />
+              </Routes>
+            </CartProvider>
+          </ProductProvider>
+        </AuthProvider>
+      </Router>
+    </ErrorBoundary>
   );
 }
