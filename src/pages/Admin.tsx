@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Routes, Route, Link, useLocation, Navigate } from 'react-router-dom';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
 import { LayoutDashboard, PackagePlus, DollarSign, ShoppingBag, TrendingUp, PlusCircle, LogOut, ClipboardList, UploadCloud, X, Menu, Home, Trash2 } from 'lucide-react';
@@ -273,18 +273,41 @@ const AdminSales = () => {
 };
 
 const AdminProducts = () => {
-  const { products, addProduct, deleteProducts } = useProducts();
+  const { products, addProduct, deleteProducts, categories, addCategory, loading } = useProducts();
   const [isAdding, setIsAdding] = useState(false);
   const [selectedProducts, setSelectedProducts] = useState<number[]>([]);
+  const [isAddingCategory, setIsAddingCategory] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   const [formData, setFormData] = useState({
     name: '',
     description: '',
-    category: 'Rosas Rojas',
+    category: '',
     price: '',
     image: '',
     secondaryImages: [] as string[]
   });
+
+  useEffect(() => {
+    if (categories.length > 0 && !formData.category) {
+      setFormData(prev => ({ ...prev, category: categories[0] }));
+    }
+  }, [categories, formData.category]);
+
+  const handleAddCategory = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (newCategoryName.trim()) {
+      try {
+        await addCategory(newCategoryName.trim());
+        setFormData(prev => ({ ...prev, category: newCategoryName.trim() }));
+        setNewCategoryName('');
+        setIsAddingCategory(false);
+      } catch (error) {
+        alert("Error al añadir categoría");
+      }
+    }
+  };
 
   const handleMainImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -310,22 +333,29 @@ const AdminProducts = () => {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name || !formData.price || !formData.image) return;
     
-    addProduct({
-      name: formData.name,
-      description: formData.description,
-      category: formData.category,
-      price: parseFloat(formData.price),
-      image: formData.image,
-      secondaryImages: formData.secondaryImages
-    });
-    
-    setIsAdding(false);
-    setFormData({ name: '', description: '', category: 'Rosas Rojas', price: '', image: '', secondaryImages: [] });
-    alert("¡Producto añadido con éxito!");
+    setIsSubmitting(true);
+    try {
+      await addProduct({
+        name: formData.name,
+        description: formData.description,
+        category: formData.category,
+        price: parseFloat(formData.price),
+        image: formData.image,
+        secondaryImages: formData.secondaryImages
+      });
+      
+      setIsAdding(false);
+      setFormData({ name: '', description: '', category: categories[0] || '', price: '', image: '', secondaryImages: [] });
+      alert("¡Producto añadido con éxito!");
+    } catch (error) {
+      alert("Error al añadir producto");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const toggleSelectAll = () => {
@@ -342,10 +372,14 @@ const AdminProducts = () => {
     );
   };
 
-  const handleDeleteSelected = () => {
+  const handleDeleteSelected = async () => {
     if (window.confirm(`¿Estás seguro de que deseas borrar ${selectedProducts.length} producto(s)?`)) {
-      deleteProducts(selectedProducts);
-      setSelectedProducts([]);
+      try {
+        await deleteProducts(selectedProducts);
+        setSelectedProducts([]);
+      } catch (error) {
+        alert("Error al borrar productos");
+      }
     }
   };
 
@@ -394,18 +428,52 @@ const AdminProducts = () => {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Categoría</label>
-                <select 
-                  value={formData.category}
-                  onChange={e => setFormData({...formData, category: e.target.value})}
-                  className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
-                >
-                  <option value="Rosas Rojas">Rosas Rojas</option>
-                  <option value="Tulipanes">Tulipanes</option>
-                  <option value="Orquídeas">Orquídeas</option>
-                  <option value="Arreglos Mixtos">Arreglos Mixtos</option>
-                  <option value="Ocasiones Especiales">Ocasiones Especiales</option>
-                  <option value="Selección Especial">Selección Especial</option>
-                </select>
+                <div className="flex space-x-2">
+                  <select 
+                    value={formData.category}
+                    onChange={e => setFormData({...formData, category: e.target.value})}
+                    className="flex-1 border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
+                  >
+                    {categories.map(cat => (
+                      <option key={cat} value={cat}>{cat}</option>
+                    ))}
+                  </select>
+                  <button 
+                    type="button"
+                    onClick={() => setIsAddingCategory(!isAddingCategory)}
+                    className="bg-gray-100 p-2 rounded-md hover:bg-gray-200 transition-colors"
+                    title="Añadir nueva categoría"
+                  >
+                    <PlusCircle size={20} />
+                  </button>
+                </div>
+                {isAddingCategory && (
+                  <div className="mt-2 p-3 bg-gray-50 rounded-md border border-gray-200">
+                    <div className="flex space-x-2">
+                      <input 
+                        type="text"
+                        value={newCategoryName}
+                        onChange={e => setNewCategoryName(e.target.value)}
+                        placeholder="Nueva categoría..."
+                        className="flex-1 text-sm border border-gray-300 rounded-md px-3 py-1 focus:outline-none focus:ring-1 focus:ring-black"
+                      />
+                      <button 
+                        type="button"
+                        onClick={handleAddCategory}
+                        className="bg-black text-white text-xs px-3 py-1 rounded-md hover:bg-gray-800"
+                      >
+                        Añadir
+                      </button>
+                      <button 
+                        type="button"
+                        onClick={() => setIsAddingCategory(false)}
+                        className="text-gray-500 hover:text-black"
+                      >
+                        <X size={16} />
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Precio ($)</label>
@@ -503,8 +571,11 @@ const AdminProducts = () => {
 
       {/* Product List */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
+        {loading ? (
+          <div className="p-12 text-center text-gray-500">Cargando productos...</div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-gray-50 border-b border-gray-100">
                 <th className="px-6 py-4 w-10">
@@ -546,8 +617,9 @@ const AdminProducts = () => {
             </tbody>
           </table>
         </div>
-      </div>
+      )}
     </div>
+  </div>
   );
 };
 

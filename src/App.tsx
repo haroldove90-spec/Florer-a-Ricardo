@@ -609,7 +609,7 @@ const Footer = () => {
 
 const ProductsSection = () => {
   const { setCheckoutProduct } = useCart();
-  const { products } = useProducts();
+  const { products, loading } = useProducts();
   
   const specialSelection = products.filter(p => p.category === "Selección Especial");
   
@@ -621,25 +621,29 @@ const ProductsSection = () => {
         <div className="w-12 h-[2px] bg-black mx-auto" />
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-8 md:gap-8">
-        {specialSelection.map(product => (
-          <div key={product.id} className="flex flex-col items-center text-center group bg-white p-4 rounded-sm border border-gray-100">
-            <div className="w-full relative overflow-hidden mb-4 md:mb-6">
-              <img src={product.image} alt={product.name} className="w-full h-64 md:h-64 object-cover transition-transform duration-700 group-hover:scale-105 rounded-md" />
+      {loading ? (
+        <div className="py-20 text-center text-black/50">Cargando selección especial...</div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-8 md:gap-8">
+          {specialSelection.map(product => (
+            <div key={product.id} className="flex flex-col items-center text-center group bg-white p-4 rounded-sm border border-gray-100">
+              <div className="w-full relative overflow-hidden mb-4 md:mb-6">
+                <img src={product.image} alt={product.name} className="w-full h-64 md:h-64 object-cover transition-transform duration-700 group-hover:scale-105 rounded-md" />
+              </div>
+              <h4 className="text-lg md:text-xl font-sans text-black mb-1 md:mb-2 uppercase tracking-wider">{product.name}</h4>
+              <p className="text-black/60 text-xs md:text-sm font-light mb-2 line-clamp-2">{product.description}</p>
+              <p className="text-black font-bold text-lg md:text-base mb-4 md:mb-6">${product.price.toFixed(2)}</p>
+              <button 
+                onClick={() => setCheckoutProduct(product)}
+                className="px-3 md:px-6 py-3 bg-black text-white text-xs md:text-sm hover:bg-gray-800 hover:text-gold transition-colors w-full uppercase tracking-widest font-bold flex items-center justify-center space-x-2"
+              >
+                <MessageCircle size={18} />
+                <span>Comprar Ahora</span>
+              </button>
             </div>
-            <h4 className="text-lg md:text-xl font-sans text-black mb-1 md:mb-2 uppercase tracking-wider">{product.name}</h4>
-            <p className="text-black/60 text-xs md:text-sm font-light mb-2 line-clamp-2">{product.description}</p>
-            <p className="text-black font-bold text-lg md:text-base mb-4 md:mb-6">${product.price.toFixed(2)}</p>
-            <button 
-              onClick={() => setCheckoutProduct(product)}
-              className="px-3 md:px-6 py-3 bg-black text-white text-xs md:text-sm hover:bg-gray-800 hover:text-gold transition-colors w-full uppercase tracking-widest font-bold flex items-center justify-center space-x-2"
-            >
-              <MessageCircle size={18} />
-              <span>Comprar Ahora</span>
-            </button>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </section>
   );
 };
@@ -885,7 +889,7 @@ const ContactSection = () => {
 };
 
 const ProductsPage = () => {
-  const { products } = useProducts();
+  const { products, loading } = useProducts();
   const { setCheckoutProduct } = useCart();
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
@@ -910,34 +914,38 @@ const ProductsPage = () => {
 
       {/* Product Grid */}
       <div className="max-w-7xl mx-auto px-6 md:px-12 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-8 md:gap-10">
-          {filteredProducts.length > 0 ? (
-            filteredProducts.map(product => (
-              <div key={product.id} className="flex flex-col items-center text-center group bg-white p-4 rounded-sm border border-gray-100 hover:border-black transition-all">
-                <div className="w-full relative overflow-hidden mb-4 md:mb-6">
-                  <img src={product.image} alt={product.name} className="w-full h-64 md:h-56 object-cover transition-transform duration-700 group-hover:scale-105 rounded-sm" />
+        {loading ? (
+          <div className="py-20 text-center text-black/50">Cargando productos...</div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-8 md:gap-10">
+            {filteredProducts.length > 0 ? (
+              filteredProducts.map(product => (
+                <div key={product.id} className="flex flex-col items-center text-center group bg-white p-4 rounded-sm border border-gray-100 hover:border-black transition-all">
+                  <div className="w-full relative overflow-hidden mb-4 md:mb-6">
+                    <img src={product.image} alt={product.name} className="w-full h-64 md:h-56 object-cover transition-transform duration-700 group-hover:scale-105 rounded-sm" />
+                  </div>
+                  <h4 className="text-lg md:text-lg font-sans text-black mb-1 md:mb-2 uppercase tracking-wider">{product.name}</h4>
+                  <p className="text-black/60 text-xs md:text-sm font-light mb-2 line-clamp-2">{product.description}</p>
+                  <p className="text-black font-bold text-lg md:text-base mb-4 md:mb-6">${product.price.toFixed(2)}</p>
+                  <button 
+                    onClick={() => setCheckoutProduct(product)}
+                    className="px-3 md:px-6 py-3 bg-black text-white text-xs md:text-sm hover:bg-gray-800 hover:text-gold transition-colors w-full uppercase tracking-widest font-bold flex items-center justify-center space-x-2"
+                  >
+                    <MessageCircle size={18} />
+                    <span>Comprar Ahora</span>
+                  </button>
                 </div>
-                <h4 className="text-lg md:text-lg font-sans text-black mb-1 md:mb-2 uppercase tracking-wider">{product.name}</h4>
-                <p className="text-black/60 text-xs md:text-sm font-light mb-2 line-clamp-2">{product.description}</p>
-                <p className="text-black font-bold text-lg md:text-base mb-4 md:mb-6">${product.price.toFixed(2)}</p>
-                <button 
-                  onClick={() => setCheckoutProduct(product)}
-                  className="px-3 md:px-6 py-3 bg-black text-white text-xs md:text-sm hover:bg-gray-800 hover:text-gold transition-colors w-full uppercase tracking-widest font-bold flex items-center justify-center space-x-2"
-                >
-                  <MessageCircle size={18} />
-                  <span>Comprar Ahora</span>
-                </button>
+              ))
+            ) : (
+              <div className="col-span-full text-center py-20 text-black/50">
+                <p className="text-xl">No se encontraron productos en esta categoría.</p>
+                <Link to="/productos" className="inline-block mt-6 px-6 py-2 border border-black text-black hover:bg-black hover:text-white transition-colors">
+                  Ver todos los productos
+                </Link>
               </div>
-            ))
-          ) : (
-            <div className="col-span-full text-center py-20 text-black/50">
-              <p className="text-xl">No se encontraron productos en esta categoría.</p>
-              <Link to="/productos" className="inline-block mt-6 px-6 py-2 border border-black text-black hover:bg-black hover:text-white transition-colors">
-                Ver todos los productos
-              </Link>
-            </div>
-          )}
-        </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
