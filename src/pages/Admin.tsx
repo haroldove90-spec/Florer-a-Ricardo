@@ -5,6 +5,7 @@ import { LayoutDashboard, PackagePlus, DollarSign, ShoppingBag, TrendingUp, Plus
 import { motion, AnimatePresence } from 'motion/react';
 import { useProducts } from '../context/ProductContext';
 import { useAuth } from '../context/AuthContext';
+import { supabase } from '../lib/supabase';
 
 const mockSalesData = [
   { time: '08:00', sales: 120 },
@@ -122,6 +123,17 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
                 </div>
                 <span className="text-xl font-serif text-white font-medium group-hover:text-gold">Gestión de Productos</span>
               </Link>
+
+              <Link 
+                to="/admin/usuarios" 
+                className={`group flex items-center space-x-4 p-4 rounded-2xl bg-white/5 shadow-sm border border-white/10 active:scale-95 transition-all ${location.pathname.includes('/usuarios') ? 'ring-2 ring-white/20' : ''}`}
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-colors ${location.pathname.includes('/usuarios') ? 'bg-white text-black shadow-md shadow-white/20' : 'bg-white/10 text-white group-hover:bg-white group-hover:text-black'}`}>
+                  <PlusCircle size={24} strokeWidth={1.5} />
+                </div>
+                <span className="text-xl font-serif text-white font-medium group-hover:text-gold">Gestión de Usuarios</span>
+              </Link>
               
               <div className="h-px bg-white/10 my-4"></div>
               
@@ -180,6 +192,14 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
           >
             <PackagePlus size={20} />
             <span>Gestión de Productos</span>
+          </Link>
+          <Link 
+            to="/admin/usuarios" 
+            onClick={() => setIsMobileMenuOpen(false)}
+            className={`flex items-center space-x-3 px-4 py-3 rounded-md transition-colors ${location.pathname.includes('/usuarios') ? 'bg-white text-black font-medium' : 'hover:bg-white/10 text-white/80 hover:text-gold'}`}
+          >
+            <PlusCircle size={20} />
+            <span>Gestión de Usuarios</span>
           </Link>
         </nav>
         <div className="p-4 border-t border-white/10 mt-auto space-y-2">
@@ -638,6 +658,128 @@ const AdminProducts = () => {
   );
 };
 
+const AdminUsers = () => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (password !== confirmPassword) {
+      setMessage({ type: 'error', text: 'Las contraseñas no coinciden.' });
+      return;
+    }
+
+    setLoading(true);
+    setMessage(null);
+
+    try {
+      // Note: In Supabase, signUp by default might sign in the new user.
+      // To create a user without signing in, you'd normally use the Admin API (service role),
+      // but for this demo we use the standard signUp. 
+      // IMPORTANT: The admin might be signed out after this if Supabase is configured to auto-login.
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: window.location.origin,
+        }
+      });
+
+      if (error) throw error;
+
+      setMessage({ 
+        type: 'success', 
+        text: 'Usuario registrado con éxito. Se ha enviado un correo de confirmación (si está habilitado en Supabase).' 
+      });
+      setEmail('');
+      setPassword('');
+      setConfirmPassword('');
+    } catch (error: any) {
+      setMessage({ type: 'error', text: error.message || 'Error al registrar el usuario.' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="space-y-8 max-w-2xl">
+      <div>
+        <h1 className="text-3xl font-serif text-black mb-2">Gestión de Usuarios</h1>
+        <p className="text-darkgray/70">Registra nuevos administradores para la tienda.</p>
+      </div>
+
+      <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100">
+        <h3 className="text-lg font-medium text-black mb-6 border-b pb-4">Registrar Nuevo Administrador</h3>
+        
+        <form onSubmit={handleRegister} className="space-y-6">
+          {message && (
+            <div className={`p-4 rounded-lg text-sm ${message.type === 'success' ? 'bg-green-50 text-green-700 border border-green-100' : 'bg-red-50 text-red-700 border border-red-100'}`}>
+              {message.text}
+            </div>
+          )}
+
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Correo Electrónico</label>
+              <input 
+                type="email" 
+                required
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                placeholder="ejemplo@floreriaricardo.com"
+                className="w-full border border-gray-200 px-4 py-3 rounded-lg outline-none focus:border-black transition-colors"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Contraseña</label>
+              <input 
+                type="password" 
+                required
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                placeholder="••••••••"
+                className="w-full border border-gray-200 px-4 py-3 rounded-lg outline-none focus:border-black transition-colors"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Confirmar Contraseña</label>
+              <input 
+                type="password" 
+                required
+                value={confirmPassword}
+                onChange={e => setConfirmPassword(e.target.value)}
+                placeholder="••••••••"
+                className="w-full border border-gray-200 px-4 py-3 rounded-lg outline-none focus:border-black transition-colors"
+              />
+            </div>
+          </div>
+
+          <div className="pt-4">
+            <button 
+              type="submit"
+              disabled={loading}
+              className="w-full py-4 bg-black text-white rounded-lg font-bold uppercase tracking-widest text-xs hover:bg-gray-800 transition-all flex items-center justify-center space-x-2 disabled:opacity-50"
+            >
+              {loading ? <Loader2 className="animate-spin" size={18} /> : <span>Registrar Usuario</span>}
+            </button>
+          </div>
+        </form>
+
+        <div className="mt-8 p-4 bg-blue-50 rounded-lg border border-blue-100">
+          <p className="text-xs text-blue-700 leading-relaxed">
+            <strong>Nota importante:</strong> Por seguridad, Supabase puede requerir que el nuevo usuario confirme su correo electrónico antes de poder iniciar sesión. Puedes desactivar esta opción en el panel de Supabase (Authentication &gt; Providers &gt; Email &gt; Confirm email) si deseas acceso inmediato.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const mockOrders = [
   {
     id: 'ORD-001',
@@ -765,6 +907,7 @@ export const AdminRoutes = () => {
         <Route path="/ventas" element={<AdminSales />} />
         <Route path="/pedidos" element={<AdminOrders />} />
         <Route path="/productos" element={<AdminProducts />} />
+        <Route path="/usuarios" element={<AdminUsers />} />
       </Routes>
     </AdminLayout>
   );
