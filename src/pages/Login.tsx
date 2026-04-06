@@ -2,12 +2,13 @@ import React, { useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { useNavigate, Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { LogIn, Mail, Lock, Loader2 } from 'lucide-react';
+import { LogIn, Mail, Lock, Loader2, Eye, EyeOff } from 'lucide-react';
 import { motion } from 'motion/react';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
@@ -52,7 +53,7 @@ const Login = () => {
         <form onSubmit={handleLogin} className="space-y-6">
           {error && (
             <div className="bg-red-50 border border-red-100 text-red-600 px-4 py-3 rounded-lg text-sm">
-              {error}
+              {error === 'Invalid login credentials' ? 'Credenciales inválidas. Por favor, verifica tu correo y contraseña.' : error}
             </div>
           )}
           
@@ -76,13 +77,21 @@ const Login = () => {
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
               <input 
-                type="password" 
+                type={showPassword ? "text" : "password"} 
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••" 
-                className="w-full border border-gray-200 pl-10 pr-4 py-3 rounded-lg outline-none focus:border-black transition-colors" 
+                className="w-full border border-gray-200 pl-10 pr-12 py-3 rounded-lg outline-none focus:border-black transition-colors" 
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-black transition-colors"
+                aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
             </div>
           </div>
 
