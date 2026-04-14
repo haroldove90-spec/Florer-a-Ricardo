@@ -9,13 +9,15 @@ export type Product = {
   secondaryImages?: string[];
   description: string;
   category?: string;
+  isSpecial?: boolean;
 };
 
 type ProductContextType = {
   products: Product[];
   categories: string[];
   loading: boolean;
-  addProduct: (product: Omit<Product, 'id'>) => Promise<void>;
+  addProduct: (product: Omit<Product, 'id'>, mainImageFile?: File, secondaryImageFiles?: File[]) => Promise<void>;
+  updateProduct: (id: number, product: Partial<Product>, mainImageFile?: File, secondaryImageFiles?: File[]) => Promise<void>;
   deleteProducts: (ids: number[]) => Promise<void>;
   addCategory: (category: string) => Promise<void>;
   deleteCategory: (category: string) => Promise<void>;
@@ -50,7 +52,8 @@ export const ProductProvider = ({ children }: { children: React.ReactNode }) => 
         image: p.image,
         secondaryImages: p.secondary_images || [],
         description: p.description,
-        category: p.category
+        category: p.category,
+        isSpecial: p.is_special || false
       }));
       setProducts(formattedProducts);
     }
@@ -65,7 +68,7 @@ export const ProductProvider = ({ children }: { children: React.ReactNode }) => 
     if (error) {
       console.error('Error fetching categories:', error);
     } else {
-      setCategories(data.map((c: any) => c.name));
+      setCategories([...new Set(data.map((c: any) => c.name.trim()))]);
     }
   };
 
@@ -99,22 +102,100 @@ export const ProductProvider = ({ children }: { children: React.ReactNode }) => 
     };
   }, []);
 
-  const addProduct = async (product: Omit<Product, 'id'>) => {
+  const uploadImage = async (file: File, path: string): Promise<string> => {
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${Math.random().toString(36).substring(2)}.${fileExt}`;
+    const filePath = `${path}/${fileName}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from('images')
+      .upload(filePath, file);
+
+    if (uploadError) {
+      console.error('Error uploading image:', uploadError);
+      throw uploadError;
+    }
+
+    const { data } = supabase.storage
+      .from('images')
+      .getPublicUrl(filePath);
+
+    return data.publicUrl;
+  };
+
+  const addProduct = async (product: Omit<Product, 'id'>, mainImageFile?: File, secondaryImageFiles?: File[]) => {
+    let mainImageUrl = product.image;
+    let secondaryImageUrls = (product.secondaryImages || []).filter(url => !url.startsWith('blob:'));
+
+    // Upload main image if it's a file
+    if (mainImageFile) {
+      mainImageUrl = await uploadImage(mainImageFile, 'products');
+    }
+
+    // Upload secondary images if they are files
+    if (secondaryImageFiles && secondaryImageFiles.length > 0) {
+      const uploadedUrls = await Promise.all(
+        secondaryImageFiles.map(file => uploadImage(file, 'products'))
+      );
+      secondaryImageUrls = [...secondaryImageUrls, ...uploadedUrls];
+    }
+
     const { error } = await supabase
       .from('products')
       .insert([{
         name: product.name,
         description: product.description,
         price: product.price,
-        image: product.image,
-        secondary_images: product.secondaryImages,
-        category: product.category
+        image: mainImageUrl,
+        secondary_images: secondaryImageUrls,
+        category: product.category,
+        is_special: product.isSpecial || false
       }]);
 
     if (error) {
       console.error('Error adding product:', error);
       throw error;
     }
+    
+    await fetchProducts();
+  };
+
+  const updateProduct = async (id: number, product: Partial<Product>, mainImageFile?: File, secondaryImageFiles?: File[]) => {
+    let mainImageUrl = product.image;
+    let secondaryImageUrls = (product.secondaryImages || []).filter(url => !url.startsWith('blob:'));
+
+    // Upload main image if it's a file
+    if (mainImageFile) {
+      mainImageUrl = await uploadImage(mainImageFile, 'products');
+    }
+
+    // Upload secondary images if they are files
+    if (secondaryImageFiles && secondaryImageFiles.length > 0) {
+      const uploadedUrls = await Promise.all(
+        secondaryImageFiles.map(file => uploadImage(file, 'products'))
+      );
+      secondaryImageUrls = [...secondaryImageUrls, ...uploadedUrls];
+    }
+
+    const { error } = await supabase
+      .from('products')
+      .update({
+        name: product.name,
+        description: product.description,
+        price: product.price,
+        image: mainImageUrl,
+        secondary_images: secondaryImageUrls,
+        category: product.category,
+        is_special: product.isSpecial ?? false
+      })
+      .eq('id', id);
+
+    if (error) {
+      console.error('Error updating product:', error);
+      throw error;
+    }
+    
+    await fetchProducts();
   };
 
   const deleteProducts = async (ids: number[]) => {
@@ -127,12 +208,17 @@ export const ProductProvider = ({ children }: { children: React.ReactNode }) => 
       console.error('Error deleting products:', error);
       throw error;
     }
+
+    await fetchProducts();
   };
 
   const addCategory = async (category: string) => {
+    const trimmedCategory = category.trim();
+    if (!trimmedCategory) return;
+    
     const { error } = await supabase
       .from('categories')
-      .insert([{ name: category }]);
+      .insert([{ name: trimmedCategory }]);
 
     if (error) {
       if (error.code === '23505') { // Unique violation
@@ -141,6 +227,8 @@ export const ProductProvider = ({ children }: { children: React.ReactNode }) => 
       console.error('Error adding category:', error);
       throw error;
     }
+
+    await fetchCategories();
   };
 
   const deleteCategory = async (category: string) => {
@@ -153,6 +241,8 @@ export const ProductProvider = ({ children }: { children: React.ReactNode }) => 
       console.error('Error deleting category:', error);
       throw error;
     }
+
+    await fetchCategories();
   };
 
   return (
@@ -161,6 +251,7 @@ export const ProductProvider = ({ children }: { children: React.ReactNode }) => 
       categories, 
       loading,
       addProduct, 
+      updateProduct,
       deleteProducts, 
       addCategory, 
       deleteCategory 

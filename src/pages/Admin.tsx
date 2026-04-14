@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, Link, useLocation, Navigate, useNavigate } from 'react-router-dom';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
-import { LayoutDashboard, PackagePlus, DollarSign, ShoppingBag, TrendingUp, PlusCircle, LogOut, ClipboardList, UploadCloud, X, Menu, Home, Trash2, Loader2 } from 'lucide-react';
+import { LayoutDashboard, PackagePlus, DollarSign, ShoppingBag, TrendingUp, PlusCircle, LogOut, ClipboardList, UploadCloud, X, Menu, Home, Trash2, Loader2, ExternalLink, Settings, Image as ImageIcon, Type, Grid } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useProducts } from '../context/ProductContext';
 import { useAuth } from '../context/AuthContext';
@@ -134,6 +134,17 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
                 </div>
                 <span className="text-xl font-serif text-white font-medium group-hover:text-gold">Gestión de Usuarios</span>
               </Link>
+
+              <Link 
+                to="/admin/personalizacion" 
+                className={`group flex items-center space-x-4 p-4 rounded-2xl bg-white/5 shadow-sm border border-white/10 active:scale-95 transition-all ${location.pathname.includes('/personalizacion') ? 'ring-2 ring-white/20' : ''}`}
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-colors ${location.pathname.includes('/personalizacion') ? 'bg-white text-black shadow-md shadow-white/20' : 'bg-white/10 text-white group-hover:bg-white group-hover:text-black'}`}>
+                  <Settings size={24} strokeWidth={1.5} />
+                </div>
+                <span className="text-xl font-serif text-white font-medium group-hover:text-gold">Personalización</span>
+              </Link>
               
               <div className="h-px bg-white/10 my-4"></div>
               
@@ -200,6 +211,14 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
           >
             <PlusCircle size={20} />
             <span>Gestión de Usuarios</span>
+          </Link>
+          <Link 
+            to="/admin/personalizacion" 
+            onClick={() => setIsMobileMenuOpen(false)}
+            className={`flex items-center space-x-3 px-4 py-3 rounded-md transition-colors ${location.pathname.includes('/personalizacion') ? 'bg-white text-black font-medium' : 'hover:bg-white/10 text-white/80 hover:text-gold'}`}
+          >
+            <Settings size={20} />
+            <span>Personalización</span>
           </Link>
         </nav>
         <div className="p-4 border-t border-white/10 mt-auto space-y-2">
@@ -308,12 +327,15 @@ const AdminSales = () => {
 };
 
 const AdminProducts = () => {
-  const { products, addProduct, deleteProducts, categories, addCategory, loading } = useProducts();
+  const { products, addProduct, updateProduct, deleteProducts, categories, addCategory, deleteCategory, loading } = useProducts();
   const [isAdding, setIsAdding] = useState(false);
+  const [editingId, setEditingId] = useState<number | null>(null);
   const [selectedProducts, setSelectedProducts] = useState<number[]>([]);
   const [isAddingCategory, setIsAddingCategory] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [mainImageFile, setMainImageFile] = useState<File | null>(null);
+  const [secondaryImageFiles, setSecondaryImageFiles] = useState<File[]>([]);
   
   const [formData, setFormData] = useState({
     name: '',
@@ -321,6 +343,7 @@ const AdminProducts = () => {
     category: '',
     price: '',
     image: '',
+    isSpecial: false,
     secondaryImages: [] as string[]
   });
 
@@ -347,6 +370,7 @@ const AdminProducts = () => {
   const handleMainImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      setMainImageFile(file);
       const url = URL.createObjectURL(file);
       setFormData(prev => ({ ...prev, image: url }));
     }
@@ -354,6 +378,7 @@ const AdminProducts = () => {
 
   const handleSecondaryImagesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []) as File[];
+    setSecondaryImageFiles(prev => [...prev, ...files]);
     const urls = files.map(file => URL.createObjectURL(file));
     setFormData(prev => ({ 
       ...prev, 
@@ -366,6 +391,7 @@ const AdminProducts = () => {
       ...prev,
       secondaryImages: prev.secondaryImages.filter((_, index) => index !== indexToRemove)
     }));
+    setSecondaryImageFiles(prev => prev.filter((_, index) => index !== indexToRemove));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -374,23 +400,66 @@ const AdminProducts = () => {
     
     setIsSubmitting(true);
     try {
-      await addProduct({
-        name: formData.name,
-        description: formData.description,
-        category: formData.category,
-        price: parseFloat(formData.price),
-        image: formData.image,
-        secondaryImages: formData.secondaryImages
-      });
+      if (editingId) {
+        await updateProduct(editingId, {
+          name: formData.name,
+          description: formData.description,
+          category: formData.category,
+          price: parseFloat(formData.price),
+          image: formData.image,
+          isSpecial: formData.isSpecial,
+          secondaryImages: formData.secondaryImages
+        }, mainImageFile || undefined, secondaryImageFiles);
+        alert("¡Producto actualizado con éxito!");
+      } else {
+        await addProduct({
+          name: formData.name,
+          description: formData.description,
+          category: formData.category,
+          price: parseFloat(formData.price),
+          image: formData.image,
+          isSpecial: formData.isSpecial,
+          secondaryImages: formData.secondaryImages
+        }, mainImageFile || undefined, secondaryImageFiles);
+        alert("¡Producto añadido con éxito!");
+      }
       
       setIsAdding(false);
-      setFormData({ name: '', description: '', category: categories[0] || '', price: '', image: '', secondaryImages: [] });
-      alert("¡Producto añadido con éxito!");
+      setEditingId(null);
+      setFormData({ name: '', description: '', category: categories[0] || '', price: '', image: '', isSpecial: false, secondaryImages: [] });
+      setMainImageFile(null);
+      setSecondaryImageFiles([]);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
     } catch (error) {
-      alert("Error al añadir producto");
+      alert(editingId ? "Error al actualizar producto" : "Error al añadir producto");
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleEdit = (product: any) => {
+    setFormData({
+      name: product.name,
+      description: product.description,
+      category: product.category || categories[0] || '',
+      price: product.price.toString(),
+      image: product.image,
+      isSpecial: product.isSpecial || false,
+      secondaryImages: product.secondaryImages || []
+    });
+    setEditingId(product.id);
+    setIsAdding(true);
+  };
+
+  const handleCancel = () => {
+    setIsAdding(false);
+    setEditingId(null);
+    setFormData({ name: '', description: '', category: categories[0] || '', price: '', image: '', isSpecial: false, secondaryImages: [] });
+    setMainImageFile(null);
+    setSecondaryImageFiles([]);
   };
 
   const toggleSelectAll = () => {
@@ -422,7 +491,12 @@ const AdminProducts = () => {
     <div className="space-y-8">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-serif text-black mb-2">Gestión de Productos</h1>
+          <h1 className="text-3xl font-serif text-black mb-2 flex items-center gap-3">
+            Gestión de Productos
+            <span className="text-sm font-sans bg-black text-white px-3 py-1 rounded-full">
+              {products.length} {products.length === 1 ? 'Producto' : 'Productos'}
+            </span>
+          </h1>
           <p className="text-darkgray/70">Administra el catálogo de tu tienda.</p>
         </div>
         <div className="flex items-center space-x-4">
@@ -436,7 +510,7 @@ const AdminProducts = () => {
             </button>
           )}
           <button 
-            onClick={() => setIsAdding(!isAdding)}
+            onClick={isAdding ? handleCancel : () => setIsAdding(true)}
             className="flex items-center space-x-2 bg-black text-white px-4 py-2 rounded-md hover:bg-gray-800 transition-colors"
           >
             {isAdding ? <X size={18} /> : <PlusCircle size={18} />}
@@ -447,7 +521,9 @@ const AdminProducts = () => {
 
       {isAdding && (
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-8">
-          <h3 className="text-lg font-medium text-black mb-6 border-b pb-4">Añadir Nuevo Producto</h3>
+          <h3 className="text-lg font-medium text-black mb-6 border-b pb-4">
+            {editingId ? 'Editar Producto' : 'Añadir Nuevo Producto'}
+          </h3>
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
@@ -521,6 +597,18 @@ const AdminProducts = () => {
                   className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
                   placeholder="0.00"
                 />
+              </div>
+              <div className="flex items-center space-x-3 pt-8">
+                <input 
+                  type="checkbox"
+                  id="isSpecial"
+                  checked={formData.isSpecial}
+                  onChange={e => setFormData({...formData, isSpecial: e.target.checked})}
+                  className="w-5 h-5 rounded border-gray-300 text-black focus:ring-black"
+                />
+                <label htmlFor="isSpecial" className="text-sm font-medium text-gray-700 cursor-pointer">
+                  Mostrar en "Selección Especial" (Slider Principal)
+                </label>
               </div>
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-2">Imagen Principal</label>
@@ -641,18 +729,67 @@ const AdminProducts = () => {
                   <td className="px-6 py-4">
                     <div className="flex items-center space-x-4">
                       <img src={product.image} alt={product.name} className="w-10 h-10 rounded-md object-cover" />
-                      <span className="font-medium text-black">{product.name}</span>
+                      <div className="flex flex-col">
+                        <span className="font-medium text-black">{product.name}</span>
+                        {product.isSpecial && (
+                          <span className="text-[10px] text-orange-600 font-bold uppercase tracking-tighter">Selección Especial</span>
+                        )}
+                      </div>
                     </div>
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-600">{product.category || 'Sin categoría'}</td>
                   <td className="px-6 py-4 text-sm font-medium text-black">${product.price.toFixed(2)}</td>
-                  <td className="px-6 py-4 text-sm text-black hover:text-gray-600 cursor-pointer">Editar</td>
+                  <td className="px-6 py-4 text-sm space-x-4">
+                    <button 
+                      onClick={() => handleEdit(product)}
+                      className="text-black hover:text-gray-600 font-medium cursor-pointer"
+                    >
+                      Editar
+                    </button>
+                    <Link 
+                      to={`/producto/${product.id}`} 
+                      target="_blank"
+                      className="text-blue-600 hover:text-blue-800 font-medium inline-flex items-center"
+                    >
+                      Ver <ExternalLink size={14} className="ml-1" />
+                    </Link>
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
       )}
+      {/* Category Management */}
+      <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mt-8">
+        <h3 className="text-lg font-medium text-black mb-4 border-b pb-4 flex items-center justify-between">
+          <span>Gestión de Categorías</span>
+          <span className="text-xs font-normal text-gray-500">{categories.length} categorías activas</span>
+        </h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+          {categories.map(cat => (
+            <div key={cat} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-100 group hover:border-gray-300 transition-all">
+              <span className="text-sm font-medium text-gray-700 truncate mr-2">{cat}</span>
+              <button 
+                onClick={() => {
+                  if (window.confirm(`¿Estás seguro de que deseas eliminar la categoría "${cat}"?`)) {
+                    deleteCategory(cat);
+                  }
+                }}
+                className="text-gray-400 hover:text-red-600 transition-colors p-1"
+                title="Eliminar categoría"
+              >
+                <Trash2 size={14} />
+              </button>
+            </div>
+          ))}
+          {categories.length === 0 && (
+            <div className="col-span-full py-4 text-center text-gray-400 text-sm italic">
+              No hay categorías personalizadas creadas.
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   </div>
   );
@@ -662,8 +799,32 @@ const AdminUsers = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [role, setRole] = useState<'admin' | 'user'>('admin');
   const [loading, setLoading] = useState(false);
+  const [users, setUsers] = useState<any[]>([]);
+  const [fetchingUsers, setFetchingUsers] = useState(true);
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+
+  const fetchUsers = async () => {
+    try {
+      setFetchingUsers(true);
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .order('updated_at', { ascending: false });
+      
+      if (error) throw error;
+      setUsers(data || []);
+    } catch (error) {
+      console.error('Error fetching users:', error);
+    } finally {
+      setFetchingUsers(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -676,15 +837,14 @@ const AdminUsers = () => {
     setMessage(null);
 
     try {
-      // Note: In Supabase, signUp by default might sign in the new user.
-      // To create a user without signing in, you'd normally use the Admin API (service role),
-      // but for this demo we use the standard signUp. 
-      // IMPORTANT: The admin might be signed out after this if Supabase is configured to auto-login.
       const { error } = await supabase.auth.signUp({
         email,
         password,
         options: {
           emailRedirectTo: window.location.origin,
+          data: {
+            role: role
+          }
         }
       });
 
@@ -692,11 +852,14 @@ const AdminUsers = () => {
 
       setMessage({ 
         type: 'success', 
-        text: 'Usuario registrado con éxito. Se ha enviado un correo de confirmación (si está habilitado en Supabase).' 
+        text: 'Usuario registrado con éxito. Se ha enviado un correo de confirmación (si está habilitado).' 
       });
       setEmail('');
       setPassword('');
       setConfirmPassword('');
+      
+      // Refresh list after a short delay to allow trigger to run
+      setTimeout(fetchUsers, 2000);
     } catch (error: any) {
       setMessage({ type: 'error', text: error.message || 'Error al registrar el usuario.' });
     } finally {
@@ -705,75 +868,132 @@ const AdminUsers = () => {
   };
 
   return (
-    <div className="space-y-8 max-w-2xl">
-      <div>
-        <h1 className="text-3xl font-serif text-black mb-2">Gestión de Usuarios</h1>
-        <p className="text-darkgray/70">Registra nuevos administradores para la tienda.</p>
+    <div className="space-y-12">
+      <div className="max-w-2xl">
+        <div>
+          <h1 className="text-3xl font-serif text-black mb-2">Gestión de Usuarios</h1>
+          <p className="text-darkgray/70">Administra los accesos y roles de la tienda.</p>
+        </div>
+
+        <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100 mt-8">
+          <h3 className="text-lg font-medium text-black mb-6 border-b pb-4">Registrar Nuevo Usuario</h3>
+          
+          <form onSubmit={handleRegister} className="space-y-6">
+            {message && (
+              <div className={`p-4 rounded-lg text-sm ${message.type === 'success' ? 'bg-green-50 text-green-700 border border-green-100' : 'bg-red-50 text-red-700 border border-red-100'}`}>
+                {message.text}
+              </div>
+            )}
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Correo Electrónico</label>
+                <input 
+                  type="email" 
+                  required
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  placeholder="ejemplo@floreriaricardo.com"
+                  className="w-full border border-gray-200 px-4 py-3 rounded-lg outline-none focus:border-black transition-colors"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Contraseña</label>
+                  <input 
+                    type="password" 
+                    required
+                    value={password}
+                    onChange={e => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="w-full border border-gray-200 px-4 py-3 rounded-lg outline-none focus:border-black transition-colors"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Confirmar Contraseña</label>
+                  <input 
+                    type="password" 
+                    required
+                    value={confirmPassword}
+                    onChange={e => setConfirmPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="w-full border border-gray-200 px-4 py-3 rounded-lg outline-none focus:border-black transition-colors"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Rol del Usuario</label>
+                <select 
+                  value={role}
+                  onChange={e => setRole(e.target.value as 'admin' | 'user')}
+                  className="w-full border border-gray-200 px-4 py-3 rounded-lg outline-none focus:border-black transition-colors bg-white"
+                >
+                  <option value="admin">Administrador (Acceso total)</option>
+                  <option value="user">Usuario (Solo lectura/limitado)</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="pt-4">
+              <button 
+                type="submit"
+                disabled={loading}
+                className="w-full py-4 bg-black text-white rounded-lg font-bold uppercase tracking-widest text-xs hover:bg-gray-800 transition-all flex items-center justify-center space-x-2 disabled:opacity-50"
+              >
+                {loading ? <Loader2 className="animate-spin" size={18} /> : <span>Registrar Usuario</span>}
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
 
-      <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100">
-        <h3 className="text-lg font-medium text-black mb-6 border-b pb-4">Registrar Nuevo Administrador</h3>
-        
-        <form onSubmit={handleRegister} className="space-y-6">
-          {message && (
-            <div className={`p-4 rounded-lg text-sm ${message.type === 'success' ? 'bg-green-50 text-green-700 border border-green-100' : 'bg-red-50 text-red-700 border border-red-100'}`}>
-              {message.text}
-            </div>
-          )}
-
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Correo Electrónico</label>
-              <input 
-                type="email" 
-                required
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                placeholder="ejemplo@floreriaricardo.com"
-                className="w-full border border-gray-200 px-4 py-3 rounded-lg outline-none focus:border-black transition-colors"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Contraseña</label>
-              <input 
-                type="password" 
-                required
-                value={password}
-                onChange={e => setPassword(e.target.value)}
-                placeholder="••••••••"
-                className="w-full border border-gray-200 px-4 py-3 rounded-lg outline-none focus:border-black transition-colors"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Confirmar Contraseña</label>
-              <input 
-                type="password" 
-                required
-                value={confirmPassword}
-                onChange={e => setConfirmPassword(e.target.value)}
-                placeholder="••••••••"
-                className="w-full border border-gray-200 px-4 py-3 rounded-lg outline-none focus:border-black transition-colors"
-              />
-            </div>
+      <div>
+        <h3 className="text-xl font-serif text-black mb-6">Usuarios Registrados</h3>
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-gray-50 border-b border-gray-100">
+                  <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Usuario</th>
+                  <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Rol</th>
+                  <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Fecha Registro</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {fetchingUsers ? (
+                  <tr>
+                    <td colSpan={3} className="px-6 py-8 text-center text-gray-400 italic">Cargando usuarios...</td>
+                  </tr>
+                ) : users.length === 0 ? (
+                  <tr>
+                    <td colSpan={3} className="px-6 py-8 text-center text-gray-400 italic">No hay usuarios registrados o la tabla 'profiles' no existe.</td>
+                  </tr>
+                ) : (
+                  users.map(u => (
+                    <tr key={u.id} className="hover:bg-gray-50 transition-colors">
+                      <td className="px-6 py-4">
+                        <div className="font-medium text-black">{u.email}</div>
+                        <div className="text-xs text-gray-400">{u.id}</div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest ${
+                          u.role === 'admin' ? 'bg-black text-white' : 'bg-gray-100 text-gray-600'
+                        }`}>
+                          {u.role}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-500">
+                        {new Date(u.updated_at).toLocaleDateString()}
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
           </div>
-
-          <div className="pt-4">
-            <button 
-              type="submit"
-              disabled={loading}
-              className="w-full py-4 bg-black text-white rounded-lg font-bold uppercase tracking-widest text-xs hover:bg-gray-800 transition-all flex items-center justify-center space-x-2 disabled:opacity-50"
-            >
-              {loading ? <Loader2 className="animate-spin" size={18} /> : <span>Registrar Usuario</span>}
-            </button>
-          </div>
-        </form>
-
-        <div className="mt-8 p-4 bg-blue-50 rounded-lg border border-blue-100">
-          <p className="text-xs text-blue-700 leading-relaxed">
-            <strong>Nota importante:</strong> Por seguridad, Supabase puede requerir que el nuevo usuario confirme su correo electrónico antes de poder iniciar sesión. Puedes desactivar esta opción en el panel de Supabase (Authentication &gt; Providers &gt; Email &gt; Confirm email) si deseas acceso inmediato.
-          </p>
         </div>
       </div>
     </div>
@@ -821,6 +1041,31 @@ const mockOrders = [
 ];
 
 const AdminOrders = () => {
+  const [orders, setOrders] = useState(mockOrders);
+
+  const handleStatusChange = (orderId: string, newStatus: string) => {
+    setOrders(prevOrders => 
+      prevOrders.map(order => 
+        order.id === orderId ? { ...order, status: newStatus } : order
+      )
+    );
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'Completado':
+        return 'bg-green-100 text-green-700';
+      case 'En proceso':
+        return 'bg-blue-100 text-blue-700';
+      case 'Pendiente':
+        return 'bg-yellow-100 text-yellow-700';
+      case 'Cancelado':
+        return 'bg-red-100 text-red-700';
+      default:
+        return 'bg-gray-100 text-gray-700';
+    }
+  };
+
   return (
     <div className="space-y-8">
       <div>
@@ -841,7 +1086,7 @@ const AdminOrders = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {mockOrders.map(order => (
+              {orders.map(order => (
                 <tr key={order.id} className="hover:bg-gray-50 transition-colors">
                   <td className="px-6 py-4">
                     <span className="font-medium text-black">{order.id}</span>
@@ -864,13 +1109,16 @@ const AdminOrders = () => {
                   </td>
                   <td className="px-6 py-4 text-sm font-medium text-black">${order.total.toFixed(2)}</td>
                   <td className="px-6 py-4">
-                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                      order.status === 'Completado' ? 'bg-green-100 text-green-700' :
-                      order.status === 'Pendiente' ? 'bg-yellow-100 text-yellow-700' :
-                      'bg-blue-100 text-blue-700'
-                    }`}>
-                      {order.status}
-                    </span>
+                    <select
+                      value={order.status}
+                      onChange={(e) => handleStatusChange(order.id, e.target.value)}
+                      className={`px-3 py-1 rounded-full text-xs font-medium border-none focus:ring-2 focus:ring-black cursor-pointer ${getStatusColor(order.status)}`}
+                    >
+                      <option value="Pendiente">Pendiente</option>
+                      <option value="En proceso">En proceso</option>
+                      <option value="Completado">Completado</option>
+                      <option value="Cancelado">Cancelado</option>
+                    </select>
                   </td>
                 </tr>
               ))}
@@ -878,6 +1126,392 @@ const AdminOrders = () => {
           </table>
         </div>
       </div>
+    </div>
+  );
+};
+
+const AdminStoreCustomization = () => {
+  const [activeTab, setActiveTab] = useState<'slider' | 'categories' | 'titles'>('slider');
+  const [slides, setSlides] = useState<any[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
+  const [settings, setSettings] = useState<any>({});
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      const [slidesRes, catsRes, settingsRes] = await Promise.all([
+        supabase.from('home_slides').select('*').order('display_order', { ascending: true }),
+        supabase.from('home_categories_config').select('*').order('display_order', { ascending: true }),
+        supabase.from('store_settings').select('*')
+      ]);
+
+      if (slidesRes.error) throw slidesRes.error;
+      if (catsRes.error) throw catsRes.error;
+      if (settingsRes.error) throw settingsRes.error;
+
+      setSlides(slidesRes.data || []);
+      setCategories(catsRes.data || []);
+      
+      const settingsMap = (settingsRes.data || []).reduce((acc: any, curr: any) => {
+        acc[curr.key] = curr.value;
+        return acc;
+      }, {});
+      setSettings(settingsMap);
+    } catch (error) {
+      console.error('Error fetching store customization data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSaveSettings = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+    setMessage(null);
+    try {
+      const updates = Object.entries(settings).map(([key, value]) => ({
+        key,
+        value: String(value)
+      }));
+
+      const { error } = await supabase.from('store_settings').upsert(updates, { onConflict: 'key' });
+      if (error) throw error;
+      setMessage({ type: 'success', text: 'Configuración guardada correctamente.' });
+    } catch (error: any) {
+      setMessage({ type: 'error', text: error.message || 'Error al guardar la configuración.' });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleAddSlide = () => {
+    setSlides([...slides, { image_url: '', title: '', subtitle: '', button_text: 'Descubrir Colección', display_order: slides.length }]);
+  };
+
+  const handleRemoveSlide = (index: number) => {
+    setSlides(slides.filter((_, i) => i !== index));
+  };
+
+  const handleUpdateSlide = (index: number, field: string, value: string) => {
+    const newSlides = [...slides];
+    newSlides[index] = { ...newSlides[index], [field]: value };
+    setSlides(newSlides);
+  };
+
+  const handleSaveSlides = async () => {
+    setSaving(true);
+    setMessage(null);
+    try {
+      // First delete all existing slides to replace with new ones (simple approach)
+      // Or better, update if ID exists, insert if not.
+      // For simplicity in this demo, we'll just upsert.
+      const slidesToSave = slides.map((slide, idx) => ({
+        ...slide,
+        display_order: idx
+      }));
+
+      // We need to handle deletions too. For now let's just upsert what we have.
+      const { error } = await supabase.from('home_slides').upsert(slidesToSave);
+      if (error) throw error;
+      
+      setMessage({ type: 'success', text: 'Slider actualizado correctamente.' });
+      fetchData(); // Refresh to get IDs for new slides
+    } catch (error: any) {
+      setMessage({ type: 'error', text: error.message || 'Error al guardar el slider.' });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleAddCategory = () => {
+    setCategories([...categories, { name: '', display_order: categories.length }]);
+  };
+
+  const handleRemoveCategory = (index: number) => {
+    setCategories(categories.filter((_, i) => i !== index));
+  };
+
+  const handleUpdateCategory = (index: number, name: string) => {
+    const newCats = [...categories];
+    newCats[index] = { ...newCats[index], name };
+    setCategories(newCats);
+  };
+
+  const handleSaveCategories = async () => {
+    setSaving(true);
+    setMessage(null);
+    try {
+      const catsToSave = categories.map((cat, idx) => ({
+        ...cat,
+        display_order: idx
+      }));
+
+      const { error } = await supabase.from('home_categories_config').upsert(catsToSave);
+      if (error) throw error;
+
+      setMessage({ type: 'success', text: 'Categorías actualizadas correctamente.' });
+      fetchData();
+    } catch (error: any) {
+      setMessage({ type: 'error', text: error.message || 'Error al guardar las categorías.' });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <Loader2 className="animate-spin text-black" size={32} />
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-8">
+      <div>
+        <h1 className="text-3xl font-serif text-black mb-2">Personalización de Tienda</h1>
+        <p className="text-darkgray/70">Configura el aspecto y contenido de tu página de inicio.</p>
+      </div>
+
+      <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg w-fit">
+        <button 
+          onClick={() => setActiveTab('slider')}
+          className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${activeTab === 'slider' ? 'bg-white text-black shadow-sm' : 'text-gray-500 hover:text-black'}`}
+        >
+          <ImageIcon size={16} className="inline mr-2" />
+          Slider Principal
+        </button>
+        <button 
+          onClick={() => setActiveTab('categories')}
+          className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${activeTab === 'categories' ? 'bg-white text-black shadow-sm' : 'text-gray-500 hover:text-black'}`}
+        >
+          <Grid size={16} className="inline mr-2" />
+          Categorías Inicio
+        </button>
+        <button 
+          onClick={() => setActiveTab('titles')}
+          className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${activeTab === 'titles' ? 'bg-white text-black shadow-sm' : 'text-gray-500 hover:text-black'}`}
+        >
+          <Type size={16} className="inline mr-2" />
+          Títulos y Textos
+        </button>
+      </div>
+
+      {message && (
+        <div className={`p-4 rounded-lg text-sm ${message.type === 'success' ? 'bg-green-50 text-green-700 border border-green-100' : 'bg-red-50 text-red-700 border border-red-100'}`}>
+          {message.text}
+        </div>
+      )}
+
+      {activeTab === 'slider' && (
+        <div className="space-y-6">
+          <div className="flex justify-between items-center">
+            <h3 className="text-xl font-serif text-black">Diapositivas del Slider</h3>
+            <button 
+              onClick={handleAddSlide}
+              className="flex items-center space-x-2 bg-black text-white px-4 py-2 rounded-lg text-sm hover:bg-gray-800 transition-colors"
+            >
+              <PlusCircle size={16} />
+              <span>Añadir Diapositiva</span>
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 gap-6">
+            {slides.map((slide, idx) => (
+              <div key={idx} className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm space-y-4 relative group">
+                <button 
+                  onClick={() => handleRemoveSlide(idx)}
+                  className="absolute top-4 right-4 text-gray-400 hover:text-red-600 transition-colors"
+                >
+                  <Trash2 size={18} />
+                </button>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">URL de la Imagen</label>
+                      <input 
+                        type="text"
+                        value={slide.image_url}
+                        onChange={(e) => handleUpdateSlide(idx, 'image_url', e.target.value)}
+                        className="w-full border border-gray-200 px-4 py-2 rounded-lg text-sm outline-none focus:border-black"
+                        placeholder="https://images.unsplash.com/..."
+                      />
+                    </div>
+                    <div className="h-40 bg-gray-50 rounded-lg overflow-hidden border border-dashed border-gray-200 flex items-center justify-center">
+                      {slide.image_url ? (
+                        <img src={slide.image_url} alt="Preview" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                      ) : (
+                        <ImageIcon size={32} className="text-gray-300" />
+                      )}
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">Título</label>
+                      <input 
+                        type="text"
+                        value={slide.title}
+                        onChange={(e) => handleUpdateSlide(idx, 'title', e.target.value)}
+                        className="w-full border border-gray-200 px-4 py-2 rounded-lg text-sm outline-none focus:border-black"
+                        placeholder="Título de la diapositiva"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">Subtítulo</label>
+                      <textarea 
+                        value={slide.subtitle}
+                        onChange={(e) => handleUpdateSlide(idx, 'subtitle', e.target.value)}
+                        className="w-full border border-gray-200 px-4 py-2 rounded-lg text-sm outline-none focus:border-black h-20 resize-none"
+                        placeholder="Descripción corta"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">Texto del Botón</label>
+                      <input 
+                        type="text"
+                        value={slide.button_text}
+                        onChange={(e) => handleUpdateSlide(idx, 'button_text', e.target.value)}
+                        className="w-full border border-gray-200 px-4 py-2 rounded-lg text-sm outline-none focus:border-black"
+                        placeholder="Descubrir Colección"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="pt-6 border-t">
+            <button 
+              onClick={handleSaveSlides}
+              disabled={saving}
+              className="bg-black text-white px-8 py-3 rounded-lg font-bold uppercase tracking-widest text-xs hover:bg-gray-800 transition-all flex items-center space-x-2 disabled:opacity-50"
+            >
+              {saving ? <Loader2 className="animate-spin" size={16} /> : <span>Guardar Cambios del Slider</span>}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'categories' && (
+        <div className="space-y-6">
+          <div className="flex justify-between items-center">
+            <h3 className="text-xl font-serif text-black">Categorías en Página de Inicio</h3>
+            <button 
+              onClick={handleAddCategory}
+              className="flex items-center space-x-2 bg-black text-white px-4 py-2 rounded-lg text-sm hover:bg-gray-800 transition-colors"
+            >
+              <PlusCircle size={16} />
+              <span>Añadir Categoría</span>
+            </button>
+          </div>
+
+          <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
+            <div className="space-y-4">
+              {categories.map((cat, idx) => (
+                <div key={idx} className="flex items-center space-x-4">
+                  <div className="flex-1">
+                    <input 
+                      type="text"
+                      value={cat.name}
+                      onChange={(e) => handleUpdateCategory(idx, e.target.value)}
+                      className="w-full border border-gray-200 px-4 py-2 rounded-lg text-sm outline-none focus:border-black"
+                      placeholder="Nombre de la categoría"
+                    />
+                  </div>
+                  <button 
+                    onClick={() => handleRemoveCategory(idx)}
+                    className="text-gray-400 hover:text-red-600 transition-colors p-2"
+                  >
+                    <Trash2 size={18} />
+                  </button>
+                </div>
+              ))}
+              {categories.length === 0 && (
+                <p className="text-center text-gray-400 py-4 italic">No hay categorías configuradas para el inicio.</p>
+              )}
+            </div>
+          </div>
+
+          <div className="pt-6 border-t">
+            <button 
+              onClick={handleSaveCategories}
+              disabled={saving}
+              className="bg-black text-white px-8 py-3 rounded-lg font-bold uppercase tracking-widest text-xs hover:bg-gray-800 transition-all flex items-center space-x-2 disabled:opacity-50"
+            >
+              {saving ? <Loader2 className="animate-spin" size={16} /> : <span>Guardar Categorías</span>}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'titles' && (
+        <div className="space-y-6">
+          <h3 className="text-xl font-serif text-black">Títulos de Secciones</h3>
+          
+          <div className="bg-white p-8 rounded-xl border border-gray-100 shadow-sm">
+            <form onSubmit={handleSaveSettings} className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="space-y-4">
+                  <h4 className="font-bold text-xs uppercase tracking-widest text-gray-400 border-b pb-2">Sección Edición Especial</h4>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Título Principal</label>
+                    <input 
+                      type="text"
+                      value={settings.special_edition_title || ''}
+                      onChange={(e) => setSettings({...settings, special_edition_title: e.target.value})}
+                      className="w-full border border-gray-200 px-4 py-3 rounded-lg outline-none focus:border-black transition-colors"
+                      placeholder="NUESTROS ARREGLOS"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Subtítulo</label>
+                    <input 
+                      type="text"
+                      value={settings.special_edition_subtitle || ''}
+                      onChange={(e) => setSettings({...settings, special_edition_subtitle: e.target.value})}
+                      className="w-full border border-gray-200 px-4 py-3 rounded-lg outline-none focus:border-black transition-colors"
+                      placeholder="Selección Especial"
+                    />
+                  </div>
+                </div>
+                
+                <div className="space-y-4">
+                  <h4 className="font-bold text-xs uppercase tracking-widest text-gray-400 border-b pb-2">Vista Previa</h4>
+                  <div className="p-6 bg-gray-50 rounded-lg text-center">
+                    <p className="text-[10px] uppercase tracking-[0.3em] text-black mb-2 font-semibold">
+                      {settings.special_edition_title || 'NUESTROS ARREGLOS'}
+                    </p>
+                    <h3 className="text-2xl font-serif text-black">
+                      {settings.special_edition_subtitle || 'Selección Especial'}
+                    </h3>
+                    <div className="w-8 h-[2px] bg-black mx-auto mt-4" />
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-6 border-t">
+                <button 
+                  type="submit"
+                  disabled={saving}
+                  className="bg-black text-white px-8 py-3 rounded-lg font-bold uppercase tracking-widest text-xs hover:bg-gray-800 transition-all flex items-center space-x-2 disabled:opacity-50"
+                >
+                  {saving ? <Loader2 className="animate-spin" size={16} /> : <span>Guardar Títulos</span>}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
@@ -908,6 +1542,7 @@ export const AdminRoutes = () => {
         <Route path="/pedidos" element={<AdminOrders />} />
         <Route path="/productos" element={<AdminProducts />} />
         <Route path="/usuarios" element={<AdminUsers />} />
+        <Route path="/personalizacion" element={<AdminStoreCustomization />} />
       </Routes>
     </AdminLayout>
   );

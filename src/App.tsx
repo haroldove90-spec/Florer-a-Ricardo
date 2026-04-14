@@ -11,7 +11,7 @@ import { Product, ProductProvider, useProducts } from './context/ProductContext'
 import { AuthProvider } from './context/AuthContext';
 import { AdminRoutes } from './pages/Admin';
 import Login from './pages/Login';
-import { isSupabaseConfigured } from './lib/supabase';
+import { supabase, isSupabaseConfigured } from './lib/supabase';
 
 class ErrorBoundary extends (Component as any) {
   constructor(props: any) {
@@ -155,38 +155,48 @@ const CartProvider = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
+const WHATSAPP_ORDER_TEMPLATE = `🌸HOJA DE PEDIDO🌸
+
+🌸POR FAVOR COPIE, PEGUE, LLENE Y REENVÍE PARA ELABORAR SU PEDIDO.
+
+
+🌻Nombre y apellido de quien manda el obsequio. (Este dato es exclusivo para la florería y necesario para elaborar su pedido).
+R:
+
+🌻Nombre y apellido de la persona que recibe.
+R:
+
+🌻Teléfono de la persona que recibe, no se le llamará a menos que sea necesario.
+R:
+
+🌻Dirección de la persona. Calle, Número exterior e interior.
+R:
+
+🌻Ubicación en Maps o Waze.
+R:
+
+🌻Fecha de entrega.
+R:
+
+🌻Hora de entrega, con rango de 4 horas, ejem: entre 12:00 y 4:00 pm, inicio de entregas 9:30am.
+R:
+
+🌻Texto de la tarjeta, si es que lleva.
+R:
+
+🌻Le confirmaremos su entrega una vez recibida en el domicilio.
+
+
+
+🌸EN CASO DE NO ENCONTRARSE LA PERSONA, EL OBSEQUIO SE REGRESARA  A LA FLORERÍA DONDE PODRÁ RECOGERLO O RE AGENDAR UNA SEGUNDA ENTREGA CON COSTO IGUAL AL DEL PRIMER ENVÍO; POR ESTE RAZÓN LE PEDIMOS QUE LOS DATOS SEAN CORRECTOS Y ESTÉN COMPLETOS
+
+🌸ATT: FLORERÍA RICARDO`;
+
 const CheckoutModal = () => {
   const { checkoutProduct, setCheckoutProduct } = useCart();
-  const [name, setName] = useState('');
-  const [location, setLocation] = useState('');
-  const [isGettingLocation, setIsGettingLocation] = useState(false);
-
-  const handleGetLocation = () => {
-    if (!navigator.geolocation) {
-      alert("La geolocalización no es compatible con tu navegador.");
-      return;
-    }
-    setIsGettingLocation(true);
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const { latitude, longitude } = position.coords;
-        setLocation(`https://www.google.com/maps?q=${latitude},${longitude}`);
-        setIsGettingLocation(false);
-      },
-      (error) => {
-        console.error(error);
-        alert("No se pudo obtener la ubicación. Por favor, ingrésala manualmente.");
-        setIsGettingLocation(false);
-      }
-    );
-  };
 
   const handleConfirm = () => {
-    if (!name || !location) {
-      alert("Por favor completa tu nombre y ubicación.");
-      return;
-    }
-    const message = `Hola! Me gustaría comprar el siguiente producto:\n\n*Producto:* ${checkoutProduct?.name}\n*Precio:* $${checkoutProduct?.price.toFixed(2)}\n\n*Datos del Cliente:*\n*Nombre:* ${name}\n*Ubicación:* ${location}`;
+    const message = `Hola! Me gustaría comprar el siguiente producto:\n\n*Producto:* ${checkoutProduct?.name}\n*Precio:* $${checkoutProduct?.price.toFixed(2)}\n\n${WHATSAPP_ORDER_TEMPLATE}`;
     const encodedMessage = encodeURIComponent(message);
     window.open(`https://wa.me/525545144797?text=${encodedMessage}`, '_blank');
     setCheckoutProduct(null);
@@ -209,54 +219,31 @@ const CheckoutModal = () => {
           className="bg-white w-full max-w-md rounded-lg p-8 shadow-2xl"
         >
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-serif text-black">Finalizar Compra</h2>
-            <button onClick={() => setCheckoutProduct(null)} className="text-black hover:text-gray-600 transition-colors">
+            <h2 className="text-2xl font-serif text-black uppercase tracking-widest">Confirmar Pedido</h2>
+            <button onClick={() => setCheckoutProduct(null)} className="text-black/40 hover:text-black transition-colors">
               <X size={24} />
             </button>
           </div>
           
-          <div className="space-y-6">
+          <div className="mb-8 flex items-center space-x-4 bg-gray-50 p-4 rounded-lg">
+            <img src={checkoutProduct.image} alt={checkoutProduct.name} className="w-20 h-20 object-cover rounded-md" />
             <div>
-              <label className="block text-xs uppercase tracking-widest text-black mb-2 font-semibold">Nombre Completo</label>
-              <input 
-                type="text" 
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Tu nombre" 
-                className="w-full border border-gray-200 px-4 py-3 outline-none focus:border-black transition-colors" 
-              />
+              <h3 className="font-serif text-lg text-black">{checkoutProduct.name}</h3>
+              <p className="text-black font-bold">${checkoutProduct.price.toFixed(2)}</p>
             </div>
-            <div>
-              <label className="block text-xs uppercase tracking-widest text-black mb-2 font-semibold">Ubicación de Entrega</label>
-              <div className="flex space-x-2">
-                <input 
-                  type="text" 
-                  value={location}
-                  onChange={(e) => setLocation(e.target.value)}
-                  placeholder="Dirección o link de mapa" 
-                  className="flex-1 border border-gray-200 px-4 py-3 outline-none focus:border-black transition-colors" 
-                />
-                <button 
-                  onClick={handleGetLocation}
-                  disabled={isGettingLocation}
-                  className="px-4 bg-black text-white rounded-sm hover:bg-gray-800 transition-colors flex items-center justify-center"
-                  title="Obtener mi ubicación actual"
-                >
-                  <MessageCircle size={20} />
-                </button>
-              </div>
-              <p className="text-[10px] text-gray-500 mt-1 italic">Puedes escribir tu dirección o usar el botón para enviar tu ubicación GPS.</p>
-            </div>
-            
-            <div className="pt-4">
-              <button 
-                onClick={handleConfirm}
-                className="w-full py-4 bg-black text-white text-sm uppercase tracking-widest hover:bg-gray-800 hover:text-gold transition-colors font-bold flex items-center justify-center space-x-2"
-              >
-                <MessageCircle size={20} />
-                <span>Confirmar y Pedir por WhatsApp</span>
-              </button>
-            </div>
+          </div>
+
+          <div className="space-y-4">
+            <p className="text-sm text-black/60 italic text-center mb-4">
+              Al hacer clic en el botón, se abrirá WhatsApp con una hoja de pedido que deberás completar para finalizar tu compra.
+            </p>
+            <button 
+              onClick={handleConfirm}
+              className="w-full py-4 bg-black text-white font-bold uppercase tracking-[0.2em] text-xs hover:bg-gray-800 transition-all flex items-center justify-center space-x-3 rounded-md"
+            >
+              <MessageCircle size={20} />
+              <span>Continuar en WhatsApp</span>
+            </button>
           </div>
         </motion.div>
       </motion.div>
@@ -407,36 +394,54 @@ const Header = () => {
   );
 };
 
-const HeroSlider = () => {
+const HeroSlider = ({ customSlides }: { customSlides?: any[] }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
   
-  const slides = [
+  const defaultSlides = [
     {
       image: "https://media.istockphoto.com/id/902155732/es/foto/mixto-ramo-de-flores.jpg?b=1&s=612x612&w=0&k=20&c=N-npmQDqTzcnJitpfHhfpJqWE7br9EaN84f78c7eFcg=",
-      text: "La belleza de las flores en cada rincón. Descubre nuestros arreglos exclusivos."
+      text: "La belleza de las flores en cada rincón. Descubre nuestros arreglos exclusivos.",
+      subtitle: "",
+      button: "Descubrir Colección"
     },
     {
       image: "https://media.istockphoto.com/id/1401141400/es/foto/bodeg%C3%B3n-de-oto%C3%B1o-con-flores-de-jard%C3%ADn-hermoso-ramo-oto%C3%B1al-en-jarr%C3%B3n-manzanas-y-bayas-sobre.jpg?s=612x612&w=0&k=20&c=6_dKEjb4b2Tpmm2vT00JwK6DGuU-KBy-sWdyam_6GrM=",
-      text: "Arreglos florales diseñados con pasión. Rosas, tulipanes y flores de temporada."
+      text: "Arreglos florales diseñados con pasión. Rosas, tulipanes y flores de temporada.",
+      subtitle: "",
+      button: "Descubrir Colección"
     },
     {
       image: "https://wallpapers.com/images/hd/floral-arrangement-2048-x-1365-wallpaper-vgmffof84qm8o3av.jpg",
-      text: "Expresa tus sentimientos con flores. Entregas a domicilio con frescura garantizada."
+      text: "Expresa tus sentimientos con flores. Entregas a domicilio con frescura garantizada.",
+      subtitle: "",
+      button: "Descubrir Colección"
     }
   ];
 
+  const slides = customSlides && customSlides.length > 0 
+    ? customSlides.map(s => ({ image: s.image_url, text: s.title, subtitle: s.subtitle, button: s.button_text }))
+    : defaultSlides;
+
   useEffect(() => {
+    if (isPaused || slides.length <= 1) return;
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % slides.length);
     }, 6000);
     return () => clearInterval(timer);
-  }, [slides.length]);
+  }, [slides.length, isPaused]);
 
   const nextSlide = () => setCurrentSlide((prev) => (prev + 1) % slides.length);
   const prevSlide = () => setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
 
+  if (slides.length === 0) return null;
+
   return (
-    <div className="relative h-[calc(100vh-88px)] md:h-[calc(100vh-96px)] w-full overflow-hidden bg-black">
+    <div 
+      className="relative h-[calc(100vh-88px)] md:h-[calc(100vh-96px)] w-full overflow-hidden bg-black"
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}
+    >
       <AnimatePresence mode="wait">
         <motion.div
           key={currentSlide}
@@ -463,6 +468,16 @@ const HeroSlider = () => {
             >
               {slides[currentSlide].text}
             </motion.p>
+            {slides[currentSlide].subtitle && (
+              <motion.p
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.6, duration: 0.8 }}
+                className="text-white/80 text-lg md:text-xl font-light mt-4 max-w-2xl"
+              >
+                {slides[currentSlide].subtitle}
+              </motion.p>
+            )}
             <motion.a
               href="#tienda"
               initial={{ y: 20, opacity: 0 }}
@@ -470,7 +485,7 @@ const HeroSlider = () => {
               transition={{ delay: 0.8, duration: 0.8 }}
               className="mt-12 px-10 py-4 bg-white text-black font-semibold uppercase tracking-[0.2em] text-xs hover:bg-black hover:text-gold transition-all duration-500 shadow-lg border border-white"
             >
-              Descubrir Colección
+              {slides[currentSlide].button || 'Descubrir Colección'}
             </motion.a>
           </div>
         </motion.div>
@@ -500,18 +515,41 @@ const HeroSlider = () => {
 
 const WelcomeSection = () => {
   return (
-    <section className="py-32 px-6 md:px-12 max-w-4xl mx-auto text-center">
-      <h2 className="text-3xl md:text-5xl font-serif text-black mb-8 leading-tight">
-        Bienvenidos a Florería Ricardo<br/>
-        <span className="italic text-gray-600 font-light text-2xl md:text-4xl mt-4 block">Arreglos Florales Exclusivos.</span>
-      </h2>
-      <div className="w-12 h-[1px] bg-black mx-auto mb-12" />
-      <p className="text-black text-lg md:text-xl font-light leading-relaxed mb-10">
-        Nos apasiona crear momentos inolvidables a través de la belleza de las flores. Cada arreglo es una obra de arte diseñada para transmitir tus sentimientos con elegancia y frescura.
-      </p>
-      <p className="text-black/80 text-base md:text-lg font-light leading-relaxed">
-        En Florería Ricardo, somos especialistas en el diseño floral de alta gama. Nos distinguimos por una selección rigurosa de flores frescas, desde las clásicas rosas rojas hasta exóticos tulipanes y flores de temporada. Nuestra misión es brindar belleza y alegría con la comodidad de una compra digital y la calidez de una atención personalizada.
-      </p>
+    <section className="py-12 px-6 md:px-12 max-w-6xl mx-auto text-center">
+      <div className="bg-[#62CAC9] p-8 md:p-10 rounded-sm shadow-sm">
+        <p className="text-white text-xl md:text-2xl font-serif leading-relaxed italic">
+          "Nos apasiona crear momentos inolvidables a través de la belleza de las flores. Cada arreglo es una obra de arte diseñada para transmitir tus sentimientos con elegancia y frescura."
+        </p>
+      </div>
+    </section>
+  );
+};
+
+const HomeCategories = ({ customCategories }: { customCategories?: any[] }) => {
+  const defaultCategories = [
+    "Arreglos mixtos",
+    "Ocasiones especiales",
+    "Orquídeas",
+    "Rosas"
+  ];
+
+  const categories = customCategories && customCategories.length > 0 
+    ? customCategories.map(c => c.name)
+    : defaultCategories;
+
+  return (
+    <section className="pb-20 px-6 md:px-12 max-w-6xl mx-auto">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+        {categories.map((cat, idx) => (
+          <Link 
+            key={idx}
+            to={`/productos?categoria=${encodeURIComponent(cat)}`}
+            className="bg-[#7BA4C7] hover:bg-[#5D89AF] text-white py-6 px-4 text-center rounded-sm transition-colors duration-300 flex items-center justify-center min-h-[80px] shadow-sm group"
+          >
+            <span className="text-base md:text-lg font-serif tracking-widest uppercase group-hover:scale-105 transition-transform duration-300">{cat}</span>
+          </Link>
+        ))}
+      </div>
     </section>
   );
 };
@@ -627,6 +665,92 @@ const FeaturedCategories = () => {
   );
 };
 
+const PrivacyPolicy = () => (
+  <div className="pt-32 pb-24 px-6 md:px-12 max-w-4xl mx-auto">
+    <h1 className="text-4xl font-serif text-black mb-8 uppercase tracking-widest">Aviso de Privacidad</h1>
+    <div className="space-y-8 text-black/80 leading-relaxed font-light">
+      <section>
+        <h2 className="text-xl font-serif text-black mb-4 uppercase tracking-wider">Aviso de Privacidad Simplificado</h2>
+        <p>
+          Florería Ricardo, con domicilio en la zona metropolitana de la Ciudad de México (Tlalnepantla y alrededores), es responsable del tratamiento de sus datos personales.
+        </p>
+      </section>
+
+      <section>
+        <h3 className="text-lg font-bold text-black mb-4 uppercase tracking-widest text-xs">¿Para qué fines utilizaremos sus datos?</h3>
+        <p className="mb-4">
+          Los datos personales que recopilamos a través de nuestra tienda en línea y WhatsApp serán utilizados para las siguientes finalidades necesarias para el servicio:
+        </p>
+        <ul className="list-disc pl-6 space-y-2">
+          <li>Identificación del remitente y confirmación del pedido.</li>
+          <li>Logística de entrega en el domicilio indicado.</li>
+          <li>Comunicación directa en caso de eventualidades con la entrega.</li>
+          <li>Notificación de confirmación de recepción del obsequio.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h3 className="text-lg font-bold text-black mb-4 uppercase tracking-widest text-xs">Datos recolectados:</h3>
+        <p>
+          Recabamos nombre completo (remitente y destinatario), teléfono de contacto, dirección física y ubicación geográfica (Maps/Waze). No compartimos su información con terceros ajenos a la operación de entrega.
+        </p>
+      </section>
+    </div>
+  </div>
+);
+
+const HowToBuy = () => (
+  <div className="pt-32 pb-24 px-6 md:px-12 max-w-4xl mx-auto">
+    <h1 className="text-4xl font-serif text-black mb-8 uppercase tracking-widest">¿Cómo Comprar?</h1>
+    <div className="space-y-12 text-black/80 leading-relaxed font-light">
+      <p className="text-lg italic">
+        En esta sección explicamos el proceso para que el cliente sepa que el cierre de la venta es personalizado vía WhatsApp.
+      </p>
+
+      <section>
+        <h2 className="text-xl font-serif text-black mb-6 uppercase tracking-wider">Pasos para realizar tu pedido:</h2>
+        <div className="grid gap-8">
+          {[
+            {
+              step: "01",
+              title: "Explora nuestro catálogo",
+              desc: "Elige el diseño floral que más te guste de nuestra colección."
+            },
+            {
+              step: "02",
+              title: "Haz clic en el botón de WhatsApp",
+              desc: "Serás redirigido a nuestro chat oficial para ser atendido por un asesor."
+            },
+            {
+              step: "03",
+              title: "Envía tu Hoja de Pedido",
+              desc: "Para agilizar el proceso, copia y llena el formato que te aparecerá automáticamente (o solicítalo en el chat)."
+            },
+            {
+              step: "04",
+              title: "Realiza tu pago",
+              desc: "Te proporcionaremos los métodos de pago disponibles (transferencia, depósito o tarjeta)."
+            },
+            {
+              step: "05",
+              title: "Confirmación",
+              desc: "Una vez verificado el pago y los datos, tu pedido entrará en ruta de elaboración."
+            }
+          ].map((item, idx) => (
+            <div key={idx} className="flex gap-6 items-start">
+              <span className="text-3xl font-serif text-black/20">{item.step}</span>
+              <div>
+                <h3 className="text-lg font-bold text-black mb-2 uppercase tracking-widest text-xs">{item.title}</h3>
+                <p>{item.desc}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+    </div>
+  </div>
+);
+
 const Footer = () => {
   return (
     <footer className="bg-black text-white pt-24 pb-12 px-6 md:px-12">
@@ -641,9 +765,10 @@ const Footer = () => {
         <div className="md:col-span-3 lg:col-span-2 lg:col-start-7">
           <h4 className="font-serif text-lg mb-6 uppercase tracking-[0.15em] text-white/60">Enlaces</h4>
           <ul className="space-y-4 text-white/80 font-light text-sm">
-            <li><a href="#" className="hover:text-gold transition-colors">Inicio</a></li>
-            <li><a href="#tienda" className="hover:text-gold transition-colors">Tienda</a></li>
-            <li><a href="#contacto" className="hover:text-gold transition-colors">Contacto</a></li>
+            <li><Link to="/" className="hover:text-gold transition-colors">Inicio</Link></li>
+            <li><Link to="/productos" className="hover:text-gold transition-colors">Tienda</Link></li>
+            <li><Link to="/como-comprar" className="hover:text-gold transition-colors">¿Cómo comprar?</Link></li>
+            <li><Link to="/privacidad" className="hover:text-gold transition-colors">Aviso de Privacidad</Link></li>
           </ul>
         </div>
         
@@ -673,41 +798,117 @@ const Footer = () => {
   );
 };
 
-const ProductsSection = () => {
+const ProductsSection = ({ customTitles }: { customTitles?: any }) => {
   const { setCheckoutProduct } = useCart();
   const { products, loading } = useProducts();
+  const scrollRef = React.useRef<HTMLDivElement>(null);
+  const [isPaused, setIsPaused] = React.useState(false);
   
-  const specialSelection = products.filter(p => p.category === "Selección Especial");
+  const specialSelection = products.filter(p => p.isSpecial);
   
+  const scroll = (direction: 'left' | 'right') => {
+    if (scrollRef.current) {
+      const { scrollLeft, clientWidth } = scrollRef.current;
+      const scrollTo = direction === 'left' ? scrollLeft - clientWidth : scrollLeft + clientWidth;
+      scrollRef.current.scrollTo({ left: scrollTo, behavior: 'smooth' });
+    }
+  };
+
+  React.useEffect(() => {
+    if (loading || specialSelection.length <= 4 || isPaused) return;
+
+    const interval = setInterval(() => {
+      if (scrollRef.current) {
+        const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
+        const maxScroll = scrollWidth - clientWidth;
+        
+        if (scrollLeft >= maxScroll - 10) {
+          scrollRef.current.scrollTo({ left: 0, behavior: 'smooth' });
+        } else {
+          scroll('right');
+        }
+      }
+    }, 4000);
+
+    return () => clearInterval(interval);
+  }, [loading, specialSelection.length, isPaused]);
+
   return (
-    <section id="tienda" className="py-24 px-4 md:px-12 max-w-7xl mx-auto">
+    <section id="tienda" className="py-24 px-4 md:px-6 lg:px-12 max-w-7xl mx-auto overflow-hidden">
       <div className="text-center mb-12 md:mb-16">
-        <h2 className="text-xs uppercase tracking-[0.3em] text-black mb-4 font-semibold">Nuestros Arreglos</h2>
-        <h3 className="text-3xl md:text-4xl font-serif text-black mb-6">Selección Especial</h3>
+        <h2 className="text-[10px] md:text-xs uppercase tracking-[0.3em] text-black mb-4 font-semibold">
+          {customTitles?.special_edition_title || 'Nuestros Arreglos'}
+        </h2>
+        <h3 className="text-3xl md:text-4xl font-serif text-black mb-6">
+          {customTitles?.special_edition_subtitle || 'Selección Especial'}
+        </h3>
         <div className="w-12 h-[2px] bg-black mx-auto" />
       </div>
       
       {loading ? (
-        <div className="py-20 text-center text-black/50">Cargando selección especial...</div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-8 md:gap-8">
-          {specialSelection.map(product => (
-            <div key={product.id} className="flex flex-col items-center text-center group bg-white p-4 rounded-sm border border-gray-100">
-              <div className="w-full relative overflow-hidden mb-4 md:mb-6">
-                <img src={product.image} alt={product.name} className="w-full h-64 md:h-64 object-cover transition-transform duration-700 group-hover:scale-105 rounded-md" />
-              </div>
-              <h4 className="text-lg md:text-xl font-sans text-black mb-1 md:mb-2 uppercase tracking-wider">{product.name}</h4>
-              <p className="text-black/60 text-xs md:text-sm font-light mb-2 line-clamp-2">{product.description}</p>
-              <p className="text-black font-bold text-lg md:text-base mb-4 md:mb-6">${product.price.toFixed(2)}</p>
-              <button 
-                onClick={() => setCheckoutProduct(product)}
-                className="px-3 md:px-6 py-3 bg-black text-white text-xs md:text-sm hover:bg-gray-800 hover:text-gold transition-colors w-full uppercase tracking-widest font-bold flex items-center justify-center space-x-2"
+        <div className="py-20 text-center text-black/50 font-light">Cargando selección especial...</div>
+      ) : specialSelection.length > 0 ? (
+        <div 
+          className="relative overflow-visible"
+          onMouseEnter={() => setIsPaused(true)}
+          onMouseLeave={() => setIsPaused(false)}
+        >
+          {/* Slider Container */}
+          <div 
+            ref={scrollRef}
+            className={`flex overflow-x-auto snap-x snap-mandatory scrollbar-hide space-x-6 pb-8 ${specialSelection.length <= 4 ? 'lg:justify-center' : ''}`}
+            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+          >
+            {specialSelection.map(product => (
+              <div 
+                key={product.id} 
+                className="flex-none w-[280px] md:w-[300px] lg:w-[calc(25%-18px)] snap-start flex flex-col items-center text-center group bg-white p-4 rounded-sm border border-gray-100 hover:shadow-xl transition-all duration-500"
               >
-                <MessageCircle size={18} />
-                <span>Comprar Ahora</span>
+                <div className="w-full relative overflow-hidden mb-4 md:mb-6 aspect-[4/5]">
+                  <img 
+                    src={product.image} 
+                    alt={product.name} 
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 rounded-md" 
+                  />
+                  <div className="absolute top-4 left-4 bg-black text-white text-[10px] uppercase tracking-widest px-3 py-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+                    Especial
+                  </div>
+                </div>
+                <h4 className="text-lg md:text-xl font-serif text-black mb-1 md:mb-2 uppercase tracking-wider">{product.name}</h4>
+                <p className="text-black/60 text-xs md:text-sm font-light mb-2 line-clamp-2 h-10">{product.description}</p>
+                <p className="text-black font-bold text-lg md:text-base mb-4 md:mb-6">${product.price.toFixed(2)}</p>
+                <button 
+                  onClick={() => setCheckoutProduct(product)}
+                  className="px-3 md:px-6 py-3 bg-black text-white text-xs md:text-sm hover:bg-gray-800 hover:text-gold transition-colors w-full uppercase tracking-widest font-bold flex items-center justify-center space-x-2"
+                >
+                  <MessageCircle size={18} />
+                  <span>Comprar Ahora</span>
+                </button>
+              </div>
+            ))}
+          </div>
+
+          {/* Navigation Buttons */}
+          {specialSelection.length > 4 && (
+            <>
+              <button 
+                onClick={() => scroll('left')}
+                className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 md:-translate-x-6 lg:-translate-x-12 bg-white text-black p-3 rounded-full shadow-lg hover:bg-black hover:text-white z-10 hidden md:block transition-all border border-gray-100"
+              >
+                <ChevronLeft size={24} />
               </button>
-            </div>
-          ))}
+              <button 
+                onClick={() => scroll('right')}
+                className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 md:translate-x-6 lg:translate-x-12 bg-white text-black p-3 rounded-full shadow-lg hover:bg-black hover:text-white z-10 hidden md:block transition-all border border-gray-100"
+              >
+                <ChevronRight size={24} />
+              </button>
+            </>
+          )}
+        </div>
+      ) : (
+        <div className="py-20 text-center text-black/40 font-light italic">
+          No hay productos marcados como especiales en este momento.
         </div>
       )}
     </section>
@@ -716,10 +917,17 @@ const ProductsSection = () => {
 
 const ProductPage = () => {
   const { id } = useParams();
-  const { products } = useProducts();
+  const { products, categories } = useProducts();
   const product = products.find(p => p.id === Number(id));
   const { addToCart } = useCart();
   const [quantity, setQuantity] = useState(1);
+  const [activeImage, setActiveImage] = useState('');
+
+  useEffect(() => {
+    if (product) {
+      setActiveImage(product.image);
+    }
+  }, [product]);
 
   if (!product) return <div className="pt-40 text-center text-2xl">Producto no encontrado</div>;
 
@@ -746,9 +954,36 @@ const ProductPage = () => {
       {/* Product Details */}
       <div className="max-w-7xl mx-auto px-6 md:px-12 py-20 grid grid-cols-1 lg:grid-cols-12 gap-12">
         <div className="lg:col-span-8 grid grid-cols-1 md:grid-cols-2 gap-12">
-          {/* Image */}
-          <div className="rounded-md overflow-hidden shadow-xl">
-            <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
+          {/* Image Gallery */}
+          <div className="space-y-6">
+            <div className="rounded-md overflow-hidden shadow-xl bg-gray-50 flex items-center justify-center min-h-[400px] md:min-h-[500px]">
+              <img 
+                src={activeImage} 
+                alt={product.name} 
+                className="max-w-full max-h-[600px] w-auto h-auto object-contain transition-all duration-500" 
+              />
+            </div>
+            
+            {/* Secondary Images Thumbnails */}
+            {product.secondaryImages && product.secondaryImages.length > 0 && (
+              <div className="grid grid-cols-4 md:grid-cols-5 gap-3">
+                <div 
+                  onClick={() => setActiveImage(product.image)}
+                  className={`aspect-square rounded-md overflow-hidden cursor-pointer transition-all border-2 ${activeImage === product.image ? 'border-black scale-105 shadow-md' : 'border-transparent hover:border-gray-300'}`}
+                >
+                  <img src={product.image} alt="Main thumbnail" className="w-full h-full object-cover" />
+                </div>
+                {product.secondaryImages.map((img, idx) => (
+                  <div 
+                    key={idx} 
+                    onClick={() => setActiveImage(img)}
+                    className={`aspect-square rounded-md overflow-hidden cursor-pointer transition-all border-2 ${activeImage === img ? 'border-black scale-105 shadow-md' : 'border-transparent hover:border-gray-300'}`}
+                  >
+                    <img src={img} alt={`Secondary thumbnail ${idx + 1}`} className="w-full h-full object-cover" />
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
           
           {/* Info */}
@@ -788,15 +1023,14 @@ const ProductPage = () => {
           <div>
             <h3 className="text-xl font-serif text-black mb-6">Categorías de arreglos</h3>
             <ul className="space-y-4 text-black/70 font-light">
-              <li className="border-b border-gray-100 pb-2 hover:text-black cursor-pointer transition-colors">
-                <Link to="/productos?categoria=Arreglos Florales">Arreglos Florales</Link>
-              </li>
-              <li className="border-b border-gray-100 pb-2 hover:text-black cursor-pointer transition-colors">
-                <Link to="/productos?categoria=Ramos de Rosas">Ramos de Rosas</Link>
-              </li>
-              <li className="border-b border-gray-100 pb-2 hover:text-black cursor-pointer transition-colors">
-                <Link to="/productos?categoria=Ocasiones Especiales">Ocasiones Especiales</Link>
-              </li>
+              {categories.map(cat => (
+                <li key={cat} className="border-b border-gray-100 pb-2 hover:text-black cursor-pointer transition-colors">
+                  <Link to={`/productos?categoria=${encodeURIComponent(cat)}`}>{cat}</Link>
+                </li>
+              ))}
+              {categories.length === 0 && (
+                <li className="text-gray-400 italic text-sm">No hay categorías disponibles</li>
+              )}
             </ul>
           </div>
         </div>
@@ -815,7 +1049,7 @@ const CartModal = () => {
     cart.forEach(item => {
       message += `- ${item.quantity}x ${item.product.name} ($${(item.product.price * item.quantity).toFixed(2)})\n`;
     });
-    message += `\n*Total: $${cartTotal.toFixed(2)}*`;
+    message += `\n*Total: $${cartTotal.toFixed(2)}*\n\n${WHATSAPP_ORDER_TEMPLATE}`;
     
     const encodedMessage = encodeURIComponent(message);
     window.open(`https://wa.me/525545144797?text=${encodedMessage}`, '_blank');
@@ -1019,7 +1253,7 @@ const ProductsPage = () => {
 
 const FloatingWhatsAppButton = () => {
   const phoneNumber = "525545144797";
-  const message = "me gustaria solicitar un arreglo floral.";
+  const message = `Hola! Me gustaría solicitar un arreglo floral.\n\n${WHATSAPP_ORDER_TEMPLATE}`;
   const encodedMessage = encodeURIComponent(message);
   const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
 
@@ -1043,16 +1277,106 @@ const FloatingWhatsAppButton = () => {
   );
 };
 
-const HomePage = () => (
-  <>
-    <HeroSlider />
-    <WelcomeSection />
-    <ValuesSection />
-    {/* <FeaturedCategories /> - Hidden per user request */}
-    <ProductsSection />
-    <ContactSection />
-  </>
-);
+const AllProductsGrid = () => {
+  const { products, loading } = useProducts();
+  const { setCheckoutProduct } = useCart();
+
+  return (
+    <section className="py-24 px-4 md:px-6 lg:px-12 max-w-[1600px] mx-auto">
+      <div className="text-center mb-12 md:mb-16">
+        <h2 className="text-xs uppercase tracking-[0.3em] text-black mb-4 font-semibold">Catálogo Completo</h2>
+        <h3 className="text-3xl md:text-4xl font-serif text-black mb-6">Todos Nuestros Productos</h3>
+        <div className="w-12 h-[2px] bg-black mx-auto" />
+      </div>
+
+      {loading ? (
+        <div className="py-20 text-center text-black/50 font-light">Cargando catálogo...</div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-6 gap-6 md:gap-8">
+          {products.map(product => (
+            <div 
+              key={product.id} 
+              className="flex flex-col items-center text-center group bg-white p-4 rounded-sm border border-gray-100 hover:shadow-lg transition-all duration-500"
+            >
+              <div className="w-full relative overflow-hidden mb-4 aspect-[4/5]">
+                <img 
+                  src={product.image} 
+                  alt={product.name} 
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 rounded-sm" 
+                />
+              </div>
+              <h4 className="text-sm md:text-base font-serif text-black mb-1 uppercase tracking-wider line-clamp-1">{product.name}</h4>
+              <p className="text-black font-bold text-sm mb-4">${product.price.toFixed(2)}</p>
+              <button 
+                onClick={() => setCheckoutProduct(product)}
+                className="px-4 py-2 bg-black text-white text-[10px] md:text-xs hover:bg-gray-800 hover:text-gold transition-colors w-full uppercase tracking-widest font-bold flex items-center justify-center space-x-2"
+              >
+                <MessageCircle size={14} />
+                <span>Comprar</span>
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+      
+      <div className="mt-16 text-center">
+        <Link 
+          to="/productos" 
+          className="inline-block px-10 py-4 border border-black text-black text-xs uppercase tracking-[0.2em] font-bold hover:bg-black hover:text-white transition-all duration-500"
+        >
+          Ver Todo el Catálogo
+        </Link>
+      </div>
+    </section>
+  );
+};
+
+const HomePage = () => {
+  const [slides, setSlides] = useState<any[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
+  const [settings, setSettings] = useState<any>({});
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [slidesRes, catsRes, settingsRes] = await Promise.all([
+          supabase.from('home_slides').select('*').order('display_order', { ascending: true }),
+          supabase.from('home_categories_config').select('*').order('display_order', { ascending: true }),
+          supabase.from('store_settings').select('*')
+        ]);
+
+        if (slidesRes.data) setSlides(slidesRes.data);
+        if (catsRes.data) setCategories(catsRes.data);
+        if (settingsRes.data) {
+          const settingsMap = settingsRes.data.reduce((acc: any, curr: any) => {
+            acc[curr.key] = curr.value;
+            return acc;
+          }, {});
+          setSettings(settingsMap);
+        }
+      } catch (error) {
+        console.error('Error fetching home data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
+  return (
+    <>
+      <HeroSlider customSlides={slides} />
+      <WelcomeSection />
+      <HomeCategories customCategories={categories} />
+      {/* <ValuesSection /> - Removed per user request */}
+      {/* <FeaturedCategories /> - Hidden per user request */}
+      <ProductsSection customTitles={settings} />
+      <AllProductsGrid />
+      <ContactSection />
+    </>
+  );
+};
 
 export default function App() {
   console.log("App rendering, isSupabaseConfigured:", isSupabaseConfigured);
@@ -1079,8 +1403,9 @@ export default function App() {
                       <Routes>
                         <Route path="/" element={<HomePage />} />
                         <Route path="/productos" element={<ProductsPage />} />
-                        {/* Product page disabled per user request */}
-                        <Route path="/producto/:id" element={<Navigate to="/productos" replace />} />
+                        <Route path="/producto/:id" element={<ProductPage />} />
+                        <Route path="/privacidad" element={<PrivacyPolicy />} />
+                        <Route path="/como-comprar" element={<HowToBuy />} />
                       </Routes>
                     </main>
                     <Footer />
