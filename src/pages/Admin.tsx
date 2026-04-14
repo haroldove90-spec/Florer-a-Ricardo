@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, Link, useLocation, Navigate, useNavigate } from 'react-router-dom';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
-import { LayoutDashboard, PackagePlus, DollarSign, ShoppingBag, TrendingUp, PlusCircle, LogOut, ClipboardList, UploadCloud, X, Menu, Home, Trash2, Loader2, ExternalLink, Settings, Image as ImageIcon, Type, Grid } from 'lucide-react';
+import { LayoutDashboard, PackagePlus, DollarSign, ShoppingBag, TrendingUp, PlusCircle, LogOut, ClipboardList, UploadCloud, X, Menu, Home, Trash2, Loader2, ExternalLink, Settings, Image as ImageIcon, Type, Grid, User } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useProducts } from '../context/ProductContext';
 import { useAuth } from '../context/AuthContext';
@@ -136,6 +136,17 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
               </Link>
 
               <Link 
+                to="/admin/perfil" 
+                className={`group flex items-center space-x-4 p-4 rounded-2xl bg-white/5 shadow-sm border border-white/10 active:scale-95 transition-all ${location.pathname.includes('/perfil') ? 'ring-2 ring-white/20' : ''}`}
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-colors ${location.pathname.includes('/perfil') ? 'bg-white text-black shadow-md shadow-white/20' : 'bg-white/10 text-white group-hover:bg-white group-hover:text-black'}`}>
+                  <User size={24} strokeWidth={1.5} />
+                </div>
+                <span className="text-xl font-serif text-white font-medium group-hover:text-gold">Mi Perfil</span>
+              </Link>
+
+              <Link 
                 to="/admin/personalizacion" 
                 className={`group flex items-center space-x-4 p-4 rounded-2xl bg-white/5 shadow-sm border border-white/10 active:scale-95 transition-all ${location.pathname.includes('/personalizacion') ? 'ring-2 ring-white/20' : ''}`}
                 onClick={() => setIsMobileMenuOpen(false)}
@@ -211,6 +222,14 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
           >
             <PlusCircle size={20} />
             <span>Gestión de Usuarios</span>
+          </Link>
+          <Link 
+            to="/admin/perfil" 
+            onClick={() => setIsMobileMenuOpen(false)}
+            className={`flex items-center space-x-3 px-4 py-3 rounded-md transition-colors ${location.pathname.includes('/perfil') ? 'bg-white text-black font-medium' : 'hover:bg-white/10 text-white/80 hover:text-gold'}`}
+          >
+            <User size={20} />
+            <span>Mi Perfil</span>
           </Link>
           <Link 
             to="/admin/personalizacion" 
@@ -795,7 +814,139 @@ const AdminProducts = () => {
   );
 };
 
+const AdminProfile = () => {
+  const { user } = useAuth();
+  const [profile, setProfile] = useState<any>(null);
+  const [fullName, setFullName] = useState('');
+  const [role, setRole] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+
+  useEffect(() => {
+    if (user) {
+      fetchProfile();
+    }
+  }, [user]);
+
+  const fetchProfile = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user?.id)
+        .single();
+      
+      if (error) throw error;
+      setProfile(data);
+      setFullName(data.full_name || '');
+      setRole(data.role || 'user');
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleUpdateProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+    setMessage(null);
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          full_name: fullName,
+          role: role
+        })
+        .eq('id', user?.id);
+      
+      if (error) throw error;
+      setMessage({ type: 'success', text: 'Perfil actualizado correctamente.' });
+    } catch (error: any) {
+      setMessage({ type: 'error', text: error.message || 'Error al actualizar el perfil.' });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <Loader2 className="animate-spin text-black" size={32} />
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-2xl space-y-8">
+      <div>
+        <h1 className="text-3xl font-serif text-black mb-2">Mi Perfil</h1>
+        <p className="text-darkgray/70">Personaliza tu información de administrador.</p>
+      </div>
+
+      <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100">
+        <form onSubmit={handleUpdateProfile} className="space-y-6">
+          {message && (
+            <div className={`p-4 rounded-lg text-sm ${message.type === 'success' ? 'bg-green-50 text-green-700 border border-green-100' : 'bg-red-50 text-red-700 border border-red-100'}`}>
+              {message.text}
+            </div>
+          )}
+
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Nombre Completo</label>
+              <input 
+                type="text" 
+                value={fullName}
+                onChange={e => setFullName(e.target.value)}
+                className="w-full border border-gray-200 px-4 py-3 rounded-lg outline-none focus:border-black transition-colors"
+                placeholder="Tu nombre"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Correo Electrónico</label>
+              <input 
+                type="email" 
+                value={user?.email}
+                disabled
+                className="w-full border border-gray-200 px-4 py-3 rounded-lg bg-gray-50 text-gray-500 cursor-not-allowed"
+              />
+              <p className="text-[10px] text-gray-400 mt-1 italic">El correo electrónico no puede ser cambiado desde aquí.</p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Rol</label>
+              <select 
+                value={role}
+                onChange={e => setRole(e.target.value)}
+                className="w-full border border-gray-200 px-4 py-3 rounded-lg outline-none focus:border-black transition-colors bg-white"
+              >
+                <option value="admin">Administrador</option>
+                <option value="user">Usuario</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="pt-4">
+            <button 
+              type="submit"
+              disabled={saving}
+              className="w-full py-4 bg-black text-white rounded-lg font-bold uppercase tracking-widest text-xs hover:bg-gray-800 transition-all flex items-center justify-center space-x-2 disabled:opacity-50"
+            >
+              {saving ? <Loader2 className="animate-spin" size={18} /> : <span>Guardar Cambios</span>}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
 const AdminUsers = () => {
+  const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -843,6 +994,7 @@ const AdminUsers = () => {
         options: {
           emailRedirectTo: window.location.origin,
           data: {
+            full_name: fullName,
             role: role
           }
         }
@@ -854,6 +1006,7 @@ const AdminUsers = () => {
         type: 'success', 
         text: 'Usuario registrado con éxito. Se ha enviado un correo de confirmación (si está habilitado).' 
       });
+      setFullName('');
       setEmail('');
       setPassword('');
       setConfirmPassword('');
@@ -886,6 +1039,18 @@ const AdminUsers = () => {
             )}
 
             <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Nombre Completo</label>
+                <input 
+                  type="text" 
+                  required
+                  value={fullName}
+                  onChange={e => setFullName(e.target.value)}
+                  placeholder="Juan Pérez"
+                  className="w-full border border-gray-200 px-4 py-3 rounded-lg outline-none focus:border-black transition-colors"
+                />
+              </div>
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Correo Electrónico</label>
                 <input 
@@ -960,23 +1125,25 @@ const AdminUsers = () => {
                   <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Usuario</th>
                   <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Rol</th>
                   <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Fecha Registro</th>
+                  <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Acciones</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {fetchingUsers ? (
                   <tr>
-                    <td colSpan={3} className="px-6 py-8 text-center text-gray-400 italic">Cargando usuarios...</td>
+                    <td colSpan={4} className="px-6 py-8 text-center text-gray-400 italic">Cargando usuarios...</td>
                   </tr>
                 ) : users.length === 0 ? (
                   <tr>
-                    <td colSpan={3} className="px-6 py-8 text-center text-gray-400 italic">No hay usuarios registrados o la tabla 'profiles' no existe.</td>
+                    <td colSpan={4} className="px-6 py-8 text-center text-gray-400 italic">No hay usuarios registrados o la tabla 'profiles' no existe.</td>
                   </tr>
                 ) : (
                   users.map(u => (
-                    <tr key={u.id} className="hover:bg-gray-50 transition-colors">
+                    <tr key={u.id} className={`hover:bg-gray-50 transition-colors ${u.role === 'admin' ? 'bg-gray-50/50' : ''}`}>
                       <td className="px-6 py-4">
-                        <div className="font-medium text-black">{u.email}</div>
-                        <div className="text-xs text-gray-400">{u.id}</div>
+                        <div className="font-medium text-black">{u.full_name || 'Sin nombre'}</div>
+                        <div className="text-xs text-gray-500">{u.email}</div>
+                        <div className="text-[10px] text-gray-400">{u.id}</div>
                       </td>
                       <td className="px-6 py-4">
                         <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest ${
@@ -987,6 +1154,28 @@ const AdminUsers = () => {
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-500">
                         {new Date(u.updated_at).toLocaleDateString()}
+                      </td>
+                      <td className="px-6 py-4 text-sm">
+                        <select 
+                          value={u.role}
+                          onChange={async (e) => {
+                            const newRole = e.target.value;
+                            try {
+                              const { error } = await supabase
+                                .from('profiles')
+                                .update({ role: newRole })
+                                .eq('id', u.id);
+                              if (error) throw error;
+                              fetchUsers();
+                            } catch (err) {
+                              console.error('Error updating user role:', err);
+                            }
+                          }}
+                          className="text-xs border border-gray-200 rounded px-2 py-1 outline-none focus:border-black"
+                        >
+                          <option value="admin">Admin</option>
+                          <option value="user">User</option>
+                        </select>
                       </td>
                     </tr>
                   ))
@@ -1542,6 +1731,7 @@ export const AdminRoutes = () => {
         <Route path="/pedidos" element={<AdminOrders />} />
         <Route path="/productos" element={<AdminProducts />} />
         <Route path="/usuarios" element={<AdminUsers />} />
+        <Route path="/perfil" element={<AdminProfile />} />
         <Route path="/personalizacion" element={<AdminStoreCustomization />} />
       </Routes>
     </AdminLayout>

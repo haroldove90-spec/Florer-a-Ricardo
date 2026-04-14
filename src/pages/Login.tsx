@@ -7,6 +7,7 @@ import { motion } from 'motion/react';
 
 const Login = () => {
   const [isRegistering, setIsRegistering] = useState(false);
+  const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -38,6 +39,7 @@ const Login = () => {
         password,
         options: {
           data: {
+            full_name: fullName,
             role: 'admin'
           }
         }
@@ -49,8 +51,10 @@ const Login = () => {
       } else {
         setSuccess('¡Registro exitoso! Por favor, verifica tu correo electrónico si es necesario.');
         setLoading(false);
-        // Optional: auto-switch to login
-        // setIsRegistering(false);
+        setFullName('');
+        setEmail('');
+        setPassword('');
+        setConfirmPassword('');
       }
     } else {
       const { error } = await supabase.auth.signInWithPassword({
@@ -104,6 +108,23 @@ const Login = () => {
           {success && (
             <div className="bg-green-50 border border-green-100 text-green-600 px-4 py-3 rounded-lg text-sm">
               {success}
+            </div>
+          )}
+          
+          {isRegistering && (
+            <div>
+              <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2 font-semibold">Nombre Completo</label>
+              <div className="relative">
+                <LogIn className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                <input 
+                  type="text" 
+                  required
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  placeholder="Juan Pérez" 
+                  className="w-full border border-gray-200 pl-10 pr-4 py-3 rounded-lg outline-none focus:border-black transition-colors" 
+                />
+              </div>
             </div>
           )}
           
