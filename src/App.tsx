@@ -425,9 +425,30 @@ const HeroSlider = ({ customSlides }: { customSlides?: any[] }) => {
         text: s.title, 
         subtitle: s.subtitle, 
         button: s.button_text,
-        alignment: s.alignment || 'center'
+        alignment: s.alignment || 'center',
+        titleSize: {
+          desktop: s.title_size_desktop || 48,
+          tablet: s.title_size_tablet || 36,
+          mobile: s.title_size_mobile || 24
+        },
+        subtitleSize: {
+          desktop: s.subtitle_size_desktop || 18,
+          tablet: s.subtitle_size_tablet || 16,
+          mobile: s.subtitle_size_mobile || 14
+        },
+        buttonSize: {
+          desktop: s.button_size_desktop || 12,
+          tablet: s.button_size_tablet || 11,
+          mobile: s.button_size_mobile || 10
+        }
       }))
-    : defaultSlides.map(s => ({ ...s, alignment: 'center' }));
+    : defaultSlides.map(s => ({ 
+        ...s, 
+        alignment: 'center',
+        titleSize: { desktop: 48, tablet: 36, mobile: 24 },
+        subtitleSize: { desktop: 18, tablet: 16, mobile: 14 },
+        buttonSize: { desktop: 12, tablet: 11, mobile: 10 }
+      }));
 
   useEffect(() => {
     if (isPaused || slides.length <= 1) return;
@@ -478,8 +499,32 @@ const HeroSlider = ({ customSlides }: { customSlides?: any[] }) => {
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.5, duration: 0.8 }}
-              className="text-white text-2xl md:text-4xl lg:text-5xl font-serif max-w-4xl leading-tight font-light"
+              className="text-white font-serif max-w-4xl leading-tight font-light"
+              style={{
+                fontSize: `var(--title-size-${currentSlide})`
+              } as any}
             >
+              <style dangerouslySetInnerHTML={{ __html: `
+                :root {
+                  --title-size-${currentSlide}: ${slides[currentSlide].titleSize.mobile}px;
+                  --subtitle-size-${currentSlide}: ${slides[currentSlide].subtitleSize.mobile}px;
+                  --button-size-${currentSlide}: ${slides[currentSlide].buttonSize.mobile}px;
+                }
+                @media (min-width: 768px) {
+                  :root {
+                    --title-size-${currentSlide}: ${slides[currentSlide].titleSize.tablet}px;
+                    --subtitle-size-${currentSlide}: ${slides[currentSlide].subtitleSize.tablet}px;
+                    --button-size-${currentSlide}: ${slides[currentSlide].buttonSize.tablet}px;
+                  }
+                }
+                @media (min-width: 1024px) {
+                  :root {
+                    --title-size-${currentSlide}: ${slides[currentSlide].titleSize.desktop}px;
+                    --subtitle-size-${currentSlide}: ${slides[currentSlide].subtitleSize.desktop}px;
+                    --button-size-${currentSlide}: ${slides[currentSlide].buttonSize.desktop}px;
+                  }
+                }
+              `}} />
               {slides[currentSlide].text}
             </motion.p>
             {slides[currentSlide].subtitle && (
@@ -487,7 +532,8 @@ const HeroSlider = ({ customSlides }: { customSlides?: any[] }) => {
                 initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.6, duration: 0.8 }}
-                className="text-white/80 text-lg md:text-xl font-light mt-4 max-w-2xl"
+                className="text-white/80 font-light mt-4 max-w-2xl"
+                style={{ fontSize: `var(--subtitle-size-${currentSlide})` }}
               >
                 {slides[currentSlide].subtitle}
               </motion.p>
@@ -497,7 +543,8 @@ const HeroSlider = ({ customSlides }: { customSlides?: any[] }) => {
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.8, duration: 0.8 }}
-              className="mt-12 px-6 md:px-10 py-4 bg-white text-black font-semibold uppercase tracking-[0.2em] text-[10px] md:text-xs hover:bg-black hover:text-gold transition-all duration-500 shadow-lg border border-white whitespace-nowrap"
+              className="mt-12 px-6 md:px-10 py-4 bg-white text-black font-semibold uppercase tracking-[0.2em] hover:bg-black hover:text-gold transition-all duration-500 shadow-lg border border-white whitespace-nowrap"
+              style={{ fontSize: `var(--button-size-${currentSlide})` }}
             >
               {slides[currentSlide].button || 'Descubrir Colección'}
             </motion.a>

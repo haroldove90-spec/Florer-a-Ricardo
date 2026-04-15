@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, Link, useLocation, Navigate, useNavigate } from 'react-router-dom';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
-import { LayoutDashboard, PackagePlus, DollarSign, ShoppingBag, TrendingUp, PlusCircle, LogOut, ClipboardList, UploadCloud, X, Menu, Home, Trash2, Loader2, ExternalLink, Settings, Image as ImageIcon, Type, Grid, User, Upload, AlignLeft, AlignCenter, AlignRight } from 'lucide-react';
+import { LayoutDashboard, PackagePlus, DollarSign, ShoppingBag, TrendingUp, PlusCircle, LogOut, ClipboardList, UploadCloud, X, Menu, Home, Trash2, Loader2, ExternalLink, Settings, Image as ImageIcon, Type, Grid, User, Upload, AlignLeft, AlignCenter, AlignRight, Monitor, Tablet, Smartphone, Type as TypeIcon } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useProducts } from '../context/ProductContext';
 import { useAuth } from '../context/AuthContext';
@@ -1321,6 +1321,7 @@ const AdminOrders = () => {
 
 const AdminStoreCustomization = () => {
   const [activeTab, setActiveTab] = useState<'slider' | 'categories' | 'titles'>('slider');
+  const [responsiveTab, setResponsiveTab] = useState<'desktop' | 'tablet' | 'mobile'>('desktop');
   const [slides, setSlides] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
   const [settings, setSettings] = useState<any>({});
@@ -1381,7 +1382,23 @@ const AdminStoreCustomization = () => {
   };
 
   const handleAddSlide = () => {
-    setSlides([...slides, { image_url: '', title: '', subtitle: '', button_text: 'Descubrir Colección', alignment: 'center', display_order: slides.length }]);
+    setSlides([...slides, { 
+      image_url: '', 
+      title: '', 
+      subtitle: '', 
+      button_text: 'Descubrir Colección', 
+      alignment: 'center', 
+      display_order: slides.length,
+      title_size_desktop: 48,
+      title_size_tablet: 36,
+      title_size_mobile: 24,
+      subtitle_size_desktop: 18,
+      subtitle_size_tablet: 16,
+      subtitle_size_mobile: 14,
+      button_size_desktop: 12,
+      button_size_tablet: 11,
+      button_size_mobile: 10
+    }]);
   };
 
   const handleRemoveSlide = (index: number) => {
@@ -1645,6 +1662,83 @@ const AdminStoreCustomization = () => {
                         >
                           <AlignRight size={18} />
                         </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pt-6 border-t border-gray-100">
+                  <div className="flex items-center justify-between mb-4">
+                    <h4 className="text-sm font-bold uppercase tracking-wider text-gray-900 flex items-center">
+                      <TypeIcon size={16} className="mr-2" />
+                      Tamaños de Fuente Responsivos
+                    </h4>
+                    <div className="flex bg-gray-100 p-1 rounded-lg">
+                      <button 
+                        onClick={() => setResponsiveTab('desktop')}
+                        className={`p-1.5 rounded-md transition-all ${responsiveTab === 'desktop' ? 'bg-white text-black shadow-sm' : 'text-gray-400 hover:text-black'}`}
+                        title="Escritorio"
+                      >
+                        <Monitor size={14} />
+                      </button>
+                      <button 
+                        onClick={() => setResponsiveTab('tablet')}
+                        className={`p-1.5 rounded-md transition-all ${responsiveTab === 'tablet' ? 'bg-white text-black shadow-sm' : 'text-gray-400 hover:text-black'}`}
+                        title="Tablet"
+                      >
+                        <Tablet size={14} />
+                      </button>
+                      <button 
+                        onClick={() => setResponsiveTab('mobile')}
+                        className={`p-1.5 rounded-md transition-all ${responsiveTab === 'mobile' ? 'bg-white text-black shadow-sm' : 'text-gray-400 hover:text-black'}`}
+                        title="Móvil"
+                      >
+                        <Smartphone size={14} />
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1">Título ({responsiveTab})</label>
+                      <div className="flex items-center space-x-2">
+                        <input 
+                          type="range" 
+                          min="12" 
+                          max="120" 
+                          value={slide[`title_size_${responsiveTab}`] || 48}
+                          onChange={(e) => handleUpdateSlide(idx, `title_size_${responsiveTab}`, e.target.value)}
+                          className="flex-1 accent-black"
+                        />
+                        <span className="text-xs font-medium w-8">{slide[`title_size_${responsiveTab}`] || 48}px</span>
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1">Subtítulo ({responsiveTab})</label>
+                      <div className="flex items-center space-x-2">
+                        <input 
+                          type="range" 
+                          min="10" 
+                          max="60" 
+                          value={slide[`subtitle_size_${responsiveTab}`] || 18}
+                          onChange={(e) => handleUpdateSlide(idx, `subtitle_size_${responsiveTab}`, e.target.value)}
+                          className="flex-1 accent-black"
+                        />
+                        <span className="text-xs font-medium w-8">{slide[`subtitle_size_${responsiveTab}`] || 18}px</span>
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1">Botón ({responsiveTab})</label>
+                      <div className="flex items-center space-x-2">
+                        <input 
+                          type="range" 
+                          min="8" 
+                          max="30" 
+                          value={slide[`button_size_${responsiveTab}`] || 12}
+                          onChange={(e) => handleUpdateSlide(idx, `button_size_${responsiveTab}`, e.target.value)}
+                          className="flex-1 accent-black"
+                        />
+                        <span className="text-xs font-medium w-8">{slide[`button_size_${responsiveTab}`] || 12}px</span>
                       </div>
                     </div>
                   </div>
