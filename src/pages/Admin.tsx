@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, Link, useLocation, Navigate, useNavigate } from 'react-router-dom';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
-import { LayoutDashboard, PackagePlus, DollarSign, ShoppingBag, TrendingUp, PlusCircle, LogOut, ClipboardList, UploadCloud, X, Menu, Home, Trash2, Loader2, ExternalLink, Settings, Image as ImageIcon, Type, Grid, User, Upload } from 'lucide-react';
+import { LayoutDashboard, PackagePlus, DollarSign, ShoppingBag, TrendingUp, PlusCircle, LogOut, ClipboardList, UploadCloud, X, Menu, Home, Trash2, Loader2, ExternalLink, Settings, Image as ImageIcon, Type, Grid, User, Upload, AlignLeft, AlignCenter, AlignRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useProducts } from '../context/ProductContext';
 import { useAuth } from '../context/AuthContext';
@@ -1381,7 +1381,7 @@ const AdminStoreCustomization = () => {
   };
 
   const handleAddSlide = () => {
-    setSlides([...slides, { image_url: '', title: '', subtitle: '', button_text: 'Descubrir Colección', display_order: slides.length }]);
+    setSlides([...slides, { image_url: '', title: '', subtitle: '', button_text: 'Descubrir Colección', alignment: 'center', display_order: slides.length }]);
   };
 
   const handleRemoveSlide = (index: number) => {
@@ -1620,6 +1620,32 @@ const AdminStoreCustomization = () => {
                         className="w-full border border-gray-200 px-4 py-2 rounded-lg text-sm outline-none focus:border-black"
                         placeholder="Descubrir Colección"
                       />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">Alineación del Contenido</label>
+                      <div className="flex space-x-2">
+                        <button 
+                          onClick={() => handleUpdateSlide(idx, 'alignment', 'left')}
+                          className={`p-2 rounded-lg border transition-all ${slide.alignment === 'left' ? 'bg-black text-white border-black' : 'bg-white text-gray-400 border-gray-200 hover:border-black hover:text-black'}`}
+                          title="Izquierda"
+                        >
+                          <AlignLeft size={18} />
+                        </button>
+                        <button 
+                          onClick={() => handleUpdateSlide(idx, 'alignment', 'center')}
+                          className={`p-2 rounded-lg border transition-all ${slide.alignment === 'center' || !slide.alignment ? 'bg-black text-white border-black' : 'bg-white text-gray-400 border-gray-200 hover:border-black hover:text-black'}`}
+                          title="Centro"
+                        >
+                          <AlignCenter size={18} />
+                        </button>
+                        <button 
+                          onClick={() => handleUpdateSlide(idx, 'alignment', 'right')}
+                          className={`p-2 rounded-lg border transition-all ${slide.alignment === 'right' ? 'bg-black text-white border-black' : 'bg-white text-gray-400 border-gray-200 hover:border-black hover:text-black'}`}
+                          title="Derecha"
+                        >
+                          <AlignRight size={18} />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>

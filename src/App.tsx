@@ -420,8 +420,14 @@ const HeroSlider = ({ customSlides }: { customSlides?: any[] }) => {
   ];
 
   const slides = customSlides && customSlides.length > 0 
-    ? customSlides.map(s => ({ image: s.image_url, text: s.title, subtitle: s.subtitle, button: s.button_text }))
-    : defaultSlides;
+    ? customSlides.map(s => ({ 
+        image: s.image_url, 
+        text: s.title, 
+        subtitle: s.subtitle, 
+        button: s.button_text,
+        alignment: s.alignment || 'center'
+      }))
+    : defaultSlides.map(s => ({ ...s, alignment: 'center' }));
 
   useEffect(() => {
     if (isPaused || slides.length <= 1) return;
@@ -435,6 +441,14 @@ const HeroSlider = ({ customSlides }: { customSlides?: any[] }) => {
   const prevSlide = () => setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
 
   if (slides.length === 0) return null;
+
+  const getAlignmentClasses = (alignment: string) => {
+    switch (alignment) {
+      case 'left': return 'items-start text-left';
+      case 'right': return 'items-end text-right';
+      default: return 'items-center text-center';
+    }
+  };
 
   return (
     <div 
@@ -459,7 +473,7 @@ const HeroSlider = ({ customSlides }: { customSlides?: any[] }) => {
             className="w-full h-full object-cover"
             referrerPolicy="no-referrer"
           />
-          <div className="absolute inset-0 z-20 flex flex-col items-center justify-center text-center px-6">
+          <div className={`absolute inset-0 z-20 flex flex-col justify-center px-12 md:px-24 ${getAlignmentClasses(slides[currentSlide].alignment)}`}>
             <motion.p 
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
