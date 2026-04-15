@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, Link, useLocation, Navigate, useNavigate } from 'react-router-dom';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
-import { LayoutDashboard, PackagePlus, DollarSign, ShoppingBag, TrendingUp, PlusCircle, LogOut, ClipboardList, UploadCloud, X, Menu, Home, Trash2, Loader2, ExternalLink, Settings, Image as ImageIcon, Type, Grid, User } from 'lucide-react';
+import { LayoutDashboard, PackagePlus, DollarSign, ShoppingBag, TrendingUp, PlusCircle, LogOut, ClipboardList, UploadCloud, X, Menu, Home, Trash2, Loader2, ExternalLink, Settings, Image as ImageIcon, Type, Grid, User, Upload } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useProducts } from '../context/ProductContext';
 import { useAuth } from '../context/AuthContext';
@@ -1394,6 +1394,35 @@ const AdminStoreCustomization = () => {
     setSlides(newSlides);
   };
 
+  const handleImageUpload = async (index: number, file: File) => {
+    try {
+      setSaving(true);
+      setMessage(null);
+      
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Math.random()}.${fileExt}`;
+      const filePath = `slides/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('slider-images')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('slider-images')
+        .getPublicUrl(filePath);
+
+      handleUpdateSlide(index, 'image_url', publicUrl);
+      setMessage({ type: 'success', text: 'Imagen subida correctamente.' });
+    } catch (error: any) {
+      console.error('Error uploading image:', error);
+      setMessage({ type: 'error', text: 'Error al subir la imagen: ' + error.message });
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const handleSaveSlides = async () => {
     setSaving(true);
     setMessage(null);
@@ -1525,21 +1554,40 @@ const AdminStoreCustomization = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-4">
                     <div>
-                      <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">URL de la Imagen</label>
-                      <input 
-                        type="text"
-                        value={slide.image_url}
-                        onChange={(e) => handleUpdateSlide(idx, 'image_url', e.target.value)}
-                        className="w-full border border-gray-200 px-4 py-2 rounded-lg text-sm outline-none focus:border-black"
-                        placeholder="https://images.unsplash.com/..."
-                      />
-                    </div>
-                    <div className="h-40 bg-gray-50 rounded-lg overflow-hidden border border-dashed border-gray-200 flex items-center justify-center">
-                      {slide.image_url ? (
-                        <img src={slide.image_url} alt="Preview" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
-                      ) : (
-                        <ImageIcon size={32} className="text-gray-300" />
-                      )}
+                      <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">Imagen de la Diapositiva</label>
+                      <div className="flex flex-col space-y-3">
+                        <div className="flex items-center space-x-2">
+                          <input 
+                            type="text"
+                            value={slide.image_url}
+                            onChange={(e) => handleUpdateSlide(idx, 'image_url', e.target.value)}
+                            className="flex-1 border border-gray-200 px-4 py-2 rounded-lg text-sm outline-none focus:border-black"
+                            placeholder="URL de la imagen o sube una..."
+                          />
+                          <label className="cursor-pointer bg-gray-100 hover:bg-gray-200 p-2 rounded-lg transition-colors" title="Subir imagen">
+                            <Upload size={18} className="text-gray-600" />
+                            <input 
+                              type="file" 
+                              className="hidden" 
+                              accept="image/*"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) handleImageUpload(idx, file);
+                              }}
+                            />
+                          </label>
+                        </div>
+                        <div className="h-40 bg-gray-50 rounded-lg overflow-hidden border border-dashed border-gray-200 flex items-center justify-center relative group/preview">
+                          {slide.image_url ? (
+                            <img src={slide.image_url} alt="Preview" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                          ) : (
+                            <div className="text-center">
+                              <ImageIcon size={32} className="text-gray-300 mx-auto mb-2" />
+                              <p className="text-[10px] text-gray-400">Sin imagen seleccionada</p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
                     </div>
                   </div>
                   
