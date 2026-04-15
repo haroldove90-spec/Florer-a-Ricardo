@@ -444,8 +444,8 @@ const HeroSlider = ({ customSlides }: { customSlides?: any[] }) => {
 
   const getAlignmentClasses = (alignment: string) => {
     switch (alignment) {
-      case 'left': return 'items-start text-left';
-      case 'right': return 'items-end text-right';
+      case 'left': return 'items-center text-center md:items-start md:text-left';
+      case 'right': return 'items-center text-center md:items-end md:text-right';
       default: return 'items-center text-center';
     }
   };
@@ -473,7 +473,7 @@ const HeroSlider = ({ customSlides }: { customSlides?: any[] }) => {
             className="w-full h-full object-cover"
             referrerPolicy="no-referrer"
           />
-          <div className={`absolute inset-0 z-20 flex flex-col justify-center px-12 md:px-24 ${getAlignmentClasses(slides[currentSlide].alignment)}`}>
+          <div className={`absolute inset-0 z-20 flex flex-col justify-center px-6 md:px-24 ${getAlignmentClasses(slides[currentSlide].alignment)}`}>
             <motion.p 
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
@@ -497,7 +497,7 @@ const HeroSlider = ({ customSlides }: { customSlides?: any[] }) => {
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.8, duration: 0.8 }}
-              className="mt-12 px-10 py-4 bg-white text-black font-semibold uppercase tracking-[0.2em] text-xs hover:bg-black hover:text-gold transition-all duration-500 shadow-lg border border-white"
+              className="mt-12 px-6 md:px-10 py-4 bg-white text-black font-semibold uppercase tracking-[0.2em] text-[10px] md:text-xs hover:bg-black hover:text-gold transition-all duration-500 shadow-lg border border-white whitespace-nowrap"
             >
               {slides[currentSlide].button || 'Descubrir Colección'}
             </motion.a>
