@@ -618,6 +618,7 @@ const HomeCategories = ({ customCategories }: { customCategories?: any[] }) => {
 const PhotoGallery = () => {
   const [photos, setPhotos] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedPhoto, setSelectedPhoto] = useState<any>(null);
 
   useEffect(() => {
     const fetchPhotos = async () => {
@@ -659,7 +660,8 @@ const PhotoGallery = () => {
               initial={{ opacity: 0, scale: 0.95 }}
               whileInView={{ opacity: 1, scale: 1 }}
               transition={{ delay: idx % 4 * 0.1 }}
-              className="aspect-square overflow-hidden bg-gray-100 rounded-sm relative group"
+              className="aspect-square overflow-hidden bg-gray-100 rounded-sm relative group cursor-pointer"
+              onClick={() => setSelectedPhoto(photo)}
             >
               <img 
                 src={photo.image_url} 
@@ -672,6 +674,44 @@ const PhotoGallery = () => {
           ))}
         </div>
       </div>
+
+      <AnimatePresence>
+        {selectedPhoto && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/95 backdrop-blur-sm"
+            onClick={() => setSelectedPhoto(null)}
+          >
+            <motion.button
+              initial={{ y: -20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: -20, opacity: 0 }}
+              className="absolute top-6 right-6 text-white hover:text-gold transition-colors p-2 z-[110]"
+              onClick={() => setSelectedPhoto(null)}
+            >
+              <X size={40} strokeWidth={1} />
+            </motion.button>
+            
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              className="relative max-w-5xl max-h-[90vh] w-full flex items-center justify-center"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <img 
+                src={selectedPhoto.image_url} 
+                alt="Gallery Preview" 
+                className="max-w-full max-h-[90vh] object-contain shadow-2xl rounded-sm"
+                referrerPolicy="no-referrer"
+              />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </section>
   );
 };
@@ -1044,6 +1084,7 @@ const ProductPage = () => {
   const { addToCart } = useCart();
   const [quantity, setQuantity] = useState(1);
   const [activeImage, setActiveImage] = useState('');
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
 
   useEffect(() => {
     if (product) {
@@ -1078,11 +1119,14 @@ const ProductPage = () => {
         <div className="lg:col-span-8 grid grid-cols-1 md:grid-cols-2 gap-12">
           {/* Image Gallery */}
           <div className="space-y-6">
-            <div className="rounded-md overflow-hidden shadow-xl bg-gray-50 flex items-center justify-center min-h-[400px] md:min-h-[500px]">
+            <div 
+              onClick={() => setIsPopupOpen(true)}
+              className="rounded-md overflow-hidden shadow-xl bg-gray-50 flex items-center justify-center min-h-[400px] md:min-h-[500px] cursor-pointer group"
+            >
               <img 
                 src={activeImage} 
                 alt={product.name} 
-                className="max-w-full max-h-[600px] w-auto h-auto object-contain transition-all duration-500" 
+                className="max-w-full max-h-[600px] w-auto h-auto object-contain transition-all duration-700 group-hover:scale-105" 
               />
             </div>
             
@@ -1157,6 +1201,44 @@ const ProductPage = () => {
           </div>
         </div>
       </div>
+
+      <AnimatePresence>
+        {isPopupOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/95 backdrop-blur-sm"
+            onClick={() => setIsPopupOpen(false)}
+          >
+            <motion.button
+              initial={{ y: -20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: -20, opacity: 0 }}
+              className="absolute top-6 right-6 text-white hover:text-gold transition-colors p-2 z-[110]"
+              onClick={() => setIsPopupOpen(false)}
+            >
+              <X size={40} strokeWidth={1} />
+            </motion.button>
+            
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              className="relative max-w-5xl max-h-[90vh] w-full flex items-center justify-center"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <img 
+                src={activeImage} 
+                alt={product?.name} 
+                className="max-w-full max-h-[90vh] object-contain shadow-2xl rounded-sm"
+                referrerPolicy="no-referrer"
+              />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
