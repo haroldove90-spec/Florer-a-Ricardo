@@ -147,6 +147,17 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
               </Link>
 
               <Link 
+                to="/admin/galeria" 
+                className={`group flex items-center space-x-4 p-4 rounded-2xl bg-white/5 shadow-sm border border-white/10 active:scale-95 transition-all ${location.pathname.includes('/galeria') ? 'ring-2 ring-white/20' : ''}`}
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-colors ${location.pathname.includes('/galeria') ? 'bg-white text-black shadow-md shadow-white/20' : 'bg-white/10 text-white group-hover:bg-white group-hover:text-black'}`}>
+                  <ImageIcon size={24} strokeWidth={1.5} />
+                </div>
+                <span className="text-xl font-serif text-white font-medium group-hover:text-gold">Galería</span>
+              </Link>
+
+              <Link 
                 to="/admin/personalizacion" 
                 className={`group flex items-center space-x-4 p-4 rounded-2xl bg-white/5 shadow-sm border border-white/10 active:scale-95 transition-all ${location.pathname.includes('/personalizacion') ? 'ring-2 ring-white/20' : ''}`}
                 onClick={() => setIsMobileMenuOpen(false)}
@@ -238,6 +249,14 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
           >
             <Settings size={20} />
             <span>Personalización</span>
+          </Link>
+          <Link 
+            to="/admin/galeria" 
+            onClick={() => setIsMobileMenuOpen(false)}
+            className={`flex items-center space-x-3 px-4 py-3 rounded-md transition-colors ${location.pathname.includes('/galeria') ? 'bg-white text-black font-medium' : 'hover:bg-white/10 text-white/80 hover:text-gold'}`}
+          >
+            <ImageIcon size={20} />
+            <span>Galería</span>
           </Link>
         </nav>
         <div className="p-4 border-t border-white/10 mt-auto space-y-2">
@@ -1319,6 +1338,149 @@ const AdminOrders = () => {
   );
 };
 
+const AdminGallery = () => {
+  const [photos, setPhotos] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [uploading, setUploading] = useState(false);
+
+  useEffect(() => {
+    fetchPhotos();
+  }, []);
+
+  const fetchPhotos = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('gallery')
+        .select('*')
+        .order('display_order', { ascending: true });
+      if (error) throw error;
+      setPhotos(data || []);
+    } catch (error) {
+      console.error('Error fetching gallery:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleUploadImages = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    setUploading(true);
+    try {
+      const uploadPromises = Array.from(files).map(async (file: File) => {
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
+        const filePath = `gallery/${fileName}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('gallery')
+          .upload(filePath, file);
+
+        if (uploadError) throw uploadError;
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('gallery')
+          .getPublicUrl(filePath);
+
+        return {
+          image_url: publicUrl,
+          display_order: photos.length
+        };
+      });
+
+      const newPhotos = await Promise.all(uploadPromises);
+      const { error: dbError } = await supabase
+        .from('gallery')
+        .insert(newPhotos);
+
+      if (dbError) throw dbError;
+      
+      fetchPhotos();
+    } catch (error) {
+      console.error('Error uploading to gallery:', error);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleDeletePhoto = async (id: string, url: string) => {
+    if (!confirm('¿Estás seguro de que quieres eliminar esta imagen?')) return;
+
+    try {
+      // Extract filename from URL
+      const fileName = url.split('/').pop();
+      if (fileName) {
+        await supabase.storage.from('gallery').remove([`gallery/${fileName}`]);
+      }
+
+      const { error } = await supabase
+        .from('gallery')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+      setPhotos(photos.filter(p => p.id !== id));
+    } catch (error) {
+      console.error('Error deleting photo:', error);
+    }
+  };
+
+  return (
+    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+      <div className="bg-white p-8 md:p-10 rounded-2xl shadow-sm border border-gray-100">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
+          <div>
+            <h2 className="text-3xl font-serif text-black mb-2">Gestión de Galería</h2>
+            <p className="text-gray-500 text-sm">Sube varias imágenes a la vez para mostrarlas en la tienda.</p>
+          </div>
+          <label className={`cursor-pointer flex items-center space-x-2 bg-black text-white px-8 py-4 rounded-xl font-bold uppercase tracking-widest text-xs hover:bg-gray-800 transition-all shadow-md group ${uploading ? 'opacity-50 pointer-events-none' : ''}`}>
+            {uploading ? <Loader2 className="animate-spin" size={16} /> : <UploadCloud size={18} className="group-hover:scale-110 transition-transform" />}
+            <span>{uploading ? 'Subiendo...' : 'Subir Imágenes'}</span>
+            <input 
+              type="file" 
+              multiple 
+              className="hidden" 
+              accept="image/*"
+              onChange={handleUploadImages}
+            />
+          </label>
+        </div>
+
+        {loading ? (
+          <div className="flex items-center justify-center py-20">
+            <Loader2 className="animate-spin text-gold" size={40} />
+          </div>
+        ) : photos.length === 0 ? (
+          <div className="text-center py-24 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
+            <ImageIcon size={48} className="mx-auto text-gray-300 mb-4" />
+            <p className="text-gray-400">No hay fotos en la galería aún.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
+            {photos.map((photo) => (
+              <div key={photo.id} className="group relative aspect-square bg-gray-100 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all">
+                <img 
+                  src={photo.image_url} 
+                  alt="Gallery" 
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                  referrerPolicy="no-referrer"
+                />
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors duration-300" />
+                <button 
+                  onClick={() => handleDeletePhoto(photo.id, photo.image_url)}
+                  className="absolute top-2 right-2 p-2 bg-white/10 backdrop-blur-md text-white rounded-lg opacity-0 group-hover:opacity-100 hover:bg-red-600 transition-all"
+                >
+                  <Trash2 size={16} />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
 const AdminStoreCustomization = () => {
   const [activeTab, setActiveTab] = useState<'slider' | 'categories' | 'titles'>('slider');
   const [responsiveTab, setResponsiveTab] = useState<'desktop' | 'tablet' | 'mobile'>('desktop');
@@ -1901,6 +2063,7 @@ export const AdminRoutes = () => {
         <Route path="/usuarios" element={<AdminUsers />} />
         <Route path="/perfil" element={<AdminProfile />} />
         <Route path="/personalizacion" element={<AdminStoreCustomization />} />
+        <Route path="/galeria" element={<AdminGallery />} />
       </Routes>
     </AdminLayout>
   );

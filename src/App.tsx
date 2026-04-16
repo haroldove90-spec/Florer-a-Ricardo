@@ -543,10 +543,10 @@ const HeroSlider = ({ customSlides }: { customSlides?: any[] }) => {
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.8, duration: 0.8 }}
-              className="mt-12 px-6 md:px-10 py-4 bg-white text-black font-semibold uppercase tracking-[0.2em] hover:bg-black hover:text-gold transition-all duration-500 shadow-lg border border-white whitespace-nowrap"
+              className={`mt-12 px-6 md:px-10 py-4 bg-white text-black font-semibold uppercase tracking-[0.2em] hover:bg-black hover:text-gold transition-all duration-500 shadow-lg border border-white whitespace-nowrap ${!slides[currentSlide].button ? 'hidden' : 'block'}`}
               style={{ fontSize: `var(--button-size-${currentSlide})` }}
             >
-              {slides[currentSlide].button || 'Descubrir Colección'}
+              {slides[currentSlide].button}
             </motion.a>
           </div>
         </motion.div>
@@ -605,11 +605,72 @@ const HomeCategories = ({ customCategories }: { customCategories?: any[] }) => {
           <Link 
             key={idx}
             to={`/productos?categoria=${encodeURIComponent(cat)}`}
-            className="bg-[#7BA4C7] hover:bg-[#5D89AF] text-white py-6 px-4 text-center rounded-sm transition-colors duration-300 flex items-center justify-center min-h-[80px] shadow-sm group"
+            className="bg-[#7BA4C7] hover:bg-[#5D89AF] text-white py-8 px-4 text-center rounded-sm transition-colors duration-300 flex items-center justify-center min-h-[100px] md:min-h-[80px] shadow-sm group"
           >
-            <span className="text-base md:text-lg font-serif tracking-widest uppercase group-hover:scale-105 transition-transform duration-300">{cat}</span>
+            <span className="text-xl md:text-lg font-serif tracking-widest uppercase group-hover:scale-105 transition-transform duration-300">{cat}</span>
           </Link>
         ))}
+      </div>
+    </section>
+  );
+};
+
+const PhotoGallery = () => {
+  const [photos, setPhotos] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchPhotos = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('gallery')
+          .select('*')
+          .order('display_order', { ascending: true });
+        
+        if (error) throw error;
+        setPhotos(data || []);
+      } catch (error) {
+        console.error('Error fetching gallery:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPhotos();
+  }, []);
+
+  if (loading || photos.length === 0) return null;
+
+  return (
+    <section className="py-24 bg-white overflow-hidden">
+      <div className="max-w-7xl mx-auto px-6 md:px-12">
+        <div className="text-center mb-16">
+          <h2 className="text-3xl md:text-4xl font-serif text-black mb-4 uppercase tracking-[0.2em]">Nuestra Galería</h2>
+          <div className="w-24 h-px bg-gold mx-auto mb-6"></div>
+          <p className="text-gray-500 font-light max-w-2xl mx-auto">
+            Descubre la belleza capturada en cada uno de nuestros diseños. Momentos reales, flores frescas y pura pasión.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          {photos.map((photo, idx) => (
+            <motion.div
+              key={photo.id}
+              initial={{ opacity: 0, scale: 0.95 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              transition={{ delay: idx % 4 * 0.1 }}
+              className="aspect-square overflow-hidden bg-gray-100 rounded-sm relative group"
+            >
+              <img 
+                src={photo.image_url} 
+                alt="Florería Ricardo Gallery" 
+                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                referrerPolicy="no-referrer"
+              />
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-500" />
+            </motion.div>
+          ))}
+        </div>
       </div>
     </section>
   );
@@ -1434,6 +1495,7 @@ const HomePage = () => {
       {/* <FeaturedCategories /> - Hidden per user request */}
       <ProductsSection customTitles={settings} />
       <AllProductsGrid />
+      <PhotoGallery />
       <ContactSection />
     </>
   );
