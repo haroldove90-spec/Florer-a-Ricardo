@@ -287,6 +287,7 @@ const Header = () => {
         <nav className="hidden md:flex space-x-10 items-center">
           <Link to="/" className="text-xs uppercase tracking-[0.2em] text-white transition-colors hover:text-gold">Inicio</Link>
           <a href="/#tienda" className="text-xs uppercase tracking-[0.2em] text-white transition-colors hover:text-gold">Tienda</a>
+          <a href="/#galeria" className="text-xs uppercase tracking-[0.2em] text-white transition-colors hover:text-gold">Galería</a>
           <a href="#contacto" className="text-xs uppercase tracking-[0.2em] text-white transition-colors hover:text-gold">Contacto</a>
           <Link to="/admin" className="text-xs uppercase tracking-[0.2em] text-white font-bold transition-colors hover:text-gold">Admin</Link>
         </nav>
@@ -357,6 +358,17 @@ const Header = () => {
                   <Store size={24} strokeWidth={1.5} />
                 </div>
                 <span className="text-xl font-serif text-white font-medium group-hover:text-gold">Tienda</span>
+              </a>
+
+              <a 
+                href="/#galeria" 
+                className="group flex items-center space-x-4 p-4 rounded-2xl bg-black shadow-sm border border-gray-800 active:scale-95 transition-all" 
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <div className="w-12 h-12 rounded-xl bg-white/10 text-white flex items-center justify-center group-hover:bg-white group-hover:text-gold transition-colors">
+                  <Store size={24} strokeWidth={1.5} />
+                </div>
+                <span className="text-xl font-serif text-white font-medium group-hover:text-gold">Galería</span>
               </a>
               
               <a 
@@ -601,15 +613,28 @@ const HomeCategories = ({ customCategories }: { customCategories?: any[] }) => {
   return (
     <section className="pb-20 px-6 md:px-12 max-w-6xl mx-auto">
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-        {categories.map((cat, idx) => (
-          <Link 
-            key={idx}
-            to={`/productos?categoria=${encodeURIComponent(cat)}`}
-            className="bg-[#7BA4C7] hover:bg-[#5D89AF] text-white py-8 px-4 text-center rounded-sm transition-colors duration-300 flex items-center justify-center min-h-[100px] md:min-h-[80px] shadow-sm group"
-          >
-            <span className="text-xl md:text-lg font-serif tracking-widest uppercase group-hover:scale-105 transition-transform duration-300">{cat}</span>
-          </Link>
-        ))}
+        {categories.map((cat, idx) => {
+          if (cat === "Rosas") {
+            return (
+              <a 
+                key={idx}
+                href="#galeria"
+                className="bg-[#7BA4C7] hover:bg-[#5D89AF] text-white py-8 px-4 text-center rounded-sm transition-colors duration-300 flex items-center justify-center min-h-[100px] md:min-h-[80px] shadow-sm group"
+              >
+                <span className="text-xl md:text-lg font-serif tracking-widest uppercase group-hover:scale-105 transition-transform duration-300">Galería</span>
+              </a>
+            );
+          }
+          return (
+            <Link 
+              key={idx}
+              to={`/productos?categoria=${encodeURIComponent(cat)}`}
+              className="bg-[#7BA4C7] hover:bg-[#5D89AF] text-white py-8 px-4 text-center rounded-sm transition-colors duration-300 flex items-center justify-center min-h-[100px] md:min-h-[80px] shadow-sm group"
+            >
+              <span className="text-xl md:text-lg font-serif tracking-widest uppercase group-hover:scale-105 transition-transform duration-300">{cat}</span>
+            </Link>
+          );
+        })}
       </div>
     </section>
   );
@@ -643,7 +668,7 @@ const PhotoGallery = () => {
   if (loading || photos.length === 0) return null;
 
   return (
-    <section className="py-24 bg-white overflow-hidden">
+    <section id="galeria" className="py-24 bg-white overflow-hidden">
       <div className="max-w-7xl mx-auto px-6 md:px-12">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-serif text-black mb-4 uppercase tracking-[0.2em]">Nuestra Galería</h2>
