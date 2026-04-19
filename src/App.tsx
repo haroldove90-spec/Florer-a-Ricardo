@@ -1470,10 +1470,20 @@ const ProductsPage = () => {
                 </div>
               ))
             ) : (
-              <div className="col-span-full text-center py-20 text-black/50">
-                <p className="text-xl">No se encontraron productos en esta categoría.</p>
-                <Link to="/productos" className="inline-block mt-6 px-6 py-2 border border-black text-black hover:bg-black hover:text-white transition-colors">
-                  Ver todos los productos
+              <div className="col-span-full py-24 flex flex-col items-center justify-center bg-gray-50 rounded-lg border border-dashed border-gray-200">
+                <div className="w-20 h-20 bg-white rounded-full shadow-sm flex items-center justify-center mb-6 text-gray-300">
+                  <ShoppingBag size={40} strokeWidth={1} />
+                </div>
+                <h3 className="text-2xl font-serif text-black mb-3">Próximamente más arreglos</h3>
+                <p className="text-gray-500 font-light max-w-md mx-auto mb-8">
+                  Aún no hemos agregado productos a la categoría <span className="font-medium text-black">"{categoryFilter}"</span>. 
+                  Vuelve pronto o explora nuestro catálogo completo.
+                </p>
+                <Link 
+                  to="/productos" 
+                  className="px-8 py-3 bg-black text-white text-xs uppercase tracking-[0.2em] font-bold hover:bg-gray-800 hover:text-gold transition-all shadow-md"
+                >
+                  Ver Catálogo Completo
                 </Link>
               </div>
             )}
