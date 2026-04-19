@@ -1606,18 +1606,47 @@ const AdminStoreCustomization = () => {
     setSaving(true);
     setMessage(null);
     try {
-      // First delete all existing slides to replace with new ones (simple approach)
-      // Or better, update if ID exists, insert if not.
-      // For simplicity in this demo, we'll just upsert.
-      const slidesToSave = slides.map((slide, idx) => ({
-        ...slide,
+      // 1. Identify existing IDs to keep, handle deletions
+      const existingIds = slides.filter(s => s.id).map(s => s.id);
+      
+      if (existingIds.length > 0) {
+        const { error: deleteError } = await supabase
+          .from('home_slides')
+          .delete()
+          .not('id', 'in', `(${existingIds.join(',')})`);
+        if (deleteError) throw deleteError;
+      } else {
+        const { error: deleteError } = await supabase
+          .from('home_slides')
+          .delete()
+          .neq('title', 'KEEP_ALL_DUMMY_THAT_DOES_NOT_EXIST');
+        if (deleteError) throw deleteError;
+      }
+
+      // 2. Process updates (items with ID) and inserts (items without ID) separately
+      const toUpdate = slides.filter(s => s.id).map((s, idx) => ({
+        ...s,
         display_order: idx
       }));
 
-      // We need to handle deletions too. For now let's just upsert what we have.
-      const { error } = await supabase.from('home_slides').upsert(slidesToSave);
-      if (error) throw error;
-      
+      const toInsert = slides.filter(s => !s.id).map((s, idx) => {
+        const { id, ...data } = s;
+        return {
+          ...data,
+          display_order: toUpdate.length + idx
+        };
+      });
+
+      if (toUpdate.length > 0) {
+        const { error } = await supabase.from('home_slides').upsert(toUpdate);
+        if (error) throw error;
+      }
+
+      if (toInsert.length > 0) {
+        const { error } = await supabase.from('home_slides').insert(toInsert);
+        if (error) throw error;
+      }
+
       setMessage({ type: 'success', text: 'Slider actualizado correctamente.' });
       fetchData(); // Refresh to get IDs for new slides
     } catch (error: any) {
@@ -1645,17 +1674,51 @@ const AdminStoreCustomization = () => {
     setSaving(true);
     setMessage(null);
     try {
-      const catsToSave = categories.map((cat, idx) => ({
+      // 1. Handle Deletions: Delete everything from the table that is NOT in our current list
+      const existingIds = categories.filter(cat => cat.id).map(cat => cat.id);
+      
+      if (existingIds.length > 0) {
+        const { error: deleteError } = await supabase
+          .from('home_categories_config')
+          .delete()
+          .not('id', 'in', `(${existingIds.join(',')})`);
+        if (deleteError) throw deleteError;
+      } else {
+        const { error: deleteError } = await supabase
+          .from('home_categories_config')
+          .delete()
+          .neq('name', 'KEEP_ALL_DUMMY_THAT_DOES_NOT_EXIST');
+        if (deleteError) throw deleteError;
+      }
+
+      // 2. Separate into updates and inserts to avoid PostgREST bulk-save id null issues
+      const toUpdate = categories.filter(cat => cat.id).map((cat, idx) => ({
         ...cat,
         display_order: idx
       }));
 
-      const { error } = await supabase.from('home_categories_config').upsert(catsToSave);
-      if (error) throw error;
+      const toInsert = categories.filter(cat => !cat.id).map((cat, idx) => {
+        const { id, ...data } = cat;
+        return {
+          ...data,
+          display_order: toUpdate.length + idx
+        };
+      });
+
+      if (toUpdate.length > 0) {
+        const { error: updateError } = await supabase.from('home_categories_config').upsert(toUpdate);
+        if (updateError) throw updateError;
+      }
+
+      if (toInsert.length > 0) {
+        const { error: insertError } = await supabase.from('home_categories_config').insert(toInsert);
+        if (insertError) throw insertError;
+      }
 
       setMessage({ type: 'success', text: 'Categorías actualizadas correctamente.' });
       fetchData();
     } catch (error: any) {
+      console.error('Error saving categories:', error);
       setMessage({ type: 'error', text: error.message || 'Error al guardar las categorías.' });
     } finally {
       setSaving(false);
