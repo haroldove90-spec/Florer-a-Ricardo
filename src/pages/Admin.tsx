@@ -1628,16 +1628,16 @@ const AdminStoreCustomization = () => {
   };
 
   const handleAddCategory = () => {
-    setCategories([...categories, { name: '', display_order: categories.length }]);
+    setCategories([...categories, { name: '', target_link: '', display_order: categories.length }]);
   };
 
   const handleRemoveCategory = (index: number) => {
     setCategories(categories.filter((_, i) => i !== index));
   };
 
-  const handleUpdateCategory = (index: number, name: string) => {
+  const handleUpdateCategory = (index: number, field: string, value: string) => {
     const newCats = [...categories];
-    newCats[index] = { ...newCats[index], name };
+    newCats[index] = { ...newCats[index], [field]: value };
     setCategories(newCats);
   };
 
@@ -1937,28 +1937,43 @@ const AdminStoreCustomization = () => {
           <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
             <div className="space-y-4">
               {categories.map((cat, idx) => (
-                <div key={idx} className="flex items-center space-x-4">
+                <div key={idx} className="flex flex-col md:flex-row md:items-center space-y-2 md:space-y-0 md:space-x-4 p-4 bg-gray-50 rounded-xl">
                   <div className="flex-1">
+                    <label className="block text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1">Nombre del Botón</label>
                     <input 
                       type="text"
                       value={cat.name}
-                      onChange={(e) => handleUpdateCategory(idx, e.target.value)}
+                      onChange={(e) => handleUpdateCategory(idx, 'name', e.target.value)}
                       className="w-full border border-gray-200 px-4 py-2 rounded-lg text-sm outline-none focus:border-black"
-                      placeholder="Nombre de la categoría"
+                      placeholder="Ej: Rosas, Orquídeas..."
                     />
                   </div>
-                  <button 
-                    onClick={() => handleRemoveCategory(idx)}
-                    className="text-gray-400 hover:text-red-600 transition-colors p-2"
-                  >
-                    <Trash2 size={18} />
-                  </button>
+                  <div className="flex-[1.5]">
+                    <label className="block text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1">Enlace / Destino (Opcional)</label>
+                    <input 
+                      type="text"
+                      value={cat.target_link || ''}
+                      onChange={(e) => handleUpdateCategory(idx, 'target_link', e.target.value)}
+                      className="w-full border border-gray-200 px-4 py-2 rounded-lg text-sm outline-none focus:border-black"
+                      placeholder="Ej: #galeria o /productos?categoria=Rosas"
+                    />
+                    <p className="text-[10px] text-gray-400 mt-1 italic">Si se deja vacío, vinculará automáticamente a la categoría de productos.</p>
+                  </div>
+                  <div className="flex items-end h-full pt-4 md:pt-0">
+                    <button 
+                      onClick={() => handleRemoveCategory(idx)}
+                      className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                      title="Eliminar"
+                    >
+                      <Trash2 size={18} />
+                    </button>
+                  </div>
                 </div>
               ))}
-              {categories.length === 0 && (
-                <p className="text-center text-gray-400 py-4 italic">No hay categorías configuradas para el inicio.</p>
-              )}
             </div>
+            {categories.length === 0 && (
+              <p className="text-center text-gray-400 py-4 italic">No hay categorías configuradas para el inicio.</p>
+            )}
           </div>
 
           <div className="pt-6 border-t">

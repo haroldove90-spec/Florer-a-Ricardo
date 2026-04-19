@@ -600,38 +600,42 @@ const WelcomeSection = () => {
 
 const HomeCategories = ({ customCategories }: { customCategories?: any[] }) => {
   const defaultCategories = [
-    "Arreglos mixtos",
-    "Ocasiones especiales",
-    "Orquídeas",
-    "Rosas"
+    { name: "Arreglos mixtos" },
+    { name: "Ocasiones especiales" },
+    { name: "Orquídeas" },
+    { name: "Galería", target_link: "#galeria" }
   ];
 
   const categories = customCategories && customCategories.length > 0 
-    ? customCategories.map(c => c.name)
+    ? customCategories
     : defaultCategories;
 
   return (
     <section className="pb-20 px-6 md:px-12 max-w-6xl mx-auto">
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
         {categories.map((cat, idx) => {
-          if (cat === "Rosas") {
+          const target = cat.target_link || `/productos?categoria=${encodeURIComponent(cat.name)}`;
+          const isScrollAnchor = target.startsWith('#');
+          
+          if (isScrollAnchor) {
             return (
               <a 
                 key={idx}
-                href="#galeria"
+                href={target}
                 className="bg-[#7BA4C7] hover:bg-[#5D89AF] text-white py-8 px-4 text-center rounded-sm transition-colors duration-300 flex items-center justify-center min-h-[100px] md:min-h-[80px] shadow-sm group"
               >
-                <span className="text-xl md:text-lg font-serif tracking-widest uppercase group-hover:scale-105 transition-transform duration-300">Galería</span>
+                <span className="text-xl md:text-lg font-serif tracking-widest uppercase group-hover:scale-105 transition-transform duration-300">{cat.name}</span>
               </a>
             );
           }
+
           return (
             <Link 
               key={idx}
-              to={`/productos?categoria=${encodeURIComponent(cat)}`}
+              to={target}
               className="bg-[#7BA4C7] hover:bg-[#5D89AF] text-white py-8 px-4 text-center rounded-sm transition-colors duration-300 flex items-center justify-center min-h-[100px] md:min-h-[80px] shadow-sm group"
             >
-              <span className="text-xl md:text-lg font-serif tracking-widest uppercase group-hover:scale-105 transition-transform duration-300">{cat}</span>
+              <span className="text-xl md:text-lg font-serif tracking-widest uppercase group-hover:scale-105 transition-transform duration-300">{cat.name}</span>
             </Link>
           );
         })}
