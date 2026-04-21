@@ -1380,6 +1380,19 @@ const CartModal = () => {
 };
 
 const ContactSection = () => {
+  const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    // Simulate API call
+    setTimeout(() => {
+      setLoading(false);
+      setSubmitted(true);
+    }, 1200);
+  };
+
   return (
     <section id="contacto" className="py-24 px-6 md:px-12 max-w-7xl mx-auto bg-white">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
@@ -1411,30 +1424,65 @@ const ContactSection = () => {
             </div>
           </div>
         </div>
-        <div className="bg-gray-50 p-8 rounded-sm">
-          <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
-            <div>
-              <label className="block text-xs uppercase tracking-wider text-black mb-2">Nombre Completo</label>
-              <input type="text" placeholder="Ej. Juan Pérez" className="w-full border border-gray-200 px-4 py-3 outline-none focus:border-black transition-colors bg-white" />
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-xs uppercase tracking-wider text-black mb-2">Correo Electrónico</label>
-                <input type="email" placeholder="ejemplo@correo.com" className="w-full border border-gray-200 px-4 py-3 outline-none focus:border-black transition-colors bg-white" />
-              </div>
-              <div>
-                <label className="block text-xs uppercase tracking-wider text-black mb-2">Teléfono</label>
-                <input type="tel" placeholder="Tu número" className="w-full border border-gray-200 px-4 py-3 outline-none focus:border-black transition-colors bg-white" />
-              </div>
-            </div>
-            <div>
-              <label className="block text-xs uppercase tracking-wider text-black mb-2">Mensaje</label>
-              <textarea rows={4} placeholder="¿En qué podemos ayudarte?" className="w-full border border-gray-200 px-4 py-3 outline-none focus:border-black transition-colors bg-white resize-none"></textarea>
-            </div>
-            <button className="w-full py-4 bg-black text-white text-sm uppercase tracking-widest hover:bg-gray-800 hover:text-gold transition-colors">
-              Enviar Mensaje
-            </button>
-          </form>
+        <div className="bg-gray-50 p-8 rounded-sm overflow-hidden relative">
+          <AnimatePresence mode="wait">
+            {!submitted ? (
+              <motion.form 
+                key="form"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                className="space-y-6" 
+                onSubmit={handleSubmit}
+              >
+                <div>
+                  <label className="block text-xs uppercase tracking-wider text-black mb-2">Nombre Completo</label>
+                  <input required type="text" placeholder="Ej. Juan Pérez" className="w-full border border-gray-200 px-4 py-3 outline-none focus:border-black transition-colors bg-white font-light text-sm" />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-xs uppercase tracking-wider text-black mb-2">Correo Electrónico</label>
+                    <input required type="email" placeholder="ejemplo@correo.com" className="w-full border border-gray-200 px-4 py-3 outline-none focus:border-black transition-colors bg-white font-light text-sm" />
+                  </div>
+                  <div>
+                    <label className="block text-xs uppercase tracking-wider text-black mb-2">Teléfono</label>
+                    <input type="tel" placeholder="Tu número" className="w-full border border-gray-200 px-4 py-3 outline-none focus:border-black transition-colors bg-white font-light text-sm" />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-xs uppercase tracking-wider text-black mb-2">Mensaje</label>
+                  <textarea required rows={4} placeholder="¿En qué podemos ayudarte?" className="w-full border border-gray-200 px-4 py-3 outline-none focus:border-black transition-colors bg-white resize-none font-light text-sm"></textarea>
+                </div>
+                <button 
+                  disabled={loading}
+                  className="w-full py-4 bg-black text-white text-sm uppercase tracking-widest hover:bg-gray-800 hover:text-gold transition-all flex items-center justify-center space-x-2 disabled:opacity-50"
+                >
+                  {loading ? <Loader2 className="animate-spin" size={18} /> : <span>Enviar Mensaje</span>}
+                </button>
+              </motion.form>
+            ) : (
+              <motion.div 
+                key="success"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="h-full min-h-[400px] flex flex-col items-center justify-center text-center space-y-4"
+              >
+                <div className="w-20 h-20 bg-black text-gold rounded-full flex items-center justify-center shadow-xl mb-4">
+                  <Check size={40} strokeWidth={3} />
+                </div>
+                <h4 className="text-2xl font-serif text-black uppercase tracking-widest">¡Mensaje Enviado!</h4>
+                <p className="text-black/60 font-light max-w-xs mx-auto">
+                  Gracias por contactarnos. Un especialista de Florería Ricardo se pondrá en contacto contigo muy pronto.
+                </p>
+                <button 
+                  onClick={() => setSubmitted(false)}
+                  className="text-xs uppercase tracking-widest font-bold border-b-2 border-black pb-1 hover:text-gold hover:border-gold transition-colors mt-8"
+                >
+                  Enviar otro mensaje
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
     </section>
@@ -1451,15 +1499,15 @@ const ProductsPage = () => {
   const rawCategory = categorySlug || searchParams.get('categoria');
   const [categoryFilter, setCategoryFilter] = useState<string | null>(rawCategory);
   const [categories, setCategories] = useState<string[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
-    const fetchCategories = async () => {
+    const fetchCategoriesList = async () => {
       const { data } = await supabase.from('home_categories_config').select('name');
       if (data) {
         const names = data.map(c => c.name);
         setCategories(names);
         
-        // If we have a raw category, try to find the match ignoring case
         if (rawCategory) {
           const match = names.find(n => n.toLowerCase() === rawCategory.toLowerCase());
           if (match) {
@@ -1470,12 +1518,15 @@ const ProductsPage = () => {
         }
       }
     };
-    fetchCategories();
+    fetchCategoriesList();
   }, [rawCategory]);
 
-  const filteredProducts = categoryFilter 
-    ? products.filter(p => p.category === categoryFilter)
-    : products;
+  const filteredProducts = products.filter(p => {
+    const matchesCategory = categoryFilter ? p.category === categoryFilter : true;
+    const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                         p.description.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesCategory && matchesSearch;
+  });
 
   return (
     <div className="pt-[88px] md:pt-[96px] min-h-screen bg-white">
@@ -1493,6 +1544,40 @@ const ProductsPage = () => {
         </p>
       </div>
 
+      {/* Search & Filter Bar */}
+      <div className="sticky top-[88px] md:top-[96px] z-40 bg-white/95 backdrop-blur-md border-b border-gray-100 py-4 px-6 md:px-12">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+          <div className="relative w-full md:w-96 group">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-black transition-colors" size={18} />
+            <input 
+              type="text" 
+              placeholder="Buscar ramos, flores, estilos..." 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full bg-gray-50 border border-gray-200 rounded-full pl-11 pr-4 py-3 text-sm outline-none focus:border-black focus:bg-white transition-all shadow-inner"
+            />
+          </div>
+          
+          <div className="flex items-center space-x-2 overflow-x-auto pb-1 md:pb-0 scrollbar-hide w-full md:w-auto">
+            <button 
+              onClick={() => setCategoryFilter(null)}
+              className={`px-4 py-2 rounded-full text-xs uppercase tracking-widest font-bold whitespace-nowrap transition-all ${!categoryFilter ? 'bg-black text-white shadow-md' : 'text-gray-400 hover:text-black hover:bg-gray-50'}`}
+            >
+              Todos
+            </button>
+            {categories.map(cat => (
+              <button 
+                key={cat}
+                onClick={() => setCategoryFilter(cat)}
+                className={`px-4 py-2 rounded-full text-xs uppercase tracking-widest font-bold whitespace-nowrap transition-all ${categoryFilter === cat ? 'bg-black text-white shadow-md' : 'text-gray-400 hover:text-black hover:bg-gray-50'}`}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
       {/* Gallery Block */}
       <PhotoGallery category={categoryFilter || undefined} />
 
@@ -1500,7 +1585,7 @@ const ProductsPage = () => {
       <div className="max-w-7xl mx-auto px-6 md:px-12 py-16">
         <div className="mb-12 text-center">
           <h2 className="text-2xl font-serif text-black mb-2 uppercase tracking-widest">
-            {categoryFilter ? `Colección: ${categoryFilter}` : 'Nuestros Productos'}
+            {searchQuery ? `Resultados para: "${searchQuery}"` : categoryFilter ? `Colección: ${categoryFilter}` : 'Nuestros Productos'}
           </h2>
           <div className="w-12 h-[2px] bg-black mx-auto" />
         </div>
@@ -1543,17 +1628,19 @@ const ProductsPage = () => {
                 <div className="w-20 h-20 bg-white rounded-full shadow-sm flex items-center justify-center mb-6 text-gray-300">
                   <ShoppingBag size={40} strokeWidth={1} />
                 </div>
-                <h3 className="text-2xl font-serif text-black mb-3">Próximamente más arreglos</h3>
+                <h3 className="text-2xl font-serif text-black mb-3">No encontramos resultados</h3>
                 <p className="text-gray-500 font-light max-w-md mx-auto mb-8 text-center px-4">
-                  Aún no hemos agregado productos a la colección <span className="font-semibold text-black italic">"{categoryFilter}"</span>. 
+                  No hay productos que coincidan con <span className="font-semibold text-black italic">"{searchQuery || categoryFilter}"</span>. 
                   Vuelve pronto o descubre nuestro catálogo completo debajo.
                 </p>
-                <Link 
-                  to="/productos" 
-                  className="px-8 py-3 bg-black text-white text-xs uppercase tracking-[0.2em] font-bold hover:bg-gray-800 hover:text-gold transition-all shadow-md"
-                >
-                  Ver Catálogo Completo
-                </Link>
+                {(searchQuery || categoryFilter) && (
+                  <button 
+                    onClick={() => { setSearchQuery(''); setCategoryFilter(null); }}
+                    className="text-xs uppercase tracking-widest font-bold border-b-2 border-black pb-1 hover:text-gold hover:border-gold transition-colors"
+                  >
+                    Ver Todo el Catálogo
+                  </button>
+                )}
               </div>
             )}
           </div>
@@ -1691,6 +1778,27 @@ const HomePage = () => {
   );
 };
 
+const NotFound = () => {
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center animate-in fade-in duration-1000 bg-white">
+      <div className="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center mb-8">
+        <Store size={48} className="text-gray-300" />
+      </div>
+      <h1 className="text-6xl font-serif text-black mb-4">404</h1>
+      <h2 className="text-xl uppercase tracking-[0.3em] text-black mb-6">Página no encontrada</h2>
+      <p className="text-gray-500 font-light max-w-md mx-auto mb-10">
+        Lo sentimos, la página que buscas no existe o ha sido movida. Explora nuestras hermosas colecciones florales en su lugar.
+      </p>
+      <Link 
+        to="/"
+        className="px-10 py-4 bg-black text-white text-xs uppercase tracking-[0.2em] font-bold hover:bg-gray-800 hover:text-gold transition-all shadow-lg rounded-sm"
+      >
+        Volver al Inicio
+      </Link>
+    </div>
+  );
+};
+
 export default function App() {
   console.log("App rendering, isSupabaseConfigured:", isSupabaseConfigured);
 
@@ -1721,6 +1829,7 @@ export default function App() {
                         <Route path="/como-comprar" element={<HowToBuy />} />
                         {/* Dynamic category route */}
                         <Route path="/:categorySlug" element={<ProductsPage />} />
+                        <Route path="*" element={<NotFound />} />
                       </Routes>
                     </main>
                     <Footer />
