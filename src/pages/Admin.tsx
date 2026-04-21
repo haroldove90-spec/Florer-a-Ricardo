@@ -1342,10 +1342,26 @@ const AdminGallery = () => {
   const [photos, setPhotos] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<string>('General');
+  const [categories, setCategories] = useState<string[]>(['General']);
 
   useEffect(() => {
     fetchPhotos();
+    fetchCategories();
   }, []);
+
+  const fetchCategories = async () => {
+    try {
+      const { data, error } = await supabase.from('home_categories_config').select('name');
+      if (error) throw error;
+      if (data) {
+        const catNames = data.map((c: any) => c.name);
+        setCategories(['General', ...catNames]);
+      }
+    } catch (error) {
+      console.error('Error fetching categories for gallery:', error);
+    }
+  };
 
   const fetchPhotos = async () => {
     try {
@@ -1385,7 +1401,8 @@ const AdminGallery = () => {
 
         return {
           image_url: publicUrl,
-          display_order: photos.length
+          display_order: photos.length,
+          category: selectedCategory
         };
       });
 
@@ -1432,19 +1449,35 @@ const AdminGallery = () => {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
           <div>
             <h2 className="text-3xl font-serif text-black mb-2">Gestión de Galería</h2>
-            <p className="text-gray-500 text-sm">Sube varias imágenes a la vez para mostrarlas en la tienda.</p>
+            <p className="text-gray-500 text-sm">Sube varias imágenes y asígnalas a una categoría.</p>
           </div>
-          <label className={`cursor-pointer flex items-center space-x-2 bg-black text-white px-8 py-4 rounded-xl font-bold uppercase tracking-widest text-xs hover:bg-gray-800 transition-all shadow-md group ${uploading ? 'opacity-50 pointer-events-none' : ''}`}>
-            {uploading ? <Loader2 className="animate-spin" size={16} /> : <UploadCloud size={18} className="group-hover:scale-110 transition-transform" />}
-            <span>{uploading ? 'Subiendo...' : 'Subir Imágenes'}</span>
-            <input 
-              type="file" 
-              multiple 
-              className="hidden" 
-              accept="image/*"
-              onChange={handleUploadImages}
-            />
-          </label>
+          
+          <div className="flex flex-col sm:flex-row items-end sm:items-center gap-4">
+            <div className="w-full sm:w-64">
+              <label className="block text-[10px] uppercase tracking-widest text-gray-400 mb-2 font-bold">Categoría para la subida</label>
+              <select 
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+                className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:border-black outline-none transition-all"
+              >
+                {categories.map(cat => (
+                  <option key={cat} value={cat}>{cat}</option>
+                ))}
+              </select>
+            </div>
+
+            <label className={`cursor-pointer flex items-center space-x-2 bg-black text-white px-8 py-4 rounded-xl font-bold uppercase tracking-widest text-xs hover:bg-gray-800 transition-all shadow-md group ${uploading ? 'opacity-50 pointer-events-none' : ''}`}>
+              {uploading ? <Loader2 className="animate-spin" size={16} /> : <UploadCloud size={18} className="group-hover:scale-110 transition-transform" />}
+              <span>{uploading ? 'Subiendo...' : 'Subir Imágenes'}</span>
+              <input 
+                type="file" 
+                multiple 
+                className="hidden" 
+                accept="image/*"
+                onChange={handleUploadImages}
+              />
+            </label>
+          </div>
         </div>
 
         {loading ? (
@@ -1467,6 +1500,9 @@ const AdminGallery = () => {
                   referrerPolicy="no-referrer"
                 />
                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors duration-300" />
+                <div className="absolute bottom-2 left-2 bg-white/90 backdrop-blur-sm text-[10px] uppercase font-bold tracking-widest px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none text-black">
+                  {photo.category || 'General'}
+                </div>
                 <button 
                   onClick={() => handleDeletePhoto(photo.id, photo.image_url)}
                   className="absolute top-2 right-2 p-2 bg-white/10 backdrop-blur-md text-white rounded-lg opacity-0 group-hover:opacity-100 hover:bg-red-600 transition-all"

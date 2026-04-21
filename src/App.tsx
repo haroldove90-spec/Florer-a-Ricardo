@@ -644,7 +644,7 @@ const HomeCategories = ({ customCategories }: { customCategories?: any[] }) => {
   );
 };
 
-const PhotoGallery = () => {
+const PhotoGallery = ({ category }: { category?: string | null }) => {
   const [photos, setPhotos] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedPhoto, setSelectedPhoto] = useState<any>(null);
@@ -652,10 +652,16 @@ const PhotoGallery = () => {
   useEffect(() => {
     const fetchPhotos = async () => {
       try {
-        const { data, error } = await supabase
+        let query = supabase
           .from('gallery')
           .select('*')
           .order('display_order', { ascending: true });
+        
+        if (category) {
+          query = query.eq('category', category);
+        }
+
+        const { data, error } = await query;
         
         if (error) throw error;
         setPhotos(data || []);
@@ -667,19 +673,25 @@ const PhotoGallery = () => {
     };
 
     fetchPhotos();
-  }, []);
+  }, [category]);
 
-  if (loading || photos.length === 0) return null;
+  if (loading) return null;
+  if (photos.length === 0 && category) return null; // Don't show empty gallery block on category pages
+  if (photos.length === 0) return null;
 
   return (
-    <section id="galeria" className="py-24 bg-white overflow-hidden">
+    <section id="galeria" className={`${category ? 'py-12' : 'py-24'} bg-white overflow-hidden`}>
       <div className="max-w-7xl mx-auto px-6 md:px-12">
         <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-serif text-black mb-4 uppercase tracking-[0.2em]">Nuestra Galería</h2>
+          <h2 className="text-3xl md:text-4xl font-serif text-black mb-4 uppercase tracking-[0.2em]">
+            {category ? `Galería: ${category}` : 'Nuestra Galería'}
+          </h2>
           <div className="w-24 h-px bg-gold mx-auto mb-6"></div>
-          <p className="text-gray-500 font-light max-w-2xl mx-auto">
-            Descubre la belleza capturada en cada uno de nuestros diseños. Momentos reales, flores frescas y pura pasión.
-          </p>
+          {!category && (
+            <p className="text-gray-500 font-light max-w-2xl mx-auto">
+              Descubre la belleza capturada en cada uno de nuestros diseños. Momentos reales, flores frescas y pura pasión.
+            </p>
+          )}
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -1445,8 +1457,15 @@ const ProductsPage = () => {
         </p>
       </div>
 
+      {/* Gallery Block */}
+      <PhotoGallery category={categoryFilter} />
+
       {/* Product Grid */}
       <div className="max-w-7xl mx-auto px-6 md:px-12 py-16">
+        <div className="mb-12">
+          <h2 className="text-2xl font-serif text-black mb-2 uppercase tracking-wider text-center">Nuestros Productos</h2>
+          <div className="w-12 h-[2px] bg-black mx-auto" />
+        </div>
         {loading ? (
           <div className="py-20 text-center text-black/50">Cargando productos...</div>
         ) : (
