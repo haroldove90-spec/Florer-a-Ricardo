@@ -399,8 +399,9 @@ const AdminProducts = () => {
         setFormData(prev => ({ ...prev, category: newCategoryName.trim() }));
         setNewCategoryName('');
         setIsAddingCategory(false);
-      } catch (error) {
-        alert("Error al añadir categoría");
+      } catch (error: any) {
+        console.error('Error adding category:', error);
+        alert(`No se pudo añadir la categoría: ${error.message || 'Error de conexión o permisos'}`);
       }
     }
   };

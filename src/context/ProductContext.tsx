@@ -248,57 +248,74 @@ export const ProductProvider = ({ children }: { children: React.ReactNode }) => 
     const trimmedCategory = category.trim();
     if (!trimmedCategory) return;
     
-    // First, check if it already exists in categories to avoid redundant inserts
-    const { data: existingCat } = await supabase
-      .from('categories')
-      .select('name')
-      .eq('name', trimmedCategory)
-      .single();
-
-    if (!existingCat) {
-      const { error: catError } = await supabase
+    try {
+      // First, check if it already exists in categories to avoid redundant inserts
+      const { data: existingCat, error: checkError } = await supabase
         .from('categories')
-        .insert([{ name: trimmedCategory }]);
+        .select('name')
+        .eq('name', trimmedCategory)
+        .maybeSingle();
 
-      if (catError && catError.code !== '23505') {
-        console.error('Error adding to categories:', catError);
-        throw catError;
+      if (checkError) {
+        console.error('Error checking category existence:', checkError);
       }
-    }
 
-    // Now check and add to home_categories_config for display on Home
-    const { data: existingHomeCat } = await supabase
-      .from('home_categories_config')
-      .select('name')
-      .eq('name', trimmedCategory)
-      .single();
+      if (!existingCat) {
+        const { error: catError } = await supabase
+          .from('categories')
+          .insert([{ name: trimmedCategory }]);
 
-    if (!existingHomeCat) {
-      // Get the current max display_order
-      const { data: maxOrderData } = await supabase
-        .from('home_categories_config')
-        .select('display_order')
-        .order('display_order', { ascending: false })
-        .limit(1);
-      
-      const nextOrder = maxOrderData && maxOrderData.length > 0 ? (maxOrderData[0].display_order + 1) : 0;
-
-      const { error: homeCatError } = await supabase
-        .from('home_categories_config')
-        .insert([{ 
-          name: trimmedCategory,
-          desc: `Descubre nuestra colección de ${trimmedCategory}.`,
-          image: 'https://images.unsplash.com/photo-1522673607200-164848d79c65?q=80&w=2072&auto=format&fit=crop', // Default beautiful placeholder
-          display_order: nextOrder
-        }]);
-
-      if (homeCatError && homeCatError.code !== '23505') {
-        console.error('Error adding to home_categories_config:', homeCatError);
-        throw homeCatError;
+        if (catError && catError.code !== '23505') {
+          console.error('Error adding to categories:', catError);
+          throw catError;
+        }
       }
-    }
 
-    await fetchCategories();
+      // Now check and add to home_categories_config for display on Home
+      const { data: existingHomeCat, error: checkHomeError } = await supabase
+        .from('home_categories_config')
+        .select('name')
+        .eq('name', trimmedCategory)
+        .maybeSingle();
+
+      if (checkHomeError) {
+        console.error('Error checking home category existence:', checkHomeError);
+      }
+
+      if (!existingHomeCat) {
+        // Get the current max display_order
+        const { data: maxOrderData, error: orderError } = await supabase
+          .from('home_categories_config')
+          .select('display_order')
+          .order('display_order', { ascending: false })
+          .limit(1);
+        
+        if (orderError) {
+          console.error('Error fetching max order:', orderError);
+        }
+        
+        const nextOrder = maxOrderData && maxOrderData.length > 0 ? (maxOrderData[0].display_order + 1) : 0;
+
+        const { error: homeCatError } = await supabase
+          .from('home_categories_config')
+          .insert([{ 
+            name: trimmedCategory,
+            desc: `Descubre nuestra colección de ${trimmedCategory}.`,
+            image: 'https://images.unsplash.com/photo-1522673607200-164848d79c65?q=80&w=2072&auto=format&fit=crop', // Default beautiful placeholder
+            display_order: nextOrder
+          }]);
+
+        if (homeCatError && homeCatError.code !== '23505') {
+          console.error('Error adding to home_categories_config:', homeCatError);
+          throw homeCatError;
+        }
+      }
+
+      await fetchCategories();
+    } catch (error) {
+      console.error('Fatal error in addCategory:', error);
+      throw error;
+    }
   };
 
   const deleteCategory = async (category: string) => {
