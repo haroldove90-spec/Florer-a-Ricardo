@@ -1344,7 +1344,7 @@ const AdminGallery = () => {
   const [uploading, setUploading] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>('General');
   const [categories, setCategories] = useState<string[]>(['General']);
-  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [selectedIds, setSelectedIds] = useState<any[]>([]);
   const [updating, setUpdating] = useState(false);
   const [bulkCategory, setBulkCategory] = useState<string>('General');
 
@@ -1444,17 +1444,18 @@ const AdminGallery = () => {
       await Promise.all(storagePromises);
 
       // Delete from DB
+      const sanitizedIds = selectedIds.map(id => typeof id === 'string' ? parseInt(id, 10) : id);
       const { error } = await supabase
         .from('gallery')
         .delete()
-        .in('id', selectedIds);
+        .in('id', sanitizedIds);
 
       if (error) throw error;
       setPhotos(photos.filter(p => !selectedIds.includes(p.id)));
       setSelectedIds([]);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error deleting photos:', error);
-      alert('Error al eliminar imágenes.');
+      alert('Error al eliminar imágenes: ' + (error.message || 'Error desconocido'));
     } finally {
       setUpdating(false);
     }
@@ -1462,27 +1463,34 @@ const AdminGallery = () => {
 
   const handleUpdateCategorySelected = async () => {
     if (selectedIds.length === 0) return;
+    if (!bulkCategory) {
+      alert('Por favor selecciona una categoría válida.');
+      return;
+    }
     
     setUpdating(true);
     try {
+      // Ensure we are working with correct types for the ID column (BIGINT)
+      const sanitizedIds = selectedIds.map(id => typeof id === 'string' ? parseInt(id, 10) : id);
+
       const { error } = await supabase
         .from('gallery')
         .update({ category: bulkCategory })
-        .in('id', selectedIds);
+        .in('id', sanitizedIds);
 
       if (error) throw error;
       
-      fetchPhotos();
+      await fetchPhotos();
       alert('Categoría actualizada correctamente.');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error updating categories:', error);
-      alert('Error al actualizar categorías.');
+      alert('Error al actualizar categorías: ' + (error.message || 'Error desconocido'));
     } finally {
       setUpdating(false);
     }
   };
 
-  const toggleSelect = (id: string) => {
+  const toggleSelect = (id: any) => {
     setSelectedIds(prev => 
       prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
     );
