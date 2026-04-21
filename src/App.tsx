@@ -1531,7 +1531,9 @@ const ProductsPage = () => {
   }, [rawCategory]);
 
   const filteredProducts = products.filter(p => {
-    const matchesCategory = categoryFilter ? p.category === categoryFilter : true;
+    const matchesCategory = categoryFilter 
+      ? (p.category && normalize(p.category) === normalize(categoryFilter)) 
+      : true;
     const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
                          p.description.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCategory && matchesSearch;
@@ -1719,8 +1721,15 @@ const AllProductsGrid = ({ customTitles }: { customTitles?: any }) => {
   const [searchQuery, setSearchQuery] = React.useState('');
   const { categories } = useProducts();
 
+  const normalize = (text: string) => {
+    return text.toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/\s+/g, '');
+  };
+
   const filteredProducts = products.filter(p => {
-    const matchesCategory = !categoryFilter || p.category === categoryFilter;
+    const matchesCategory = !categoryFilter || (p.category && normalize(p.category) === normalize(categoryFilter));
     const matchesSearch = !searchQuery || 
       p.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
       p.description.toLowerCase().includes(searchQuery.toLowerCase());
