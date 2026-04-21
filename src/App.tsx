@@ -588,7 +588,7 @@ const HeroSlider = ({ customSlides }: { customSlides?: any[] }) => {
 
 const WelcomeSection = () => {
   return (
-    <section className="py-12 px-6 md:px-12 max-w-6xl mx-auto text-center">
+    <section className="pt-2 pb-10 px-6 md:px-12 max-w-6xl mx-auto text-center">
       <div className="bg-[#62CAC9] p-8 md:p-10 rounded-sm shadow-sm">
         <p className="text-white text-xl md:text-2xl font-serif leading-relaxed italic">
           "Pregunta por nuestras promociones de cada mes"
