@@ -598,6 +598,13 @@ const WelcomeSection = () => {
   );
 };
 
+const createSlug = (text: string) => {
+  return text.toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]/g, '');
+};
+
 const HomeCategories = ({ customCategories }: { customCategories?: any[] }) => {
   const defaultCategories = [
     { name: "Ramos" },
@@ -616,7 +623,7 @@ const HomeCategories = ({ customCategories }: { customCategories?: any[] }) => {
     <section className="pb-20 px-6 md:px-12 max-w-6xl mx-auto">
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
         {categories.map((cat, idx) => {
-          const target = cat.target_link || `/${encodeURIComponent(cat.name)}`;
+          const target = cat.target_link || `/${createSlug(cat.name)}`;
           const isScrollAnchor = target.startsWith('#');
           
           if (isScrollAnchor) {
@@ -1490,15 +1497,14 @@ const ContactSection = () => {
 };
 
 const ProductsPage = () => {
-  const { products, loading } = useProducts();
+  const { products, loading, categories: allCategories } = useProducts();
   const { setCheckoutProduct } = useCart();
   const location = useLocation();
   const { categorySlug } = useParams();
   const searchParams = new URLSearchParams(location.search);
   
   const rawCategory = categorySlug || searchParams.get('categoria');
-  const [categoryFilter, setCategoryFilter] = useState<string | null>(rawCategory);
-  const [categories, setCategories] = useState<string[]>([]);
+  const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
 
   // Helper to normalize text for comparison (removes accents and spaces)
@@ -1510,33 +1516,26 @@ const ProductsPage = () => {
   };
 
   useEffect(() => {
-    const fetchCategoriesList = async () => {
-      const { data } = await supabase.from('home_categories_config').select('name');
-      if (data) {
-        const names = data.map(c => c.name);
-        setCategories(names);
-        
-        if (rawCategory) {
-          const normalizedRaw = normalize(rawCategory);
-          // Try exact match first, then partial match
-          let match = names.find(n => normalize(n) === normalizedRaw);
-          if (!match) {
-            match = names.find(n => {
-              const normN = normalize(n);
-              return normN.length > 3 && normalizedRaw.length > 3 && (normN.includes(normalizedRaw) || normalizedRaw.includes(normN));
-            });
-          }
-          
-          if (match) {
-            setCategoryFilter(match);
-          } else {
-            setCategoryFilter(rawCategory);
-          }
-        }
+    if (rawCategory && allCategories.length > 0) {
+      const normalizedRaw = normalize(rawCategory);
+      // Try exact match first, then partial match
+      let match = allCategories.find(n => normalize(n) === normalizedRaw);
+      if (!match) {
+        match = allCategories.find(n => {
+          const normN = normalize(n);
+          return normN.length > 3 && normalizedRaw.length > 3 && (normN.includes(normalizedRaw) || normalizedRaw.includes(normN));
+        });
       }
-    };
-    fetchCategoriesList();
-  }, [rawCategory]);
+      
+      if (match) {
+        setCategoryFilter(match);
+      } else {
+        setCategoryFilter(rawCategory);
+      }
+    } else if (!rawCategory) {
+      setCategoryFilter(null);
+    }
+  }, [rawCategory, allCategories]);
 
   const filteredProducts = products.filter(p => {
     if (!categoryFilter) return !searchQuery || (p.name + p.description).toLowerCase().includes(searchQuery.toLowerCase());
@@ -1594,7 +1593,7 @@ const ProductsPage = () => {
             >
               Todos
             </button>
-            {categories.map((cat, idx) => {
+            {allCategories.map((cat, idx) => {
               const colors = [
                 'hover:bg-rose-50 text-gray-500 hover:text-rose-600 active:bg-rose-600 active:text-white',
                 'hover:bg-amber-50 text-gray-500 hover:text-amber-600 active:bg-amber-600 active:text-white',
