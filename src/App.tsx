@@ -829,7 +829,7 @@ const FeaturedCategories = () => {
       image: "https://i.pinimg.com/736x/e2/99/05/e2990573cdd3c1d03468a5cb62542990.jpg"
     },
     {
-      name: "Selección Especial",
+      name: "Lo más vendido",
       desc: "Nuestra colección más exclusiva de arreglos premium y detalles únicos para los gustos más exigentes.",
       image: "https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcSJ4YWuFqLKrPpSlUgLC5yi-J5IkFKFhF3jcW1h21CkDnUUjVmQi8AvwdNNrrmTzqas2gvXEC4UbP_ZMLVR5SMxHTGP5K7Fm2dcviaHclJjZUorRjH7S1TOpZw"
     }
@@ -1051,13 +1051,13 @@ const ProductsSection = ({ customTitles }: { customTitles?: any }) => {
           {customTitles?.special_edition_title || 'Nuestros Arreglos'}
         </h2>
         <h3 className="text-3xl md:text-4xl font-serif text-black mb-6">
-          {customTitles?.special_edition_subtitle || 'Selección Especial'}
+          {customTitles?.special_edition_subtitle || 'Lo más vendido'}
         </h3>
         <div className="w-12 h-[2px] bg-black mx-auto" />
       </div>
       
       {loading ? (
-        <div className="py-20 text-center text-black/50 font-light">Cargando selección especial...</div>
+        <div className="py-20 text-center text-black/50 font-light">Cargando lo más vendido...</div>
       ) : specialSelection.length > 0 ? (
         <div 
           className="relative overflow-visible"
@@ -1578,14 +1578,11 @@ const ProductsPage = () => {
         </div>
       </div>
 
-      {/* Gallery Block */}
-      <PhotoGallery category={categoryFilter || undefined} />
-
       {/* Product Grid */}
       <div className="max-w-7xl mx-auto px-6 md:px-12 py-16">
         <div className="mb-12 text-center">
           <h2 className="text-2xl font-serif text-black mb-2 uppercase tracking-widest">
-            {searchQuery ? `Resultados para: "${searchQuery}"` : categoryFilter ? `Colección: ${categoryFilter}` : 'Nuestros Productos'}
+            {searchQuery ? `Resultados para: "${searchQuery}"` : categoryFilter ? `Colección: ${categoryFilter}` : 'Lo más vendido'}
           </h2>
           <div className="w-12 h-[2px] bg-black mx-auto" />
         </div>
@@ -1646,6 +1643,9 @@ const ProductsPage = () => {
           </div>
         )}
       </div>
+
+      {/* Gallery Block */}
+      <PhotoGallery category={categoryFilter || undefined} />
     </div>
   );
 };
