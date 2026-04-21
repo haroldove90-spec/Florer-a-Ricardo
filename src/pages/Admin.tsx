@@ -584,45 +584,62 @@ const AdminProducts = () => {
                 <div className="flex space-x-2">
                   <select 
                     value={formData.category}
-                    onChange={e => setFormData({...formData, category: e.target.value})}
+                    onChange={e => {
+                      if (e.target.value === 'ADD_NEW') {
+                        setIsAddingCategory(true);
+                      } else {
+                        setFormData({...formData, category: e.target.value});
+                        setIsAddingCategory(false);
+                      }
+                    }}
                     className="flex-1 border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
                   >
                     {categories.map(cat => (
                       <option key={cat} value={cat}>{cat}</option>
                     ))}
+                    <option value="ADD_NEW" className="font-bold text-black border-t">+ Añadir Nueva Categoría</option>
                   </select>
                   <button 
                     type="button"
                     onClick={() => setIsAddingCategory(!isAddingCategory)}
-                    className="bg-gray-100 p-2 rounded-md hover:bg-gray-200 transition-colors"
+                    className={`p-2 rounded-md transition-colors ${isAddingCategory ? 'bg-black text-white' : 'bg-gray-100 hover:bg-gray-200'}`}
                     title="Añadir nueva categoría"
                   >
                     <PlusCircle size={20} />
                   </button>
                 </div>
                 {isAddingCategory && (
-                  <div className="mt-2 p-3 bg-gray-50 rounded-md border border-gray-200">
+                  <div className="mt-2 p-4 bg-gray-50 rounded-lg border border-gray-200 animate-in slide-in-from-top-2 duration-300">
+                    <p className="text-[10px] uppercase tracking-widest text-gray-400 mb-2 font-bold">Nueva Categoría</p>
                     <div className="flex space-x-2">
                       <input 
                         type="text"
+                        autoFocus
                         value={newCategoryName}
                         onChange={e => setNewCategoryName(e.target.value)}
-                        placeholder="Nueva categoría..."
-                        className="flex-1 text-sm border border-gray-300 rounded-md px-3 py-1 focus:outline-none focus:ring-1 focus:ring-black"
+                        placeholder="Nombre de la categoría..."
+                        className="flex-1 text-sm border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            handleAddCategory(e as any);
+                          }
+                        }}
                       />
                       <button 
                         type="button"
                         onClick={handleAddCategory}
-                        className="bg-black text-white text-xs px-3 py-1 rounded-md hover:bg-gray-800"
+                        disabled={!newCategoryName.trim()}
+                        className="bg-black text-white text-xs px-4 py-2 rounded-md hover:bg-gray-800 disabled:opacity-50 transition-all font-bold"
                       >
-                        Añadir
+                        Guardar
                       </button>
                       <button 
                         type="button"
                         onClick={() => setIsAddingCategory(false)}
-                        className="text-gray-500 hover:text-black"
+                        className="text-gray-500 hover:text-black p-2"
                       >
-                        <X size={16} />
+                        <X size={20} />
                       </button>
                     </div>
                   </div>

@@ -248,16 +248,54 @@ export const ProductProvider = ({ children }: { children: React.ReactNode }) => 
     const trimmedCategory = category.trim();
     if (!trimmedCategory) return;
     
-    const { error } = await supabase
+    // First, check if it already exists in categories to avoid redundant inserts
+    const { data: existingCat } = await supabase
       .from('categories')
-      .insert([{ name: trimmedCategory }]);
+      .select('name')
+      .eq('name', trimmedCategory)
+      .single();
 
-    if (error) {
-      if (error.code === '23505') { // Unique violation
-        return;
+    if (!existingCat) {
+      const { error: catError } = await supabase
+        .from('categories')
+        .insert([{ name: trimmedCategory }]);
+
+      if (catError && catError.code !== '23505') {
+        console.error('Error adding to categories:', catError);
+        throw catError;
       }
-      console.error('Error adding category:', error);
-      throw error;
+    }
+
+    // Now check and add to home_categories_config for display on Home
+    const { data: existingHomeCat } = await supabase
+      .from('home_categories_config')
+      .select('name')
+      .eq('name', trimmedCategory)
+      .single();
+
+    if (!existingHomeCat) {
+      // Get the current max display_order
+      const { data: maxOrderData } = await supabase
+        .from('home_categories_config')
+        .select('display_order')
+        .order('display_order', { ascending: false })
+        .limit(1);
+      
+      const nextOrder = maxOrderData && maxOrderData.length > 0 ? (maxOrderData[0].display_order + 1) : 0;
+
+      const { error: homeCatError } = await supabase
+        .from('home_categories_config')
+        .insert([{ 
+          name: trimmedCategory,
+          desc: `Descubre nuestra colección de ${trimmedCategory}.`,
+          image: 'https://images.unsplash.com/photo-1522673607200-164848d79c65?q=80&w=2072&auto=format&fit=crop', // Default beautiful placeholder
+          display_order: nextOrder
+        }]);
+
+      if (homeCatError && homeCatError.code !== '23505') {
+        console.error('Error adding to home_categories_config:', homeCatError);
+        throw homeCatError;
+      }
     }
 
     await fetchCategories();
