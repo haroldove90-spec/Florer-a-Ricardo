@@ -624,9 +624,9 @@ const HomeCategories = ({ customCategories }: { customCategories?: any[] }) => {
               <a 
                 key={idx}
                 href={target}
-                className="bg-[#7BA4C7] hover:bg-[#5D89AF] text-white py-4 px-4 text-center rounded-sm transition-colors duration-300 flex items-center justify-center min-h-[70px] md:min-h-[60px] shadow-sm group"
+                className="bg-[#7BA4C7] hover:bg-[#5D89AF] text-white py-2.5 px-4 text-center rounded-sm transition-colors duration-300 flex items-center justify-center min-h-[50px] shadow-sm group"
               >
-                <span className="text-xl md:text-lg font-serif tracking-widest uppercase group-hover:scale-105 transition-transform duration-300">{cat.name}</span>
+                <span className="text-lg md:text-base font-serif tracking-widest uppercase group-hover:scale-105 transition-transform duration-300">{cat.name}</span>
               </a>
             );
           }
@@ -635,9 +635,9 @@ const HomeCategories = ({ customCategories }: { customCategories?: any[] }) => {
             <Link 
               key={idx}
               to={target}
-              className="bg-[#7BA4C7] hover:bg-[#5D89AF] text-white py-4 px-4 text-center rounded-sm transition-colors duration-300 flex items-center justify-center min-h-[70px] md:min-h-[60px] shadow-sm group"
+              className="bg-[#7BA4C7] hover:bg-[#5D89AF] text-white py-2.5 px-4 text-center rounded-sm transition-colors duration-300 flex items-center justify-center min-h-[50px] shadow-sm group"
             >
-              <span className="text-xl md:text-lg font-serif tracking-widest uppercase group-hover:scale-105 transition-transform duration-300">{cat.name}</span>
+              <span className="text-lg md:text-base font-serif tracking-widest uppercase group-hover:scale-105 transition-transform duration-300">{cat.name}</span>
             </Link>
           );
         })}
