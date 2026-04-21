@@ -590,7 +590,7 @@ const WelcomeSection = () => {
   return (
     <section className="pt-2 pb-10 px-6 md:px-12 max-w-6xl mx-auto text-center">
       <div className="bg-[#62CAC9] p-8 md:p-10 rounded-sm shadow-sm">
-        <p className="text-white text-xl md:text-2xl font-serif leading-relaxed italic">
+        <p className="text-white text-xl md:text-2xl font-serif leading-relaxed italic font-medium">
           "Pregunta por nuestras promociones de cada mes"
         </p>
       </div>
@@ -624,7 +624,7 @@ const HomeCategories = ({ customCategories }: { customCategories?: any[] }) => {
               <a 
                 key={idx}
                 href={target}
-                className="bg-[#62CAC9] hover:bg-[#4FB4B3] text-white py-2.5 px-4 text-center rounded-sm transition-colors duration-300 flex items-center justify-center min-h-[50px] shadow-sm group"
+                className="bg-[#7CA4C7] hover:bg-[#6A8EB0] text-white py-2.5 px-4 text-center rounded-sm transition-colors duration-300 flex items-center justify-center min-h-[50px] shadow-sm group"
               >
                 <span className="text-lg md:text-base font-serif tracking-widest uppercase group-hover:scale-105 transition-transform duration-300">{cat.name}</span>
               </a>
@@ -635,7 +635,7 @@ const HomeCategories = ({ customCategories }: { customCategories?: any[] }) => {
             <Link 
               key={idx}
               to={target}
-              className="bg-[#62CAC9] hover:bg-[#4FB4B3] text-white py-2.5 px-4 text-center rounded-sm transition-colors duration-300 flex items-center justify-center min-h-[50px] shadow-sm group"
+              className="bg-[#7CA4C7] hover:bg-[#6A8EB0] text-white py-2.5 px-4 text-center rounded-sm transition-colors duration-300 flex items-center justify-center min-h-[50px] shadow-sm group"
             >
               <span className="text-lg md:text-base font-serif tracking-widest uppercase group-hover:scale-105 transition-transform duration-300">{cat.name}</span>
             </Link>
