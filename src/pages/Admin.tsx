@@ -1817,13 +1817,17 @@ const AdminStoreCustomization = () => {
       }
 
       // 2. Process updates (items with ID) and inserts (items without ID) separately
-      const toUpdate = slides.filter(s => s.id).map((s, idx) => ({
-        ...s,
-        display_order: idx
-      }));
+      const toUpdate = slides.filter(s => s.id).map((s, idx) => {
+        // Strip any frontend-only fields that might be added later
+        const { temp_id, ...data } = s as any;
+        return {
+          ...data,
+          display_order: idx
+        };
+      });
 
       const toInsert = slides.filter(s => !s.id).map((s, idx) => {
-        const { id, ...data } = s;
+        const { id, temp_id, ...data } = s as any;
         return {
           ...data,
           display_order: toUpdate.length + idx
@@ -1890,13 +1894,16 @@ const AdminStoreCustomization = () => {
       }
 
       // 2. Separate into updates and inserts to avoid PostgREST bulk-save id null issues
-      const toUpdate = categories.filter(cat => cat.id).map((cat, idx) => ({
-        ...cat,
-        display_order: idx
-      }));
+      const toUpdate = categories.filter(cat => cat.id).map((cat, idx) => {
+        const { temp_id, ...data } = cat;
+        return {
+          ...data,
+          display_order: idx
+        };
+      });
 
       const toInsert = categories.filter(cat => !cat.id).map((cat, idx) => {
-        const { id, ...data } = cat;
+        const { id, temp_id, ...data } = cat;
         return {
           ...data,
           display_order: toUpdate.length + idx
