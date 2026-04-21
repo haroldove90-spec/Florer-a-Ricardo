@@ -591,7 +591,7 @@ const WelcomeSection = () => {
     <section className="py-12 px-6 md:px-12 max-w-6xl mx-auto text-center">
       <div className="bg-[#62CAC9] p-8 md:p-10 rounded-sm shadow-sm">
         <p className="text-white text-xl md:text-2xl font-serif leading-relaxed italic">
-          "Nos apasiona crear momentos inolvidables a través de la belleza de las flores. Cada arreglo es una obra de arte diseñada para transmitir tus sentimientos con elegancia y frescura."
+          "Pregunta por nuestras promociones de cada mes"
         </p>
       </div>
     </section>
@@ -624,7 +624,7 @@ const HomeCategories = ({ customCategories }: { customCategories?: any[] }) => {
               <a 
                 key={idx}
                 href={target}
-                className="bg-[#7BA4C7] hover:bg-[#5D89AF] text-white py-2.5 px-4 text-center rounded-sm transition-colors duration-300 flex items-center justify-center min-h-[50px] shadow-sm group"
+                className="bg-[#62CAC9] hover:bg-[#4FB4B3] text-white py-2.5 px-4 text-center rounded-sm transition-colors duration-300 flex items-center justify-center min-h-[50px] shadow-sm group"
               >
                 <span className="text-lg md:text-base font-serif tracking-widest uppercase group-hover:scale-105 transition-transform duration-300">{cat.name}</span>
               </a>
@@ -635,7 +635,7 @@ const HomeCategories = ({ customCategories }: { customCategories?: any[] }) => {
             <Link 
               key={idx}
               to={target}
-              className="bg-[#7BA4C7] hover:bg-[#5D89AF] text-white py-2.5 px-4 text-center rounded-sm transition-colors duration-300 flex items-center justify-center min-h-[50px] shadow-sm group"
+              className="bg-[#62CAC9] hover:bg-[#4FB4B3] text-white py-2.5 px-4 text-center rounded-sm transition-colors duration-300 flex items-center justify-center min-h-[50px] shadow-sm group"
             >
               <span className="text-lg md:text-base font-serif tracking-widest uppercase group-hover:scale-105 transition-transform duration-300">{cat.name}</span>
             </Link>
@@ -1090,7 +1090,7 @@ const ProductsSection = ({ customTitles }: { customTitles?: any }) => {
                 <p className="text-black font-bold text-lg md:text-base mb-4 md:mb-6">${product.price.toFixed(2)}</p>
                 <button 
                   onClick={() => setCheckoutProduct(product)}
-                  className="px-3 md:px-6 py-3 bg-black text-white text-xs md:text-sm hover:bg-gray-800 hover:text-gold transition-colors w-full uppercase tracking-widest font-bold flex items-center justify-center space-x-2"
+                  className="px-3 md:px-6 py-3 bg-[#62CAC9] text-white text-xs md:text-sm hover:bg-[#4FB4B3] transition-colors w-full uppercase tracking-widest font-bold flex items-center justify-center space-x-2 rounded-sm shadow-sm"
                 >
                   <MessageCircle size={18} />
                   <span>Comprar Ahora</span>
@@ -1217,7 +1217,7 @@ const ProductPage = () => {
               </div>
               <button 
                 onClick={() => addToCart(product, quantity)}
-                className="px-8 py-3 bg-white border border-black text-black text-sm hover:bg-black hover:text-gold transition-colors"
+                className="px-8 py-3 bg-[#62CAC9] text-white text-sm hover:bg-[#4FB4B3] transition-colors uppercase tracking-widest font-bold"
               >
                 Añadir al carrito
               </button>
@@ -1230,8 +1230,8 @@ const ProductPage = () => {
           <div>
             <h3 className="text-xl font-serif text-black mb-6">Buscar</h3>
             <div className="flex">
-              <input type="text" placeholder="Buscar productos..." className="flex-1 border border-gray-300 px-4 py-2 outline-none focus:border-black transition-colors" />
-              <button className="px-6 py-2 bg-black text-white border border-black hover:bg-gray-800 transition-colors">Buscar</button>
+              <input type="text" placeholder="Buscar productos..." className="flex-1 border border-gray-300 px-4 py-2 outline-none focus:border-[#62CAC9] transition-colors" />
+              <button className="px-6 py-2 bg-[#62CAC9] text-white border border-[#62CAC9] hover:bg-[#4FB4B3] transition-colors">Buscar</button>
             </div>
           </div>
           
@@ -1363,13 +1363,13 @@ const CartModal = () => {
                   <span className="text-black font-medium">Total:</span>
                   <span className="text-xl text-black font-serif font-bold">${cartTotal.toFixed(2)}</span>
                 </div>
-                <button 
-                  onClick={handleWhatsAppCheckout}
-                  className="w-full py-4 bg-black hover:bg-gray-800 hover:text-gold text-white font-medium uppercase tracking-widest text-sm flex items-center justify-center space-x-2 transition-colors rounded-sm shadow-md"
-                >
-                  <MessageCircle size={20} />
-                  <span>Pedir por WhatsApp</span>
-                </button>
+              <button 
+                onClick={handleWhatsAppCheckout}
+                className="w-full py-4 bg-[#62CAC9] hover:bg-[#4FB4B3] text-white font-medium uppercase tracking-widest text-sm flex items-center justify-center space-x-2 transition-colors rounded-sm shadow-md"
+              >
+                <MessageCircle size={20} />
+                <span>Pedir por WhatsApp</span>
+              </button>
               </div>
             )}
           </motion.div>
@@ -1455,7 +1455,7 @@ const ContactSection = () => {
                 </div>
                 <button 
                   disabled={loading}
-                  className="w-full py-4 bg-black text-white text-sm uppercase tracking-widest hover:bg-gray-800 hover:text-gold transition-all flex items-center justify-center space-x-2 disabled:opacity-50"
+                  className="w-full py-4 bg-[#62CAC9] text-white text-sm uppercase tracking-widest hover:bg-[#4FB4B3] transition-all flex items-center justify-center space-x-2 disabled:opacity-50 rounded-sm shadow-md"
                 >
                   {loading ? <Loader2 className="animate-spin" size={18} /> : <span>Enviar Mensaje</span>}
                 </button>
@@ -1572,7 +1572,7 @@ const ProductsPage = () => {
               onClick={() => setCategoryFilter(null)}
               className={`px-4 py-2 rounded-full text-xs uppercase tracking-widest font-bold whitespace-nowrap transition-all shadow-sm ${
                 !categoryFilter 
-                  ? 'bg-black text-white ring-2 ring-offset-2 ring-black' 
+                  ? 'bg-[#62CAC9] text-white ring-2 ring-offset-2 ring-[#62CAC9]' 
                   : 'bg-gray-100 text-gray-500 hover:bg-gray-200 hover:text-black'
               }`}
             >
@@ -1648,7 +1648,7 @@ const ProductsPage = () => {
                   <p className="text-black font-bold text-base mb-4 md:mb-6">${product.price.toFixed(2)}</p>
                   <button 
                     onClick={() => setCheckoutProduct(product)}
-                    className="px-3 md:px-6 py-3 bg-black text-white text-[10px] md:text-xs hover:bg-gray-800 hover:text-gold transition-all w-full uppercase tracking-[0.2em] font-bold flex items-center justify-center space-x-2 shadow-sm"
+                    className="px-3 md:px-6 py-3 bg-[#62CAC9] text-white text-[10px] md:text-xs hover:bg-[#4FB4B3] transition-all w-full uppercase tracking-[0.2em] font-bold flex items-center justify-center space-x-2 shadow-sm rounded-sm"
                   >
                     <MessageCircle size={16} />
                     <span>Comprar Ahora</span>
@@ -1748,7 +1748,7 @@ const AllProductsGrid = ({ customTitles }: { customTitles?: any }) => {
               onClick={() => setCategoryFilter(null)}
               className={`px-4 py-2 rounded-full text-xs uppercase tracking-widest font-bold whitespace-nowrap transition-all shadow-sm ${
                 !categoryFilter 
-                  ? 'bg-black text-white ring-2 ring-offset-2 ring-black' 
+                  ? 'bg-[#62CAC9] text-white ring-2 ring-offset-2 ring-[#62CAC9]' 
                   : 'bg-gray-100 text-gray-500 hover:bg-gray-200 hover:text-black'
               }`}
             >
@@ -1812,7 +1812,7 @@ const AllProductsGrid = ({ customTitles }: { customTitles?: any }) => {
               <p className="text-black font-bold text-sm mb-4">${product.price.toFixed(2)}</p>
               <button 
                 onClick={() => setCheckoutProduct(product)}
-                className="px-4 py-2 bg-black text-white text-[10px] md:text-xs hover:bg-gray-800 hover:text-gold transition-colors w-full uppercase tracking-widest font-bold flex items-center justify-center space-x-2"
+                className="px-4 py-2 bg-[#62CAC9] text-white text-[10px] md:text-xs hover:bg-[#4FB4B3] transition-colors w-full uppercase tracking-widest font-bold flex items-center justify-center space-x-2"
               >
                 <MessageCircle size={14} />
                 <span>Comprar</span>
@@ -1825,7 +1825,7 @@ const AllProductsGrid = ({ customTitles }: { customTitles?: any }) => {
       <div className="mt-16 text-center">
         <Link 
           to="/productos" 
-          className="inline-block px-10 py-4 border border-black text-black text-xs uppercase tracking-[0.2em] font-bold hover:bg-black hover:text-white transition-all duration-500"
+          className="inline-block px-10 py-4 bg-[#62CAC9] text-white text-xs uppercase tracking-[0.2em] font-bold hover:bg-[#4FB4B3] transition-all duration-500 rounded-sm shadow-md"
         >
           Ver Todo el Catálogo
         </Link>
@@ -1895,7 +1895,7 @@ const NotFound = () => {
       </p>
       <Link 
         to="/"
-        className="px-10 py-4 bg-black text-white text-xs uppercase tracking-[0.2em] font-bold hover:bg-gray-800 hover:text-gold transition-all shadow-lg rounded-sm"
+        className="px-10 py-4 bg-[#62CAC9] text-white text-xs uppercase tracking-[0.2em] font-bold hover:bg-[#4FB4B3] transition-all shadow-lg rounded-sm"
       >
         Volver al Inicio
       </Link>
