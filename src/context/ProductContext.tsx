@@ -150,6 +150,20 @@ export const ProductProvider = ({ children }: { children: React.ReactNode }) => 
     let mainImageUrl = product.image;
     let secondaryImageUrls = (product.secondaryImages || []).filter(url => !url.startsWith('blob:'));
 
+    // Ensure category exists in categories table to satisfy foreign key constraint
+    if (product.category) {
+      const trimmedCategory = product.category.trim();
+      const { data: existingCat } = await supabase
+        .from('categories')
+        .select('name')
+        .eq('name', trimmedCategory)
+        .maybeSingle();
+
+      if (!existingCat) {
+        await supabase.from('categories').insert([{ name: trimmedCategory }]);
+      }
+    }
+
     // Upload main image if it's a file
     if (mainImageFile) {
       mainImageUrl = await uploadImage(mainImageFile, 'products');
@@ -185,6 +199,20 @@ export const ProductProvider = ({ children }: { children: React.ReactNode }) => 
 
   const updateProduct = async (id: number, product: Partial<Product>, mainImageFile?: File, secondaryImageFiles?: File[]) => {
     try {
+      // Ensure category exists in categories table if it's being updated
+      if (product.category) {
+        const trimmedCategory = product.category.trim();
+        const { data: existingCat } = await supabase
+          .from('categories')
+          .select('name')
+          .eq('name', trimmedCategory)
+          .maybeSingle();
+
+        if (!existingCat) {
+          await supabase.from('categories').insert([{ name: trimmedCategory }]);
+        }
+      }
+
       let mainImageUrl = product.image;
       let secondaryImageUrls = (product.secondaryImages || []).filter(url => !url.startsWith('blob:'));
 

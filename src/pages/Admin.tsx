@@ -1903,6 +1903,15 @@ const AdminStoreCustomization = () => {
         if (insertError) throw insertError;
       }
 
+      // 3. Sync with main categories table to ensure foreign keys in products table remain valid
+      const allCategoryNames = categories.map(c => c.name.trim()).filter(Boolean);
+      for (const name of allCategoryNames) {
+        const { data: exists } = await supabase.from('categories').select('name').eq('name', name).maybeSingle();
+        if (!exists) {
+          await supabase.from('categories').insert([{ name }]);
+        }
+      }
+
       setMessage({ type: 'success', text: 'Categorías actualizadas correctamente.' });
       fetchData();
     } catch (error: any) {
