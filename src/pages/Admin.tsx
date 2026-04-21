@@ -649,7 +649,7 @@ const AdminProducts = () => {
                   className="w-5 h-5 rounded border-gray-300 text-black focus:ring-black"
                 />
                 <label htmlFor="isSpecial" className="text-sm font-medium text-gray-700 cursor-pointer">
-                  Mostrar en "Selección Especial" (Slider Principal)
+                  Mostrar en "Lo más vendido" (Slider Principal)
                 </label>
               </div>
               <div className="md:col-span-2">
@@ -774,7 +774,7 @@ const AdminProducts = () => {
                       <div className="flex flex-col">
                         <span className="font-medium text-black">{product.name}</span>
                         {product.isSpecial && (
-                          <span className="text-[10px] text-orange-600 font-bold uppercase tracking-tighter">Selección Especial</span>
+                          <span className="text-[10px] text-orange-600 font-bold uppercase tracking-tighter">Lo más vendido</span>
                         )}
                       </div>
                     </div>
@@ -2247,7 +2247,7 @@ const AdminStoreCustomization = () => {
                       value={settings.special_edition_subtitle || ''}
                       onChange={(e) => setSettings({...settings, special_edition_subtitle: e.target.value})}
                       className="w-full border border-gray-200 px-4 py-3 rounded-lg outline-none focus:border-black transition-colors"
-                      placeholder="Selección Especial"
+                      placeholder="Lo más vendido"
                     />
                   </div>
                 </div>
@@ -2259,7 +2259,7 @@ const AdminStoreCustomization = () => {
                       {settings.special_edition_title || 'NUESTROS ARREGLOS'}
                     </p>
                     <h3 className="text-2xl font-serif text-black">
-                      {settings.special_edition_subtitle || 'Selección Especial'}
+                      {settings.special_edition_subtitle || 'Lo más vendido'}
                     </h3>
                     <div className="w-8 h-[2px] bg-black mx-auto mt-4" />
                   </div>

@@ -1051,7 +1051,7 @@ const ProductsSection = ({ customTitles }: { customTitles?: any }) => {
           {customTitles?.special_edition_title || 'Nuestros Arreglos'}
         </h2>
         <h3 className="text-3xl md:text-4xl font-serif text-black mb-6">
-          {customTitles?.special_edition_subtitle || 'Lo más vendido'}
+          {customTitles?.special_edition_subtitle === 'Selección Especial' ? 'Lo más vendido' : (customTitles?.special_edition_subtitle || 'Lo más vendido')}
         </h3>
         <div className="w-12 h-[2px] bg-black mx-auto" />
       </div>
@@ -1561,19 +1561,45 @@ const ProductsPage = () => {
           <div className="flex items-center space-x-2 overflow-x-auto pb-1 md:pb-0 scrollbar-hide w-full md:w-auto">
             <button 
               onClick={() => setCategoryFilter(null)}
-              className={`px-4 py-2 rounded-full text-xs uppercase tracking-widest font-bold whitespace-nowrap transition-all ${!categoryFilter ? 'bg-black text-white shadow-md' : 'text-gray-400 hover:text-black hover:bg-gray-50'}`}
+              className={`px-4 py-2 rounded-full text-xs uppercase tracking-widest font-bold whitespace-nowrap transition-all shadow-sm ${
+                !categoryFilter 
+                  ? 'bg-black text-white ring-2 ring-offset-2 ring-black' 
+                  : 'bg-gray-100 text-gray-500 hover:bg-gray-200 hover:text-black'
+              }`}
             >
               Todos
             </button>
-            {categories.map(cat => (
-              <button 
-                key={cat}
-                onClick={() => setCategoryFilter(cat)}
-                className={`px-4 py-2 rounded-full text-xs uppercase tracking-widest font-bold whitespace-nowrap transition-all ${categoryFilter === cat ? 'bg-black text-white shadow-md' : 'text-gray-400 hover:text-black hover:bg-gray-50'}`}
-              >
-                {cat}
-              </button>
-            ))}
+            {categories.map((cat, idx) => {
+              const colors = [
+                'hover:bg-rose-50 text-gray-500 hover:text-rose-600 active:bg-rose-600 active:text-white',
+                'hover:bg-amber-50 text-gray-500 hover:text-amber-600 active:bg-amber-600 active:text-white',
+                'hover:bg-purple-50 text-gray-500 hover:text-purple-600 active:bg-purple-600 active:text-white',
+                'hover:bg-emerald-50 text-gray-500 hover:text-emerald-600 active:bg-emerald-600 active:text-white',
+                'hover:bg-blue-50 text-gray-500 hover:text-blue-600 active:bg-blue-600 active:text-white',
+              ];
+              const activeColors = [
+                'bg-rose-600 text-white ring-2 ring-offset-2 ring-rose-600',
+                'bg-amber-600 text-white ring-2 ring-offset-2 ring-amber-600',
+                'bg-purple-600 text-white ring-2 ring-offset-2 ring-purple-600',
+                'bg-emerald-600 text-white ring-2 ring-offset-2 ring-emerald-600',
+                'bg-blue-600 text-white ring-2 ring-offset-2 ring-blue-600',
+              ];
+              const colorIdx = idx % colors.length;
+              
+              return (
+                <button 
+                  key={cat}
+                  onClick={() => setCategoryFilter(cat)}
+                  className={`px-4 py-2 rounded-full text-xs uppercase tracking-widest font-bold whitespace-nowrap transition-all shadow-sm ${
+                    categoryFilter === cat 
+                      ? activeColors[colorIdx] 
+                      : `bg-gray-50 ${colors[colorIdx]}`
+                  }`}
+                >
+                  {cat}
+                </button>
+              );
+            })}
           </div>
         </div>
       </div>
