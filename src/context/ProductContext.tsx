@@ -300,8 +300,6 @@ export const ProductProvider = ({ children }: { children: React.ReactNode }) => 
           .from('home_categories_config')
           .insert([{ 
             name: trimmedCategory,
-            desc: `Descubre nuestra colección de ${trimmedCategory}.`,
-            image: 'https://images.unsplash.com/photo-1522673607200-164848d79c65?q=80&w=2072&auto=format&fit=crop', // Default beautiful placeholder
             display_order: nextOrder
           }]);
 
