@@ -836,9 +836,15 @@ const AdminProducts = () => {
             <div key={cat} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-100 group hover:border-gray-300 transition-all">
               <span className="text-sm font-medium text-gray-700 truncate mr-2">{cat}</span>
               <button 
-                onClick={() => {
+                onClick={async () => {
                   if (window.confirm(`¿Estás seguro de que deseas eliminar la categoría "${cat}"?`)) {
-                    deleteCategory(cat);
+                    try {
+                      await deleteCategory(cat);
+                      alert(`Categoría "${cat}" eliminada con éxito.`);
+                    } catch (error: any) {
+                      console.error("Error deleting category:", error);
+                      alert(`Error al eliminar categoría: ${error.message || 'Error desconocido'}`);
+                    }
                   }
                 }}
                 className="text-gray-400 hover:text-red-600 transition-colors p-1"

@@ -344,18 +344,51 @@ export const ProductProvider = ({ children }: { children: React.ReactNode }) => 
     }
   };
 
-  const deleteCategory = async (category: string) => {
-    const { error } = await supabase
-      .from('categories')
-      .delete()
-      .eq('name', category);
+  const deleteCategory = async (categoryName: string) => {
+    const trimmedName = categoryName.trim();
+    try {
+      // 0. Ensure "Sin Categoría" exists in the categories table so it's a valid reference if needed
+      await supabase
+        .from('categories')
+        .upsert({ name: 'Sin Categoría' }, { onConflict: 'name' });
 
-    if (error) {
-      console.error('Error deleting category:', error);
+      // 1. Update all products that belong to this category to "Sin Categoría"
+      const { error: updateError } = await supabase
+        .from('products')
+        .update({ category: 'Sin Categoría' })
+        .eq('category', trimmedName);
+
+      if (updateError) {
+        console.error('Error updating products during category deletion:', updateError);
+      }
+
+      // 2. Delete from the main categories table
+      const { error: catError } = await supabase
+        .from('categories')
+        .delete()
+        .eq('name', trimmedName);
+
+      if (catError) {
+        console.error('Error deleting category:', catError);
+        throw catError;
+      }
+
+      // 3. Delete from the home categories configuration
+      const { error: homeCatError } = await supabase
+        .from('home_categories_config')
+        .delete()
+        .eq('name', trimmedName);
+      
+      if (homeCatError) {
+        console.error('Error deleting home category config:', homeCatError);
+      }
+
+      // 4. Update the local state for both products and categories
+      await Promise.all([fetchCategories(), fetchProducts()]);
+    } catch (error) {
+      console.error('Fatal error in deleteCategory:', error);
       throw error;
     }
-
-    await fetchCategories();
   };
 
   return (
