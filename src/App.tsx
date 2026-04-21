@@ -600,10 +600,12 @@ const WelcomeSection = () => {
 
 const HomeCategories = ({ customCategories }: { customCategories?: any[] }) => {
   const defaultCategories = [
-    { name: "Arreglos mixtos" },
-    { name: "Ocasiones especiales" },
+    { name: "Ramos" },
+    { name: "Cajas" },
+    { name: "Arreglos" },
     { name: "Orquídeas" },
-    { name: "Galería", target_link: "#galeria" }
+    { name: "Globos" },
+    { name: "Eventos" }
   ];
 
   const categories = customCategories && customCategories.length > 0 
@@ -614,7 +616,7 @@ const HomeCategories = ({ customCategories }: { customCategories?: any[] }) => {
     <section className="pb-20 px-6 md:px-12 max-w-6xl mx-auto">
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
         {categories.map((cat, idx) => {
-          const target = cat.target_link || `/productos?categoria=${encodeURIComponent(cat.name)}`;
+          const target = cat.target_link || `/${encodeURIComponent(cat.name)}`;
           const isScrollAnchor = target.startsWith('#');
           
           if (isScrollAnchor) {

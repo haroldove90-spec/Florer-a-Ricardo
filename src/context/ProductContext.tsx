@@ -60,15 +60,30 @@ export const ProductProvider = ({ children }: { children: React.ReactNode }) => 
   };
 
   const fetchCategories = async () => {
-    const { data, error } = await supabase
-      .from('categories')
-      .select('name')
-      .order('name', { ascending: true });
+    try {
+      const [categoriesRes, homeCatsRes] = await Promise.all([
+        supabase
+          .from('categories')
+          .select('name')
+          .order('name', { ascending: true }),
+        supabase
+          .from('home_categories_config')
+          .select('name')
+          .order('display_order', { ascending: true })
+      ]);
 
-    if (error) {
+      if (categoriesRes.error) throw categoriesRes.error;
+      
+      const catNames = categoriesRes.data ? categoriesRes.data.map((c: any) => c.name.trim()) : [];
+      const homeCatNames = homeCatsRes.data ? homeCatsRes.data.map((c: any) => c.name.trim()) : [];
+      
+      // Merge and remove duplicates, filter out empty strings and "Galería"
+      const allNames = [...catNames, ...homeCatNames]
+        .filter(name => name && name !== 'Galería');
+        
+      setCategories([...new Set(allNames)].sort());
+    } catch (error) {
       console.error('Error fetching categories:', error);
-    } else {
-      setCategories([...new Set(data.map((c: any) => c.name.trim()))]);
     }
   };
 
@@ -96,9 +111,17 @@ export const ProductProvider = ({ children }: { children: React.ReactNode }) => 
       })
       .subscribe();
 
+    const homeCategoriesSubscription = supabase
+      .channel('home-categories-changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'home_categories_config' } as any, () => {
+        fetchCategories();
+      })
+      .subscribe();
+
     return () => {
       supabase.removeChannel(productsSubscription);
       supabase.removeChannel(categoriesSubscription);
+      supabase.removeChannel(homeCategoriesSubscription);
     };
   }, []);
 
