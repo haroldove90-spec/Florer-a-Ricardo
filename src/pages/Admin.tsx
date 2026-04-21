@@ -2293,9 +2293,33 @@ const AdminStoreCustomization = () => {
                     />
                   </div>
                 </div>
+
+                <div className="space-y-4">
+                  <h4 className="font-bold text-xs uppercase tracking-widest text-gray-400 border-b pb-2">Catálogo General</h4>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Título de Sección</label>
+                    <input 
+                      type="text"
+                      value={settings.catalog_title || ''}
+                      onChange={(e) => setSettings({...settings, catalog_title: e.target.value})}
+                      className="w-full border border-gray-200 px-4 py-3 rounded-lg outline-none focus:border-black transition-colors"
+                      placeholder="Catálogo Completo"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Subtítulo de Sección</label>
+                    <input 
+                      type="text"
+                      value={settings.catalog_subtitle || ''}
+                      onChange={(e) => setSettings({...settings, catalog_subtitle: e.target.value})}
+                      className="w-full border border-gray-200 px-4 py-3 rounded-lg outline-none focus:border-black transition-colors"
+                      placeholder="Todos Nuestros Productos"
+                    />
+                  </div>
+                </div>
                 
                 <div className="space-y-4">
-                  <h4 className="font-bold text-xs uppercase tracking-widest text-gray-400 border-b pb-2">Vista Previa</h4>
+                  <h4 className="font-bold text-xs uppercase tracking-widest text-gray-400 border-b pb-2">Vista Previa (Edición Especial)</h4>
                   <div className="p-6 bg-gray-50 rounded-lg text-center">
                     <p className="text-[10px] uppercase tracking-[0.3em] text-black mb-2 font-semibold">
                       {settings.special_edition_title || 'NUESTROS ARREGLOS'}

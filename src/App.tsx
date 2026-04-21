@@ -1051,7 +1051,7 @@ const ProductsSection = ({ customTitles }: { customTitles?: any }) => {
           {customTitles?.special_edition_title || 'Nuestros Arreglos'}
         </h2>
         <h3 className="text-3xl md:text-4xl font-serif text-black mb-6">
-          {customTitles?.special_edition_subtitle === 'Selección Especial' ? 'Lo más vendido' : (customTitles?.special_edition_subtitle || 'Lo más vendido')}
+          {customTitles?.special_edition_subtitle || 'Lo más vendido'}
         </h3>
         <div className="w-12 h-[2px] bg-black mx-auto" />
       </div>
@@ -1702,15 +1702,84 @@ const FloatingWhatsAppButton = () => {
   );
 };
 
-const AllProductsGrid = () => {
+const AllProductsGrid = ({ customTitles }: { customTitles?: any }) => {
   const { products, loading } = useProducts();
   const { setCheckoutProduct } = useCart();
 
+  const [categoryFilter, setCategoryFilter] = React.useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = React.useState('');
+  const { categories } = useProducts();
+
+  const filteredProducts = products.filter(p => {
+    const matchesCategory = !categoryFilter || p.category === categoryFilter;
+    const matchesSearch = !searchQuery || 
+      p.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+      p.description.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesCategory && matchesSearch;
+  });
+
   return (
     <section className="py-24 px-4 md:px-6 lg:px-12 max-w-[1600px] mx-auto">
-      <div className="text-center mb-12 md:mb-16">
-        <h2 className="text-xs uppercase tracking-[0.3em] text-black mb-4 font-semibold">Catálogo Completo</h2>
-        <h3 className="text-3xl md:text-4xl font-serif text-black mb-6">Todos Nuestros Productos</h3>
+      {/* Search and Filters */}
+      <div className="max-w-7xl mx-auto px-6 pt-12">
+        <div className="flex flex-col md:flex-row justify-between items-center gap-6">
+          <div className="relative w-full md:w-96 group">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-black transition-colors" size={18} />
+            <input 
+              type="text" 
+              placeholder="Buscar ramos, flores, estilos..." 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full bg-gray-50 border border-gray-200 rounded-full pl-11 pr-4 py-3 text-sm outline-none focus:border-black focus:bg-white transition-all shadow-inner"
+            />
+          </div>
+          
+          <div className="flex items-center space-x-2 overflow-x-auto pb-1 md:pb-0 scrollbar-hide w-full md:w-auto">
+            <button 
+              onClick={() => setCategoryFilter(null)}
+              className={`px-4 py-2 rounded-full text-xs uppercase tracking-widest font-bold whitespace-nowrap transition-all shadow-sm ${
+                !categoryFilter 
+                  ? 'bg-black text-white ring-2 ring-offset-2 ring-black' 
+                  : 'bg-gray-100 text-gray-500 hover:bg-gray-200 hover:text-black'
+              }`}
+            >
+              Todos
+            </button>
+            {categories.map((cat, idx) => {
+              const activeColors = [
+                'bg-rose-600 text-white ring-2 ring-offset-2 ring-rose-600',
+                'bg-amber-600 text-white ring-2 ring-offset-2 ring-amber-600',
+                'bg-purple-600 text-white ring-2 ring-offset-2 ring-purple-600',
+                'bg-emerald-600 text-white ring-2 ring-offset-2 ring-emerald-600',
+                'bg-blue-600 text-white ring-2 ring-offset-2 ring-blue-600',
+              ];
+              const colorIdx = idx % activeColors.length;
+              
+              return (
+                <button 
+                  key={cat}
+                  onClick={() => setCategoryFilter(cat)}
+                  className={`px-4 py-2 rounded-full text-xs uppercase tracking-widest font-bold whitespace-nowrap transition-all shadow-sm ${
+                    categoryFilter === cat 
+                      ? activeColors[colorIdx] 
+                      : `bg-gray-50 text-gray-500 hover:text-black hover:bg-gray-100`
+                  }`}
+                >
+                  {cat}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      <div className="text-center mb-12 md:mb-16 mt-16">
+        <h2 className="text-xs uppercase tracking-[0.3em] text-black mb-4 font-semibold">
+          {searchQuery ? 'Resultados de Búsqueda' : categoryFilter ? 'Categoría' : (customTitles?.catalog_title || 'Catálogo Completo')}
+        </h2>
+        <h3 className="text-3xl md:text-4xl font-serif text-black mb-6">
+          {searchQuery ? `"${searchQuery}"` : categoryFilter ? categoryFilter : (customTitles?.catalog_subtitle || 'Todos Nuestros Productos')}
+        </h3>
         <div className="w-12 h-[2px] bg-black mx-auto" />
       </div>
 
@@ -1718,7 +1787,7 @@ const AllProductsGrid = () => {
         <div className="py-20 text-center text-black/50 font-light">Cargando catálogo...</div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-6 gap-6 md:gap-8">
-          {products.map(product => (
+          {filteredProducts.map(product => (
             <div 
               key={product.id} 
               className="flex flex-col items-center text-center group bg-white p-4 rounded-sm border border-gray-100 hover:shadow-lg transition-all duration-500"
@@ -1797,7 +1866,7 @@ const HomePage = () => {
       {/* <ValuesSection /> - Removed per user request */}
       {/* <FeaturedCategories /> - Hidden per user request */}
       <ProductsSection customTitles={settings} />
-      <AllProductsGrid />
+      <AllProductsGrid customTitles={settings} />
       <PhotoGallery />
       <ContactSection />
     </>
