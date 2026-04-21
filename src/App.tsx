@@ -1867,21 +1867,19 @@ const AllProductsGrid = ({ customTitles }: { customTitles?: any }) => {
 
 const HomePage = () => {
   const [slides, setSlides] = useState<any[]>([]);
-  const [categories, setCategories] = useState<any[]>([]);
   const [settings, setSettings] = useState<any>({});
   const [loading, setLoading] = useState(true);
+  const { categories: contextCategories } = useProducts();
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [slidesRes, catsRes, settingsRes] = await Promise.all([
+        const [slidesRes, settingsRes] = await Promise.all([
           supabase.from('home_slides').select('*').order('display_order', { ascending: true }),
-          supabase.from('home_categories_config').select('*').order('display_order', { ascending: true }),
           supabase.from('store_settings').select('*')
         ]);
 
         if (slidesRes.data) setSlides(slidesRes.data);
-        if (catsRes.data) setCategories(catsRes.data);
         if (settingsRes.data) {
           const settingsMap = settingsRes.data.reduce((acc: any, curr: any) => {
             acc[curr.key] = curr.value;
@@ -1898,11 +1896,13 @@ const HomePage = () => {
     fetchData();
   }, []);
 
+  const homeCategories = contextCategories.map(name => ({ name }));
+
   return (
     <>
       <HeroSlider customSlides={slides} />
       <WelcomeSection />
-      <HomeCategories customCategories={categories} />
+      <HomeCategories customCategories={homeCategories} />
       {/* <ValuesSection /> - Removed per user request */}
       {/* <FeaturedCategories /> - Hidden per user request */}
       <ProductsSection customTitles={settings} />

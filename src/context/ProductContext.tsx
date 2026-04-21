@@ -68,8 +68,26 @@ export const ProductProvider = ({ children }: { children: React.ReactNode }) => 
 
       if (error) throw error;
       
-      const names = data ? data.map((c: any) => c.name.trim()).filter(Boolean) : [];
-      setCategories(names);
+      if (!data) {
+        setCategories([]);
+        return;
+      }
+
+      // De-duplicate case-insensitively while preserving the first instance's casing
+      const uniqueNames: string[] = [];
+      const seen = new Set<string>();
+      
+      data.forEach((c: any) => {
+        const name = c.name.trim();
+        if (!name) return;
+        const normalized = name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '');
+        if (!seen.has(normalized)) {
+          uniqueNames.push(name);
+          seen.add(normalized);
+        }
+      });
+
+      setCategories(uniqueNames);
     } catch (error) {
       console.error('Error fetching categories:', error);
     }
@@ -139,23 +157,18 @@ export const ProductProvider = ({ children }: { children: React.ReactNode }) => 
     if (!trimmedCategory) return;
     
     try {
-      // 1. Ensure it exists in 'categories' table
-      const { data: existingCat } = await supabase
-        .from('categories')
-        .select('name')
-        .eq('name', trimmedCategory)
-        .maybeSingle();
+      // 1. Ensure it exists in 'categories' table (case-insensitive check)
+      const { data: allCats } = await supabase.from('categories').select('name');
+      const normalizedNew = trimmedCategory.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '');
+      const existingCat = allCats?.find(c => c.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '') === normalizedNew);
 
       if (!existingCat) {
         await supabase.from('categories').insert([{ name: trimmedCategory }]);
       }
 
-      // 2. Ensure it exists in 'home_categories_config'
-      const { data: existingHomeCat } = await supabase
-        .from('home_categories_config')
-        .select('name')
-        .eq('name', trimmedCategory)
-        .maybeSingle();
+      // 2. Ensure it exists in 'home_categories_config' (case-insensitive check)
+      const { data: allHomeCats } = await supabase.from('home_categories_config').select('name');
+      const existingHomeCat = allHomeCats?.find(c => c.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '') === normalizedNew);
 
       if (!existingHomeCat) {
         // Get the current max display_order
