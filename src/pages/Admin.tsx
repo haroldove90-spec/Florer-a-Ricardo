@@ -1620,16 +1620,27 @@ const AdminGallery = () => {
                   referrerPolicy="no-referrer"
                 />
                 
-                {/* Selection indicator */}
-                <div className={`absolute top-4 left-4 w-7 h-7 rounded-full shadow-lg border-2 flex items-center justify-center transition-all ${selectedIds.includes(photo.id) ? 'bg-black border-black scale-110' : 'bg-white/80 border-white group-hover:bg-white'}`}>
-                  {selectedIds.includes(photo.id) && <Check size={16} className="text-white" />}
+                {/* Selection indicator & Assigned status */}
+                <div className={`absolute top-4 left-4 w-7 h-7 rounded-full shadow-lg border-2 flex items-center justify-center transition-all z-10 ${
+                  selectedIds.includes(photo.id) 
+                    ? 'bg-black border-white scale-110 shadow-black/40' 
+                    : photo.category 
+                      ? 'bg-black border-black/10' 
+                      : 'bg-white/80 border-white group-hover:bg-white'
+                }`}>
+                  {(selectedIds.includes(photo.id) || photo.category) && (
+                    <Check size={14} className="text-white" />
+                  )}
                 </div>
 
                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300" />
                 
-                <div className="absolute bottom-4 left-4 right-4 flex justify-between items-end translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all">
-                  <div className="bg-black/80 backdrop-blur-md text-[10px] uppercase font-bold tracking-widest px-3 py-1.5 rounded-full text-white shadow-lg">
-                    {photo.category || 'General'}
+                <div className="absolute bottom-4 left-4 right-4 flex justify-between items-end transition-all">
+                  <div className={`backdrop-blur-md text-[10px] uppercase font-bold tracking-widest px-3 py-1.5 rounded-full shadow-lg flex items-center space-x-1 ${
+                    photo.category ? 'bg-black text-white' : 'bg-white/90 text-gray-500'
+                  }`}>
+                    {photo.category && <Check size={10} strokeWidth={3} />}
+                    <span>{photo.category || 'General'}</span>
                   </div>
                 </div>
               </div>
