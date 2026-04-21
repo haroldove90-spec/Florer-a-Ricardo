@@ -620,34 +620,40 @@ const HomeCategories = ({ customCategories }: { customCategories?: any[] }) => {
     : defaultCategories;
 
   return (
-    <section className="pb-20 px-6 md:px-12 max-w-6xl mx-auto">
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+    <section className="pb-20 px-6 md:px-12 max-w-6xl mx-auto overflow-hidden">
+      <div className="flex md:grid md:grid-cols-4 gap-6 overflow-x-auto md:overflow-x-visible pb-6 md:pb-0 scrollbar-thin snap-x">
         {categories.map((cat, idx) => {
           const target = cat.target_link || `/${createSlug(cat.name)}`;
           const isScrollAnchor = target.startsWith('#');
           
-          if (isScrollAnchor) {
-            return (
-              <a 
-                key={idx}
-                href={target}
-                className="bg-[#7CA4C7] hover:bg-[#6A8EB0] text-white py-2.5 px-4 text-center rounded-sm transition-colors duration-300 flex items-center justify-center min-h-[50px] shadow-sm group"
-              >
-                <span className="text-lg md:text-base font-serif tracking-widest uppercase group-hover:scale-105 transition-transform duration-300">{cat.name}</span>
-              </a>
-            );
-          }
+          const Content = (
+            <>
+              <span className="text-lg md:text-base font-serif tracking-widest uppercase group-hover:scale-105 transition-transform duration-300">{cat.name}</span>
+            </>
+          );
 
           return (
-            <Link 
-              key={idx}
-              to={target}
-              className="bg-[#7CA4C7] hover:bg-[#6A8EB0] text-white py-2.5 px-4 text-center rounded-sm transition-colors duration-300 flex items-center justify-center min-h-[50px] shadow-sm group"
-            >
-              <span className="text-lg md:text-base font-serif tracking-widest uppercase group-hover:scale-105 transition-transform duration-300">{cat.name}</span>
-            </Link>
+            <div key={idx} className="flex-shrink-0 w-[240px] md:w-auto snap-center">
+              {isScrollAnchor ? (
+                <a 
+                  href={target}
+                  className="bg-[#7CA4C7] hover:bg-[#6A8EB0] text-white py-2.5 px-4 text-center rounded-sm transition-colors duration-300 flex items-center justify-center min-h-[60px] shadow-sm group w-full h-full"
+                >
+                  {Content}
+                </a>
+              ) : (
+                <Link 
+                  to={target}
+                  className="bg-[#7CA4C7] hover:bg-[#6A8EB0] text-white py-2.5 px-4 text-center rounded-sm transition-colors duration-300 flex items-center justify-center min-h-[60px] shadow-sm group w-full h-full"
+                >
+                  {Content}
+                </Link>
+              )}
+            </div>
           );
         })}
+        {/* Extra space for horizontal scroll on mobile */}
+        <div className="flex-shrink-0 w-4 md:hidden"></div>
       </div>
     </section>
   );
@@ -1582,10 +1588,10 @@ const ProductsPage = () => {
             />
           </div>
           
-          <div className="flex items-center space-x-2 overflow-x-auto pb-1 md:pb-0 scrollbar-hide w-full md:w-auto">
+          <div className="flex items-center space-x-2 overflow-x-auto pb-4 scrollbar-thin w-full md:w-auto px-1 flex-nowrap">
             <button 
               onClick={() => setCategoryFilter(null)}
-              className={`px-4 py-2 rounded-full text-xs uppercase tracking-widest font-bold whitespace-nowrap transition-all shadow-sm ${
+              className={`px-4 py-2 rounded-full text-xs uppercase tracking-widest font-bold whitespace-nowrap transition-all shadow-sm flex-shrink-0 ${
                 !categoryFilter 
                   ? 'bg-[#62CAC9] text-white ring-2 ring-offset-2 ring-[#62CAC9]' 
                   : 'bg-gray-100 text-gray-500 hover:bg-gray-200 hover:text-black'
@@ -1614,7 +1620,7 @@ const ProductsPage = () => {
                 <button 
                   key={cat}
                   onClick={() => setCategoryFilter(cat)}
-                  className={`px-4 py-2 rounded-full text-xs uppercase tracking-widest font-bold whitespace-nowrap transition-all shadow-sm ${
+                  className={`px-4 py-2 rounded-full text-xs uppercase tracking-widest font-bold whitespace-nowrap transition-all shadow-sm flex-shrink-0 ${
                     categoryFilter === cat 
                       ? activeColors[colorIdx] 
                       : `bg-gray-50 ${colors[colorIdx]}`
@@ -1624,6 +1630,8 @@ const ProductsPage = () => {
                 </button>
               );
             })}
+            {/* Added extra padding element at the end for scroll end visibility */}
+            <div className="flex-shrink-0 w-8 h-4"></div>
           </div>
         </div>
       </div>
@@ -1822,7 +1830,7 @@ const HomePage = () => {
     <>
       <HeroSlider customSlides={slides} />
       <WelcomeSection />
-      {/* <HomeCategories customCategories={categories} /> - Removed per user request */}
+      <HomeCategories customCategories={categories} />
       {/* <ValuesSection /> - Removed per user request */}
       {/* <FeaturedCategories /> - Hidden per user request */}
       <ProductsSection customTitles={settings} />
