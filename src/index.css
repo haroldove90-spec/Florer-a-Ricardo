@@ -33,18 +33,4 @@ h1, h2, h3, h4, h5, h6, .font-serif {
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
-  .scrollbar-thin::-webkit-scrollbar {
-    height: 6px;
-    width: 6px;
-  }
-  .scrollbar-thin::-webkit-scrollbar-track {
-    background: transparent;
-  }
-  .scrollbar-thin::-webkit-scrollbar-thumb {
-    background: rgba(0,0,0,0.15);
-    border-radius: 10px;
-  }
-  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-    background: rgba(0,0,0,0.3);
-  }
 }
