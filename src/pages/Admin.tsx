@@ -495,6 +495,8 @@ const AdminProducts = () => {
     });
     setEditingId(product.id);
     setIsAdding(true);
+    // Scroll to the top where the form is located
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleCancel = () => {
@@ -801,15 +803,18 @@ const AdminProducts = () => {
                   <td className="px-6 py-4 text-sm font-medium text-black">${product.price.toFixed(2)}</td>
                   <td className="px-6 py-4 text-sm space-x-4">
                     <button 
-                      onClick={() => handleEdit(product)}
-                      className="text-black hover:text-gray-600 font-medium cursor-pointer"
+                      onClick={() => {
+                        console.log('Editing product:', product.id);
+                        handleEdit(product);
+                      }}
+                      className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${editingId === product.id ? 'bg-black text-white' : 'text-black hover:bg-gray-100 hover:text-gray-900 underline decoration-gray-200 underline-offset-4'}`}
                     >
                       Editar
                     </button>
                     <Link 
                       to={`/producto/${product.id}`} 
                       target="_blank"
-                      className="text-blue-600 hover:text-blue-800 font-medium inline-flex items-center"
+                      className="text-blue-600 hover:text-blue-800 font-medium inline-flex items-center hover:underline"
                     >
                       Ver <ExternalLink size={14} className="ml-1" />
                     </Link>
