@@ -1850,7 +1850,12 @@ const AdminStoreCustomization = () => {
   };
 
   const handleAddCategory = () => {
-    setCategories([...categories, { name: '', target_link: '', display_order: categories.length }]);
+    setCategories([...categories, { 
+      temp_id: Math.random().toString(36).substring(7),
+      name: '', 
+      target_link: '', 
+      display_order: categories.length 
+    }]);
   };
 
   const handleRemoveCategory = (index: number) => {
@@ -2208,7 +2213,7 @@ const AdminStoreCustomization = () => {
             >
               {categories.map((cat, idx) => (
                 <Reorder.Item 
-                  key={cat.id || `temp-${idx}-${cat.name}`} 
+                  key={cat.id || cat.temp_id || `idx-${idx}`} 
                   value={cat}
                   className="flex flex-col md:flex-row md:items-center space-y-2 md:space-y-0 md:space-x-4 p-4 bg-gray-50 rounded-xl cursor-grab active:cursor-grabbing border border-transparent hover:border-gray-200 transition-colors"
                 >
@@ -2223,7 +2228,9 @@ const AdminStoreCustomization = () => {
                       onChange={(e) => handleUpdateCategory(idx, 'name', e.target.value)}
                       className="w-full border border-gray-200 px-4 py-2 rounded-lg text-sm outline-none focus:border-black bg-white"
                       placeholder="Ej: Rosas, Orquídeas..."
-                      onPointerDown={(e) => e.stopPropagation()} // Prevent drag when interacting with input
+                      onPointerDown={(e) => e.stopPropagation()}
+                      onMouseDown={(e) => e.stopPropagation()}
+                      onClick={(e) => e.stopPropagation()}
                     />
                   </div>
                   <div className="flex-[1.5]">
@@ -2234,16 +2241,22 @@ const AdminStoreCustomization = () => {
                       onChange={(e) => handleUpdateCategory(idx, 'target_link', e.target.value)}
                       className="w-full border border-gray-200 px-4 py-2 rounded-lg text-sm outline-none focus:border-black bg-white"
                       placeholder="Ej: #galeria o /productos?categoria=Rosas"
-                      onPointerDown={(e) => e.stopPropagation()} // Prevent drag when interacting with input
+                      onPointerDown={(e) => e.stopPropagation()}
+                      onMouseDown={(e) => e.stopPropagation()}
+                      onClick={(e) => e.stopPropagation()}
                     />
                     <p className="text-[10px] text-gray-400 mt-1 italic">Si se deja vacío, vinculará automáticamente a la categoría de productos.</p>
                   </div>
                   <div className="flex items-end h-full pt-4 md:pt-0">
                     <button 
-                      onClick={() => handleRemoveCategory(idx)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleRemoveCategory(idx);
+                      }}
                       className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
                       title="Eliminar"
-                      onPointerDown={(e) => e.stopPropagation()} // Prevent drag when clicking button
+                      onPointerDown={(e) => e.stopPropagation()}
+                      onMouseDown={(e) => e.stopPropagation()}
                     >
                       <Trash2 size={18} />
                     </button>
