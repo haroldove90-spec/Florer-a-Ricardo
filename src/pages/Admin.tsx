@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, Link, useLocation, Navigate, useNavigate } from 'react-router-dom';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
-import { LayoutDashboard, PackagePlus, DollarSign, ShoppingBag, TrendingUp, PlusCircle, LogOut, ClipboardList, UploadCloud, X, Menu, Home, Trash2, Loader2, ExternalLink, Settings, Image as ImageIcon, Type, Grid, User, Upload, AlignLeft, AlignCenter, AlignRight, Monitor, Tablet, Smartphone, Type as TypeIcon } from 'lucide-react';
+import { LayoutDashboard, PackagePlus, DollarSign, ShoppingBag, TrendingUp, PlusCircle, LogOut, ClipboardList, UploadCloud, X, Menu, Home, Trash2, Loader2, ExternalLink, Settings, Image as ImageIcon, Type, Grid, User, Upload, AlignLeft, AlignCenter, AlignRight, Monitor, Tablet, Smartphone, Type as TypeIcon, Check, Save } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useProducts } from '../context/ProductContext';
 import { useAuth } from '../context/AuthContext';
@@ -1344,6 +1344,9 @@ const AdminGallery = () => {
   const [uploading, setUploading] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>('General');
   const [categories, setCategories] = useState<string[]>(['General']);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [updating, setUpdating] = useState(false);
+  const [bulkCategory, setBulkCategory] = useState<string>('General');
 
   useEffect(() => {
     fetchPhotos();
@@ -1368,9 +1371,10 @@ const AdminGallery = () => {
       const { data, error } = await supabase
         .from('gallery')
         .select('*')
-        .order('display_order', { ascending: true });
+        .order('created_at', { ascending: false });
       if (error) throw error;
       setPhotos(data || []);
+      setSelectedIds([]);
     } catch (error) {
       console.error('Error fetching gallery:', error);
     } finally {
@@ -1401,7 +1405,7 @@ const AdminGallery = () => {
 
         return {
           image_url: publicUrl,
-          display_order: photos.length,
+          display_order: 0,
           category: selectedCategory
         };
       });
@@ -1416,37 +1420,86 @@ const AdminGallery = () => {
       fetchPhotos();
     } catch (error) {
       console.error('Error uploading to gallery:', error);
+      alert('Error al subir imágenes. Por favor intenta de nuevo.');
     } finally {
       setUploading(false);
     }
   };
 
-  const handleDeletePhoto = async (id: string, url: string) => {
-    if (!confirm('¿Estás seguro de que quieres eliminar esta imagen?')) return;
+  const handleDeleteSelected = async () => {
+    if (selectedIds.length === 0) return;
+    if (!confirm(`¿Estás seguro de que quieres eliminar ${selectedIds.length} imágenes?`)) return;
 
+    setUpdating(true);
     try {
-      // Extract filename from URL
-      const fileName = url.split('/').pop();
-      if (fileName) {
-        await supabase.storage.from('gallery').remove([`gallery/${fileName}`]);
-      }
+      const photosToDelete = photos.filter(p => selectedIds.includes(p.id));
+      
+      // Delete from storage
+      const storagePromises = photosToDelete.map(async (p) => {
+        const fileName = p.image_url.split('/').pop();
+        if (fileName) {
+          return supabase.storage.from('gallery').remove([`gallery/${fileName}`]);
+        }
+      });
+      await Promise.all(storagePromises);
 
+      // Delete from DB
       const { error } = await supabase
         .from('gallery')
         .delete()
-        .eq('id', id);
+        .in('id', selectedIds);
 
       if (error) throw error;
-      setPhotos(photos.filter(p => p.id !== id));
+      setPhotos(photos.filter(p => !selectedIds.includes(p.id)));
+      setSelectedIds([]);
     } catch (error) {
-      console.error('Error deleting photo:', error);
+      console.error('Error deleting photos:', error);
+      alert('Error al eliminar imágenes.');
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  const handleUpdateCategorySelected = async () => {
+    if (selectedIds.length === 0) return;
+    
+    setUpdating(true);
+    try {
+      const { error } = await supabase
+        .from('gallery')
+        .update({ category: bulkCategory })
+        .in('id', selectedIds);
+
+      if (error) throw error;
+      
+      fetchPhotos();
+      alert('Categoría actualizada correctamente.');
+    } catch (error) {
+      console.error('Error updating categories:', error);
+      alert('Error al actualizar categorías.');
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  const toggleSelect = (id: string) => {
+    setSelectedIds(prev => 
+      prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
+    );
+  };
+
+  const selectAll = () => {
+    if (selectedIds.length === photos.length) {
+      setSelectedIds([]);
+    } else {
+      setSelectedIds(photos.map(p => p.id));
     }
   };
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <div className="bg-white p-8 md:p-10 rounded-2xl shadow-sm border border-gray-100">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10 border-b pb-8">
           <div>
             <h2 className="text-3xl font-serif text-black mb-2">Gestión de Galería</h2>
             <p className="text-gray-500 text-sm">Sube varias imágenes y asígnalas a una categoría.</p>
@@ -1454,7 +1507,7 @@ const AdminGallery = () => {
           
           <div className="flex flex-col sm:flex-row items-end sm:items-center gap-4">
             <div className="w-full sm:w-64">
-              <label className="block text-[10px] uppercase tracking-widest text-gray-400 mb-2 font-bold">Categoría para la subida</label>
+              <label className="block text-[10px] uppercase tracking-widest text-gray-400 mb-2 font-bold text-right sm:text-left">Asignar categoría al subir</label>
               <select 
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
@@ -1480,6 +1533,57 @@ const AdminGallery = () => {
           </div>
         </div>
 
+        {photos.length > 0 && (
+          <div className="bg-gray-50 p-6 rounded-2xl mb-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 border border-gray-100 shadow-inner">
+            <div className="flex items-center space-x-6">
+              <button 
+                onClick={selectAll}
+                className="text-sm font-bold uppercase tracking-widest text-black hover:text-gold flex items-center space-x-2"
+              >
+                <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${selectedIds.length === photos.length ? 'bg-black border-black' : 'border-gray-300'}`}>
+                  {selectedIds.length === photos.length && <Check size={14} className="text-white" />}
+                </div>
+                <span>{selectedIds.length === photos.length ? 'Deseleccionar Todo' : 'Seleccionar Todo'}</span>
+              </button>
+              <span className="text-gray-400 text-sm font-medium">{selectedIds.length} seleccionadas</span>
+            </div>
+
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full md:w-auto">
+              <div className="flex items-center gap-2">
+                <select 
+                  value={bulkCategory}
+                  onChange={(e) => setBulkCategory(e.target.value)}
+                  className="bg-white border border-gray-200 rounded-lg px-4 py-2 text-sm outline-none focus:border-black transition-all"
+                >
+                  <option value="" disabled>Cambiar a...</option>
+                  {categories.map(cat => (
+                    <option key={cat} value={cat}>{cat}</option>
+                  ))}
+                </select>
+                <button 
+                  onClick={handleUpdateCategorySelected}
+                  disabled={selectedIds.length === 0 || updating}
+                  className="bg-black text-white px-6 py-2 rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-gray-800 disabled:opacity-30 transition-all flex items-center space-x-2 whitespace-nowrap"
+                >
+                  <Save size={14} />
+                  <span>{updating ? 'Guardando...' : 'Asignar Selección'}</span>
+                </button>
+              </div>
+
+              <div className="w-px h-8 bg-gray-200 hidden sm:block mx-2" />
+
+              <button 
+                onClick={handleDeleteSelected}
+                disabled={selectedIds.length === 0 || updating}
+                className="bg-red-50 text-red-600 border border-red-100 px-6 py-2 rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-red-600 hover:text-white disabled:opacity-30 transition-all flex items-center space-x-2 whitespace-nowrap"
+              >
+                <Trash2 size={14} />
+                <span>Eliminar {selectedIds.length > 0 ? selectedIds.length : ''}</span>
+              </button>
+            </div>
+          </div>
+        )}
+
         {loading ? (
           <div className="flex items-center justify-center py-20">
             <Loader2 className="animate-spin text-gold" size={40} />
@@ -1492,23 +1596,30 @@ const AdminGallery = () => {
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
             {photos.map((photo) => (
-              <div key={photo.id} className="group relative aspect-square bg-gray-100 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all">
+              <div 
+                key={photo.id} 
+                onClick={() => toggleSelect(photo.id)}
+                className={`group relative aspect-square bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all cursor-pointer border-4 ${selectedIds.includes(photo.id) ? 'border-black scale-[0.98]' : 'border-transparent'}`}
+              >
                 <img 
                   src={photo.image_url} 
                   alt="Gallery" 
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                   referrerPolicy="no-referrer"
                 />
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors duration-300" />
-                <div className="absolute bottom-2 left-2 bg-white/90 backdrop-blur-sm text-[10px] uppercase font-bold tracking-widest px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none text-black">
-                  {photo.category || 'General'}
+                
+                {/* Selection indicator */}
+                <div className={`absolute top-4 left-4 w-7 h-7 rounded-full shadow-lg border-2 flex items-center justify-center transition-all ${selectedIds.includes(photo.id) ? 'bg-black border-black scale-110' : 'bg-white/80 border-white group-hover:bg-white'}`}>
+                  {selectedIds.includes(photo.id) && <Check size={16} className="text-white" />}
                 </div>
-                <button 
-                  onClick={() => handleDeletePhoto(photo.id, photo.image_url)}
-                  className="absolute top-2 right-2 p-2 bg-white/10 backdrop-blur-md text-white rounded-lg opacity-0 group-hover:opacity-100 hover:bg-red-600 transition-all"
-                >
-                  <Trash2 size={16} />
-                </button>
+
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300" />
+                
+                <div className="absolute bottom-4 left-4 right-4 flex justify-between items-end translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all">
+                  <div className="bg-black/80 backdrop-blur-md text-[10px] uppercase font-bold tracking-widest px-3 py-1.5 rounded-full text-white shadow-lg">
+                    {photo.category || 'General'}
+                  </div>
+                </div>
               </div>
             ))}
           </div>
