@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useEffect, createContext, useContext, Component } from 'react';
-import { ShoppingCart, Menu, X, ChevronRight, ChevronLeft, MessageCircle, Award, HeartHandshake, Snowflake, Home, Store, Phone, Shield, ShoppingBag } from 'lucide-react';
+import { ShoppingCart, Menu, X, ChevronRight, ChevronLeft, MessageCircle, Award, HeartHandshake, Snowflake, Home, Store, Phone, Shield, ShoppingBag, Search, Check, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { BrowserRouter as Router, Routes, Route, Link, useParams, useLocation, Navigate } from 'react-router-dom';
 import { Product, ProductProvider, useProducts } from './context/ProductContext';
