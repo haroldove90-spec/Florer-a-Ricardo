@@ -624,7 +624,7 @@ const HomeCategories = ({ customCategories }: { customCategories?: any[] }) => {
               <a 
                 key={idx}
                 href={target}
-                className="bg-[#7BA4C7] hover:bg-[#5D89AF] text-white py-8 px-4 text-center rounded-sm transition-colors duration-300 flex items-center justify-center min-h-[100px] md:min-h-[80px] shadow-sm group"
+                className="bg-[#7BA4C7] hover:bg-[#5D89AF] text-white py-4 px-4 text-center rounded-sm transition-colors duration-300 flex items-center justify-center min-h-[70px] md:min-h-[60px] shadow-sm group"
               >
                 <span className="text-xl md:text-lg font-serif tracking-widest uppercase group-hover:scale-105 transition-transform duration-300">{cat.name}</span>
               </a>
@@ -635,7 +635,7 @@ const HomeCategories = ({ customCategories }: { customCategories?: any[] }) => {
             <Link 
               key={idx}
               to={target}
-              className="bg-[#7BA4C7] hover:bg-[#5D89AF] text-white py-8 px-4 text-center rounded-sm transition-colors duration-300 flex items-center justify-center min-h-[100px] md:min-h-[80px] shadow-sm group"
+              className="bg-[#7BA4C7] hover:bg-[#5D89AF] text-white py-4 px-4 text-center rounded-sm transition-colors duration-300 flex items-center justify-center min-h-[70px] md:min-h-[60px] shadow-sm group"
             >
               <span className="text-xl md:text-lg font-serif tracking-widest uppercase group-hover:scale-105 transition-transform duration-300">{cat.name}</span>
             </Link>
@@ -1501,6 +1501,14 @@ const ProductsPage = () => {
   const [categories, setCategories] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
 
+  // Helper to normalize text for comparison (removes accents and spaces)
+  const normalize = (text: string) => {
+    return text.toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/\s+/g, '');
+  };
+
   useEffect(() => {
     const fetchCategoriesList = async () => {
       const { data } = await supabase.from('home_categories_config').select('name');
@@ -1509,7 +1517,8 @@ const ProductsPage = () => {
         setCategories(names);
         
         if (rawCategory) {
-          const match = names.find(n => n.toLowerCase() === rawCategory.toLowerCase());
+          const normalizedRaw = normalize(rawCategory);
+          const match = names.find(n => normalize(n) === normalizedRaw);
           if (match) {
             setCategoryFilter(match);
           } else {
