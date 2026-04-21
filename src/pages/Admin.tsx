@@ -471,8 +471,12 @@ const AdminProducts = () => {
       setTimeout(() => {
         window.location.reload();
       }, 1000);
-    } catch (error) {
-      alert(editingId ? "Error al actualizar producto" : "Error al añadir producto");
+    } catch (error: any) {
+      console.error('Error in product submission:', error);
+      alert(editingId 
+        ? `Error al actualizar producto: ${error.message || 'Verifica los datos e intenta de nuevo'}` 
+        : `Error al añadir producto: ${error.message || 'Verifica los datos e intenta de nuevo'}`
+      );
     } finally {
       setIsSubmitting(false);
     }

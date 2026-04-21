@@ -184,41 +184,50 @@ export const ProductProvider = ({ children }: { children: React.ReactNode }) => 
   };
 
   const updateProduct = async (id: number, product: Partial<Product>, mainImageFile?: File, secondaryImageFiles?: File[]) => {
-    let mainImageUrl = product.image;
-    let secondaryImageUrls = (product.secondaryImages || []).filter(url => !url.startsWith('blob:'));
+    try {
+      let mainImageUrl = product.image;
+      let secondaryImageUrls = (product.secondaryImages || []).filter(url => !url.startsWith('blob:'));
 
-    // Upload main image if it's a file
-    if (mainImageFile) {
-      mainImageUrl = await uploadImage(mainImageFile, 'products');
-    }
+      // Upload main image if it's a file
+      if (mainImageFile) {
+        mainImageUrl = await uploadImage(mainImageFile, 'products');
+      }
 
-    // Upload secondary images if they are files
-    if (secondaryImageFiles && secondaryImageFiles.length > 0) {
-      const uploadedUrls = await Promise.all(
-        secondaryImageFiles.map(file => uploadImage(file, 'products'))
-      );
-      secondaryImageUrls = [...secondaryImageUrls, ...uploadedUrls];
-    }
+      // Upload secondary images if they are files
+      if (secondaryImageFiles && secondaryImageFiles.length > 0) {
+        const uploadedUrls = await Promise.all(
+          secondaryImageFiles.map(file => uploadImage(file, 'products'))
+        );
+        secondaryImageUrls = [...secondaryImageUrls, ...uploadedUrls];
+      }
 
-    const { error } = await supabase
-      .from('products')
-      .update({
-        name: product.name,
-        description: product.description,
-        price: product.price,
-        image: mainImageUrl,
-        secondary_images: secondaryImageUrls,
-        category: product.category,
-        is_special: product.isSpecial ?? false
-      })
-      .eq('id', id);
+      const updateData: any = {};
+      if (product.name !== undefined) updateData.name = product.name.trim();
+      if (product.description !== undefined) updateData.description = product.description;
+      if (product.price !== undefined) updateData.price = product.price;
+      if (mainImageUrl !== undefined) updateData.image = mainImageUrl;
+      if (secondaryImageUrls !== undefined) updateData.secondary_images = secondaryImageUrls;
+      if (product.category !== undefined) updateData.category = product.category;
+      if (product.isSpecial !== undefined) updateData.is_special = product.isSpecial;
 
-    if (error) {
-      console.error('Error updating product:', error);
+      // Filter out keys with undefined values just in case
+      Object.keys(updateData).forEach(key => updateData[key] === undefined && delete updateData[key]);
+
+      const { error } = await supabase
+        .from('products')
+        .update(updateData)
+        .eq('id', id);
+
+      if (error) {
+        console.error('Supabase update error:', error);
+        throw error;
+      }
+      
+      await fetchProducts();
+    } catch (error) {
+      console.error('Error in updateProduct:', error);
       throw error;
     }
-    
-    await fetchProducts();
   };
 
   const deleteProducts = async (ids: number[]) => {
