@@ -590,7 +590,7 @@ const WelcomeSection = () => {
   return (
     <section className="pt-2 pb-10 px-6 md:px-12 max-w-6xl mx-auto text-center">
       <div className="bg-[#62CAC9] p-8 md:p-10 rounded-sm shadow-sm">
-        <p className="text-white text-xl md:text-2xl font-serif leading-relaxed italic font-medium">
+        <p className="text-white text-2xl md:text-3xl font-serif leading-relaxed italic font-medium">
           "Pregunta por nuestras promociones de cada mes"
         </p>
       </div>
