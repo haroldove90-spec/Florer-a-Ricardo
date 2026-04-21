@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, Link, useLocation, Navigate, useNavigate } from 'react-router-dom';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
-import { LayoutDashboard, PackagePlus, DollarSign, ShoppingBag, TrendingUp, PlusCircle, LogOut, ClipboardList, UploadCloud, X, Menu, Home, Trash2, Loader2, ExternalLink, Settings, Image as ImageIcon, Type, Grid, User, Upload, AlignLeft, AlignCenter, AlignRight, Monitor, Tablet, Smartphone, Type as TypeIcon, Check, Save } from 'lucide-react';
-import { motion, AnimatePresence } from 'motion/react';
+import { LayoutDashboard, PackagePlus, DollarSign, ShoppingBag, TrendingUp, PlusCircle, LogOut, ClipboardList, UploadCloud, X, Menu, Home, Trash2, Loader2, ExternalLink, Settings, Image as ImageIcon, Type, Grid, User, Upload, AlignLeft, AlignCenter, AlignRight, Monitor, Tablet, Smartphone, Type as TypeIcon, Check, Save, GripVertical } from 'lucide-react';
+import { motion, AnimatePresence, Reorder } from 'motion/react';
 import { useProducts } from '../context/ProductContext';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
@@ -2186,17 +2186,30 @@ const AdminStoreCustomization = () => {
           </div>
 
           <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
-            <div className="space-y-4">
+            <Reorder.Group 
+              axis="y" 
+              values={categories} 
+              onReorder={setCategories}
+              className="space-y-4"
+            >
               {categories.map((cat, idx) => (
-                <div key={idx} className="flex flex-col md:flex-row md:items-center space-y-2 md:space-y-0 md:space-x-4 p-4 bg-gray-50 rounded-xl">
+                <Reorder.Item 
+                  key={cat.id || `temp-${idx}-${cat.name}`} 
+                  value={cat}
+                  className="flex flex-col md:flex-row md:items-center space-y-2 md:space-y-0 md:space-x-4 p-4 bg-gray-50 rounded-xl cursor-grab active:cursor-grabbing border border-transparent hover:border-gray-200 transition-colors"
+                >
+                  <div className="hidden md:flex items-center text-gray-400">
+                    <GripVertical size={20} />
+                  </div>
                   <div className="flex-1">
                     <label className="block text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1">Nombre del Botón</label>
                     <input 
                       type="text"
                       value={cat.name}
                       onChange={(e) => handleUpdateCategory(idx, 'name', e.target.value)}
-                      className="w-full border border-gray-200 px-4 py-2 rounded-lg text-sm outline-none focus:border-black"
+                      className="w-full border border-gray-200 px-4 py-2 rounded-lg text-sm outline-none focus:border-black bg-white"
                       placeholder="Ej: Rosas, Orquídeas..."
+                      onPointerDown={(e) => e.stopPropagation()} // Prevent drag when interacting with input
                     />
                   </div>
                   <div className="flex-[1.5]">
@@ -2205,8 +2218,9 @@ const AdminStoreCustomization = () => {
                       type="text"
                       value={cat.target_link || ''}
                       onChange={(e) => handleUpdateCategory(idx, 'target_link', e.target.value)}
-                      className="w-full border border-gray-200 px-4 py-2 rounded-lg text-sm outline-none focus:border-black"
+                      className="w-full border border-gray-200 px-4 py-2 rounded-lg text-sm outline-none focus:border-black bg-white"
                       placeholder="Ej: #galeria o /productos?categoria=Rosas"
+                      onPointerDown={(e) => e.stopPropagation()} // Prevent drag when interacting with input
                     />
                     <p className="text-[10px] text-gray-400 mt-1 italic">Si se deja vacío, vinculará automáticamente a la categoría de productos.</p>
                   </div>
@@ -2215,13 +2229,14 @@ const AdminStoreCustomization = () => {
                       onClick={() => handleRemoveCategory(idx)}
                       className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
                       title="Eliminar"
+                      onPointerDown={(e) => e.stopPropagation()} // Prevent drag when clicking button
                     >
                       <Trash2 size={18} />
                     </button>
                   </div>
-                </div>
+                </Reorder.Item>
               ))}
-            </div>
+            </Reorder.Group>
             {categories.length === 0 && (
               <p className="text-center text-gray-400 py-4 italic">No hay categorías configuradas para el inicio.</p>
             )}
