@@ -1518,7 +1518,15 @@ const ProductsPage = () => {
         
         if (rawCategory) {
           const normalizedRaw = normalize(rawCategory);
-          const match = names.find(n => normalize(n) === normalizedRaw);
+          // Try exact match first, then partial match
+          let match = names.find(n => normalize(n) === normalizedRaw);
+          if (!match) {
+            match = names.find(n => {
+              const normN = normalize(n);
+              return normN.length > 3 && normalizedRaw.length > 3 && (normN.includes(normalizedRaw) || normalizedRaw.includes(normN));
+            });
+          }
+          
           if (match) {
             setCategoryFilter(match);
           } else {
@@ -1531,10 +1539,16 @@ const ProductsPage = () => {
   }, [rawCategory]);
 
   const filteredProducts = products.filter(p => {
-    const matchesCategory = categoryFilter 
-      ? (p.category && normalize(p.category) === normalize(categoryFilter)) 
-      : true;
-    const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    if (!categoryFilter) return !searchQuery || (p.name + p.description).toLowerCase().includes(searchQuery.toLowerCase());
+    
+    const normalizedFilter = normalize(categoryFilter);
+    const normalizedProductCat = p.category ? normalize(p.category) : '';
+    
+    const matchesCategory = normalizedProductCat === normalizedFilter || 
+                           (normalizedProductCat.length > 3 && normalizedFilter.length > 3 && 
+                            (normalizedProductCat.includes(normalizedFilter) || normalizedFilter.includes(normalizedProductCat)));
+                            
+    const matchesSearch = !searchQuery || p.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
                          p.description.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCategory && matchesSearch;
   });
@@ -1729,10 +1743,19 @@ const AllProductsGrid = ({ customTitles }: { customTitles?: any }) => {
   };
 
   const filteredProducts = products.filter(p => {
-    const matchesCategory = !categoryFilter || (p.category && normalize(p.category) === normalize(categoryFilter));
     const matchesSearch = !searchQuery || 
       p.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
       p.description.toLowerCase().includes(searchQuery.toLowerCase());
+      
+    if (!categoryFilter) return matchesSearch;
+
+    const normalizedFilter = normalize(categoryFilter);
+    const normalizedProductCat = p.category ? normalize(p.category) : '';
+    
+    const matchesCategory = normalizedProductCat === normalizedFilter || 
+                           (normalizedProductCat.length > 3 && normalizedFilter.length > 3 && 
+                            (normalizedProductCat.includes(normalizedFilter) || normalizedFilter.includes(normalizedProductCat)));
+                            
     return matchesCategory && matchesSearch;
   });
 
