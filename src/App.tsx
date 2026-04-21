@@ -1443,8 +1443,33 @@ const ProductsPage = () => {
   const { products, loading } = useProducts();
   const { setCheckoutProduct } = useCart();
   const location = useLocation();
+  const { categorySlug } = useParams();
   const searchParams = new URLSearchParams(location.search);
-  const categoryFilter = searchParams.get('categoria');
+  
+  const rawCategory = categorySlug || searchParams.get('categoria');
+  const [categoryFilter, setCategoryFilter] = useState<string | null>(rawCategory);
+  const [categories, setCategories] = useState<string[]>([]);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      const { data } = await supabase.from('home_categories_config').select('name');
+      if (data) {
+        const names = data.map(c => c.name);
+        setCategories(names);
+        
+        // If we have a raw category, try to find the match ignoring case
+        if (rawCategory) {
+          const match = names.find(n => n.toLowerCase() === rawCategory.toLowerCase());
+          if (match) {
+            setCategoryFilter(match);
+          } else {
+            setCategoryFilter(rawCategory);
+          }
+        }
+      }
+    };
+    fetchCategories();
+  }, [rawCategory]);
 
   const filteredProducts = categoryFilter 
     ? products.filter(p => p.category === categoryFilter)
@@ -1454,45 +1479,62 @@ const ProductsPage = () => {
     <div className="pt-[88px] md:pt-[96px] min-h-screen bg-white">
       {/* Header */}
       <div className="bg-black py-16 px-6 text-center">
-        <h1 className="text-3xl md:text-5xl font-serif text-white mb-4">
+        <h1 className="text-3xl md:text-5xl font-serif text-white mb-4 uppercase tracking-[0.2em] animate-in fade-in slide-in-from-top duration-1000">
           {categoryFilter ? categoryFilter : 'Nuestras Flores'}
         </h1>
-        <div className="w-12 h-[2px] bg-white mx-auto mb-6" />
+        <div className="w-12 h-[2px] bg-gold mx-auto mb-6" />
         <p className="text-white/70 font-light max-w-2xl mx-auto">
-          Explora nuestra selección premium de arreglos florales y ramos, diseñados para cautivar y emocionar.
+          {categoryFilter 
+            ? `Explora nuestra colección exclusiva de ${categoryFilter}. Arreglos diseñados para cautivar en cada detalle.`
+            : 'Explora nuestra selección premium de arreglos florales y ramos, diseñados para cautivar y emocionar.'
+          }
         </p>
       </div>
 
       {/* Gallery Block */}
-      <PhotoGallery category={categoryFilter} />
+      <PhotoGallery category={categoryFilter || undefined} />
 
       {/* Product Grid */}
       <div className="max-w-7xl mx-auto px-6 md:px-12 py-16">
-        <div className="mb-12">
-          <h2 className="text-2xl font-serif text-black mb-2 uppercase tracking-wider text-center">Nuestros Productos</h2>
+        <div className="mb-12 text-center">
+          <h2 className="text-2xl font-serif text-black mb-2 uppercase tracking-widest">
+            {categoryFilter ? `Colección: ${categoryFilter}` : 'Nuestros Productos'}
+          </h2>
           <div className="w-12 h-[2px] bg-black mx-auto" />
         </div>
+        
         {loading ? (
-          <div className="py-20 text-center text-black/50">Cargando productos...</div>
+          <div className="py-20 text-center text-black/50 font-light animate-pulse">Cargando productos...</div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-8 md:gap-10">
             {filteredProducts.length > 0 ? (
-              filteredProducts.map(product => (
-                <div key={product.id} className="flex flex-col items-center text-center group bg-white p-4 rounded-sm border border-gray-100 hover:border-black transition-all">
-                  <div className="w-full relative overflow-hidden mb-4 md:mb-6">
-                    <img src={product.image} alt={product.name} className="w-full h-64 md:h-56 object-cover transition-transform duration-700 group-hover:scale-105 rounded-sm" />
+              filteredProducts.map((product, idx) => (
+                <motion.div 
+                  key={product.id} 
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ delay: idx % 4 * 0.1 }}
+                  className="flex flex-col items-center text-center group bg-white p-4 rounded-sm border border-gray-100 hover:border-black transition-all duration-500 hover:shadow-xl"
+                >
+                  <div className="w-full relative overflow-hidden mb-4 md:mb-6 aspect-[4/5]">
+                    <img 
+                      src={product.image} 
+                      alt={product.name} 
+                      className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110 rounded-sm" 
+                    />
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-500" />
                   </div>
-                  <h4 className="text-lg md:text-lg font-sans text-black mb-1 md:mb-2 uppercase tracking-wider">{product.name}</h4>
-                  <p className="text-black/60 text-xs md:text-sm font-light mb-2 line-clamp-2">{product.description}</p>
-                  <p className="text-black font-bold text-lg md:text-base mb-4 md:mb-6">${product.price.toFixed(2)}</p>
+                  <h4 className="text-sm font-sans font-bold text-black mb-1 md:mb-2 uppercase tracking-widest">{product.name}</h4>
+                  <p className="text-black/60 text-xs font-light mb-3 line-clamp-2 h-8">{product.description}</p>
+                  <p className="text-black font-bold text-base mb-4 md:mb-6">${product.price.toFixed(2)}</p>
                   <button 
                     onClick={() => setCheckoutProduct(product)}
-                    className="px-3 md:px-6 py-3 bg-black text-white text-xs md:text-sm hover:bg-gray-800 hover:text-gold transition-colors w-full uppercase tracking-widest font-bold flex items-center justify-center space-x-2"
+                    className="px-3 md:px-6 py-3 bg-black text-white text-[10px] md:text-xs hover:bg-gray-800 hover:text-gold transition-all w-full uppercase tracking-[0.2em] font-bold flex items-center justify-center space-x-2 shadow-sm"
                   >
-                    <MessageCircle size={18} />
+                    <MessageCircle size={16} />
                     <span>Comprar Ahora</span>
                   </button>
-                </div>
+                </motion.div>
               ))
             ) : (
               <div className="col-span-full py-24 flex flex-col items-center justify-center bg-gray-50 rounded-lg border border-dashed border-gray-200">
@@ -1500,9 +1542,9 @@ const ProductsPage = () => {
                   <ShoppingBag size={40} strokeWidth={1} />
                 </div>
                 <h3 className="text-2xl font-serif text-black mb-3">Próximamente más arreglos</h3>
-                <p className="text-gray-500 font-light max-w-md mx-auto mb-8">
-                  Aún no hemos agregado productos a la categoría <span className="font-medium text-black">"{categoryFilter}"</span>. 
-                  Vuelve pronto o explora nuestro catálogo completo.
+                <p className="text-gray-500 font-light max-w-md mx-auto mb-8 text-center px-4">
+                  Aún no hemos agregado productos a la colección <span className="font-semibold text-black italic">"{categoryFilter}"</span>. 
+                  Vuelve pronto o descubre nuestro catálogo completo debajo.
                 </p>
                 <Link 
                   to="/productos" 
@@ -1675,6 +1717,8 @@ export default function App() {
                         <Route path="/producto/:id" element={<ProductPage />} />
                         <Route path="/privacidad" element={<PrivacyPolicy />} />
                         <Route path="/como-comprar" element={<HowToBuy />} />
+                        {/* Dynamic category route */}
+                        <Route path="/:categorySlug" element={<ProductsPage />} />
                       </Routes>
                     </main>
                     <Footer />
