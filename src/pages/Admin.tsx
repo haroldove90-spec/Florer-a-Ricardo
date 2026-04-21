@@ -1920,16 +1920,27 @@ const AdminStoreCustomization = () => {
         if (insertError) throw insertError;
       }
 
-      // 3. Sync with main categories table to ensure foreign keys in products table remain valid
+      // 3. Sync with main categories table to ensure full synchronization
       const allCategoryNames = categories.map(c => c.name.trim()).filter(Boolean);
-      for (const name of allCategoryNames) {
-        const { data: exists } = await supabase.from('categories').select('name').eq('name', name).maybeSingle();
-        if (!exists) {
-          await supabase.from('categories').insert([{ name }]);
-        }
+      
+      // Get all current categories from the categories table
+      const { data: existingAllCats } = await supabase.from('categories').select('name');
+      const existingNamesSet = new Set((existingAllCats || []).map(c => c.name));
+      const currentNamesSet = new Set(allCategoryNames);
+
+      // Deletions: Categories in DB but not in our current list
+      const namesToDelete = [...existingNamesSet].filter(name => !currentNamesSet.has(name));
+      if (namesToDelete.length > 0) {
+        await supabase.from('categories').delete().in('name', namesToDelete);
       }
 
-      setMessage({ type: 'success', text: 'Categorías actualizadas correctamente.' });
+      // Additions: Categories in our list but not in DB
+      const namesToInsert = allCategoryNames.filter(name => !existingNamesSet.has(name));
+      if (namesToInsert.length > 0) {
+        await supabase.from('categories').insert(namesToInsert.map(name => ({ name })));
+      }
+
+      setMessage({ type: 'success', text: 'Categorías actualizadas y sincronizadas correctamente.' });
       fetchData();
     } catch (error: any) {
       console.error('Error saving categories:', error);

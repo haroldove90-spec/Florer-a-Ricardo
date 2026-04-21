@@ -61,27 +61,15 @@ export const ProductProvider = ({ children }: { children: React.ReactNode }) => 
 
   const fetchCategories = async () => {
     try {
-      const [categoriesRes, homeCatsRes] = await Promise.all([
-        supabase
-          .from('categories')
-          .select('name')
-          .order('name', { ascending: true }),
-        supabase
-          .from('home_categories_config')
-          .select('name')
-          .order('display_order', { ascending: true })
-      ]);
+      const { data, error } = await supabase
+        .from('home_categories_config')
+        .select('name')
+        .order('display_order', { ascending: true });
 
-      if (categoriesRes.error) throw categoriesRes.error;
+      if (error) throw error;
       
-      const catNames = categoriesRes.data ? categoriesRes.data.map((c: any) => c.name.trim()) : [];
-      const homeCatNames = homeCatsRes.data ? homeCatsRes.data.map((c: any) => c.name.trim()) : [];
-      
-      // Merge and remove duplicates, filter out empty strings and "Galería"
-      const allNames = [...catNames, ...homeCatNames]
-        .filter(name => name && name !== 'Galería');
-        
-      setCategories([...new Set(allNames)].sort());
+      const names = data ? data.map((c: any) => c.name.trim()).filter(Boolean) : [];
+      setCategories(names);
     } catch (error) {
       console.error('Error fetching categories:', error);
     }
@@ -146,13 +134,12 @@ export const ProductProvider = ({ children }: { children: React.ReactNode }) => 
     return data.publicUrl;
   };
 
-  const addProduct = async (product: Omit<Product, 'id'>, mainImageFile?: File, secondaryImageFiles?: File[]) => {
-    let mainImageUrl = product.image;
-    let secondaryImageUrls = (product.secondaryImages || []).filter(url => !url.startsWith('blob:'));
-
-    // Ensure category exists in categories table to satisfy foreign key constraint
-    if (product.category) {
-      const trimmedCategory = product.category.trim();
+  const syncCategory = async (category: string) => {
+    const trimmedCategory = category.trim();
+    if (!trimmedCategory) return;
+    
+    try {
+      // 1. Ensure it exists in 'categories' table
       const { data: existingCat } = await supabase
         .from('categories')
         .select('name')
@@ -162,6 +149,41 @@ export const ProductProvider = ({ children }: { children: React.ReactNode }) => 
       if (!existingCat) {
         await supabase.from('categories').insert([{ name: trimmedCategory }]);
       }
+
+      // 2. Ensure it exists in 'home_categories_config'
+      const { data: existingHomeCat } = await supabase
+        .from('home_categories_config')
+        .select('name')
+        .eq('name', trimmedCategory)
+        .maybeSingle();
+
+      if (!existingHomeCat) {
+        // Get the current max display_order
+        const { data: maxOrderData } = await supabase
+          .from('home_categories_config')
+          .select('display_order')
+          .order('display_order', { ascending: false })
+          .limit(1);
+        
+        const nextOrder = maxOrderData && maxOrderData.length > 0 ? (maxOrderData[0].display_order + 1) : 0;
+
+        await supabase.from('home_categories_config').insert([{ 
+          name: trimmedCategory,
+          display_order: nextOrder
+        }]);
+      }
+    } catch (error) {
+      console.error('Error syncing category:', error);
+    }
+  };
+
+  const addProduct = async (product: Omit<Product, 'id'>, mainImageFile?: File, secondaryImageFiles?: File[]) => {
+    let mainImageUrl = product.image;
+    let secondaryImageUrls = (product.secondaryImages || []).filter(url => !url.startsWith('blob:'));
+
+    // Synchronize category across all tables
+    if (product.category) {
+      await syncCategory(product.category);
     }
 
     // Upload main image if it's a file
@@ -199,18 +221,9 @@ export const ProductProvider = ({ children }: { children: React.ReactNode }) => 
 
   const updateProduct = async (id: number, product: Partial<Product>, mainImageFile?: File, secondaryImageFiles?: File[]) => {
     try {
-      // Ensure category exists in categories table if it's being updated
+      // Synchronize category across all tables if it's being updated
       if (product.category) {
-        const trimmedCategory = product.category.trim();
-        const { data: existingCat } = await supabase
-          .from('categories')
-          .select('name')
-          .eq('name', trimmedCategory)
-          .maybeSingle();
-
-        if (!existingCat) {
-          await supabase.from('categories').insert([{ name: trimmedCategory }]);
-        }
+        await syncCategory(product.category);
       }
 
       let mainImageUrl = product.image;
@@ -273,89 +286,32 @@ export const ProductProvider = ({ children }: { children: React.ReactNode }) => 
   };
 
   const addCategory = async (category: string) => {
-    const trimmedCategory = category.trim();
-    if (!trimmedCategory) return;
-    
-    try {
-      // First, check if it already exists in categories to avoid redundant inserts
-      const { data: existingCat, error: checkError } = await supabase
-        .from('categories')
-        .select('name')
-        .eq('name', trimmedCategory)
-        .maybeSingle();
-
-      if (checkError) {
-        console.error('Error checking category existence:', checkError);
-      }
-
-      if (!existingCat) {
-        const { error: catError } = await supabase
-          .from('categories')
-          .insert([{ name: trimmedCategory }]);
-
-        if (catError && catError.code !== '23505') {
-          console.error('Error adding to categories:', catError);
-          throw catError;
-        }
-      }
-
-      // Now check and add to home_categories_config for display on Home
-      const { data: existingHomeCat, error: checkHomeError } = await supabase
-        .from('home_categories_config')
-        .select('name')
-        .eq('name', trimmedCategory)
-        .maybeSingle();
-
-      if (checkHomeError) {
-        console.error('Error checking home category existence:', checkHomeError);
-      }
-
-      if (!existingHomeCat) {
-        // Get the current max display_order
-        const { data: maxOrderData, error: orderError } = await supabase
-          .from('home_categories_config')
-          .select('display_order')
-          .order('display_order', { ascending: false })
-          .limit(1);
-        
-        if (orderError) {
-          console.error('Error fetching max order:', orderError);
-        }
-        
-        const nextOrder = maxOrderData && maxOrderData.length > 0 ? (maxOrderData[0].display_order + 1) : 0;
-
-        const { error: homeCatError } = await supabase
-          .from('home_categories_config')
-          .insert([{ 
-            name: trimmedCategory,
-            display_order: nextOrder
-          }]);
-
-        if (homeCatError && homeCatError.code !== '23505') {
-          console.error('Error adding to home_categories_config:', homeCatError);
-          throw homeCatError;
-        }
-      }
-
-      await fetchCategories();
-    } catch (error) {
-      console.error('Fatal error in addCategory:', error);
-      throw error;
-    }
+    await syncCategory(category);
+    await fetchCategories();
   };
 
   const deleteCategory = async (category: string) => {
-    const { error } = await supabase
-      .from('categories')
-      .delete()
-      .eq('name', category);
+    try {
+      // Delete from both tables to maintain synchronization
+      const { error: homeError } = await supabase
+        .from('home_categories_config')
+        .delete()
+        .eq('name', category);
 
-    if (error) {
+      if (homeError) throw homeError;
+
+      const { error: catError } = await supabase
+        .from('categories')
+        .delete()
+        .eq('name', category);
+
+      if (catError) throw catError;
+
+      await fetchCategories();
+    } catch (error) {
       console.error('Error deleting category:', error);
       throw error;
     }
-
-    await fetchCategories();
   };
 
   return (
