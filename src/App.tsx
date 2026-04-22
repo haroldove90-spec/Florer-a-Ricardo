@@ -1568,131 +1568,135 @@ const ProductsPage = () => {
         </p>
       </div>
 
-      {/* Search & Filter Bar */}
-      <div className="sticky top-[88px] md:top-[96px] z-40 bg-white/95 backdrop-blur-md border-b border-gray-100 py-4 px-6 md:px-12">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
-          <div className="relative w-full md:w-96 group">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-black transition-colors" size={18} />
-            <input 
-              type="text" 
-              placeholder="Buscar ramos, flores, estilos..." 
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-gray-50 border border-gray-200 rounded-full pl-11 pr-4 py-3 text-sm outline-none focus:border-black focus:bg-white transition-all shadow-inner"
-            />
+      {/* Search & Filter Bar - Hide if category is 'Eventos' */}
+      {normalize(categoryFilter || '') !== 'eventos' && (
+        <div className="sticky top-[88px] md:top-[96px] z-40 bg-white/95 backdrop-blur-md border-b border-gray-100 py-4 px-6 md:px-12">
+          <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+            <div className="relative w-full md:w-96 group">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-black transition-colors" size={18} />
+              <input 
+                type="text" 
+                placeholder="Buscar ramos, flores, estilos..." 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full bg-gray-50 border border-gray-200 rounded-full pl-11 pr-4 py-3 text-sm outline-none focus:border-black focus:bg-white transition-all shadow-inner"
+              />
+            </div>
+            
+            <div className="flex items-center space-x-2 overflow-x-auto pb-1 md:pb-0 scrollbar-hide w-full md:w-auto">
+              <button 
+                onClick={() => setCategoryFilter(null)}
+                className={`px-4 py-2 rounded-full text-xs uppercase tracking-widest font-bold whitespace-nowrap transition-all shadow-sm ${
+                  !categoryFilter 
+                    ? 'bg-[#62CAC9] text-white ring-2 ring-offset-2 ring-[#62CAC9]' 
+                    : 'bg-gray-100 text-gray-500 hover:bg-gray-200 hover:text-black'
+                }`}
+              >
+                Todos
+              </button>
+              {allCategories.map((cat, idx) => {
+                const colors = [
+                  'hover:bg-rose-50 text-gray-500 hover:text-rose-600 active:bg-rose-600 active:text-white',
+                  'hover:bg-amber-50 text-gray-500 hover:text-amber-600 active:bg-amber-600 active:text-white',
+                  'hover:bg-purple-50 text-gray-500 hover:text-purple-600 active:bg-purple-600 active:text-white',
+                  'hover:bg-emerald-50 text-gray-500 hover:text-emerald-600 active:bg-emerald-600 active:text-white',
+                  'hover:bg-blue-50 text-gray-500 hover:text-blue-600 active:bg-blue-600 active:text-white',
+                ];
+                const activeColors = [
+                  'bg-rose-600 text-white ring-2 ring-offset-2 ring-rose-600',
+                  'bg-amber-600 text-white ring-2 ring-offset-2 ring-amber-600',
+                  'bg-purple-600 text-white ring-2 ring-offset-2 ring-purple-600',
+                  'bg-emerald-600 text-white ring-2 ring-offset-2 ring-emerald-600',
+                  'bg-blue-600 text-white ring-2 ring-offset-2 ring-blue-600',
+                ];
+                const colorIdx = idx % colors.length;
+                
+                return (
+                  <button 
+                    key={cat}
+                    onClick={() => setCategoryFilter(cat)}
+                    className={`px-4 py-2 rounded-full text-xs uppercase tracking-widest font-bold whitespace-nowrap transition-all shadow-sm ${
+                      categoryFilter === cat 
+                        ? activeColors[colorIdx] 
+                        : `bg-gray-50 ${colors[colorIdx]}`
+                    }`}
+                  >
+                    {cat}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Product Grid - Hide if category is 'Eventos' */}
+      {normalize(categoryFilter || '') !== 'eventos' && (
+        <div className="max-w-7xl mx-auto px-6 md:px-12 py-16">
+          <div className="mb-12 text-center">
+            <h2 className="text-2xl font-serif text-black mb-2 uppercase tracking-widest">
+              {searchQuery ? `Resultados para: "${searchQuery}"` : categoryFilter ? `Colección: ${categoryFilter}` : 'Lo más vendido'}
+            </h2>
+            <div className="w-12 h-[2px] bg-black mx-auto" />
           </div>
           
-          <div className="flex items-center space-x-2 overflow-x-auto pb-1 md:pb-0 scrollbar-hide w-full md:w-auto">
-            <button 
-              onClick={() => setCategoryFilter(null)}
-              className={`px-4 py-2 rounded-full text-xs uppercase tracking-widest font-bold whitespace-nowrap transition-all shadow-sm ${
-                !categoryFilter 
-                  ? 'bg-[#62CAC9] text-white ring-2 ring-offset-2 ring-[#62CAC9]' 
-                  : 'bg-gray-100 text-gray-500 hover:bg-gray-200 hover:text-black'
-              }`}
-            >
-              Todos
-            </button>
-            {allCategories.map((cat, idx) => {
-              const colors = [
-                'hover:bg-rose-50 text-gray-500 hover:text-rose-600 active:bg-rose-600 active:text-white',
-                'hover:bg-amber-50 text-gray-500 hover:text-amber-600 active:bg-amber-600 active:text-white',
-                'hover:bg-purple-50 text-gray-500 hover:text-purple-600 active:bg-purple-600 active:text-white',
-                'hover:bg-emerald-50 text-gray-500 hover:text-emerald-600 active:bg-emerald-600 active:text-white',
-                'hover:bg-blue-50 text-gray-500 hover:text-blue-600 active:bg-blue-600 active:text-white',
-              ];
-              const activeColors = [
-                'bg-rose-600 text-white ring-2 ring-offset-2 ring-rose-600',
-                'bg-amber-600 text-white ring-2 ring-offset-2 ring-amber-600',
-                'bg-purple-600 text-white ring-2 ring-offset-2 ring-purple-600',
-                'bg-emerald-600 text-white ring-2 ring-offset-2 ring-emerald-600',
-                'bg-blue-600 text-white ring-2 ring-offset-2 ring-blue-600',
-              ];
-              const colorIdx = idx % colors.length;
-              
-              return (
-                <button 
-                  key={cat}
-                  onClick={() => setCategoryFilter(cat)}
-                  className={`px-4 py-2 rounded-full text-xs uppercase tracking-widest font-bold whitespace-nowrap transition-all shadow-sm ${
-                    categoryFilter === cat 
-                      ? activeColors[colorIdx] 
-                      : `bg-gray-50 ${colors[colorIdx]}`
-                  }`}
-                >
-                  {cat}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      </div>
-
-      {/* Product Grid */}
-      <div className="max-w-7xl mx-auto px-6 md:px-12 py-16">
-        <div className="mb-12 text-center">
-          <h2 className="text-2xl font-serif text-black mb-2 uppercase tracking-widest">
-            {searchQuery ? `Resultados para: "${searchQuery}"` : categoryFilter ? `Colección: ${categoryFilter}` : 'Lo más vendido'}
-          </h2>
-          <div className="w-12 h-[2px] bg-black mx-auto" />
-        </div>
-        
-        {loading ? (
-          <div className="py-20 text-center text-black/50 font-light animate-pulse">Cargando productos...</div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-8 md:gap-10">
-            {filteredProducts.length > 0 ? (
-              filteredProducts.map((product, idx) => (
-                <motion.div 
-                  key={product.id} 
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ delay: idx % 4 * 0.1 }}
-                  className="flex flex-col items-center text-center group bg-white p-4 rounded-sm border border-gray-100 hover:border-black transition-all duration-500 hover:shadow-xl"
-                >
-                  <div className="w-full relative overflow-hidden mb-4 md:mb-6 aspect-[4/5]">
-                    <img 
-                      src={product.image} 
-                      alt={product.name} 
-                      className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110 rounded-sm" 
-                    />
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-500" />
+          {loading ? (
+            <div className="py-20 text-center text-black/50 font-light animate-pulse">Cargando productos...</div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-8 md:gap-10">
+              {filteredProducts.length > 0 ? (
+                filteredProducts.map((product, idx) => (
+                  <motion.div 
+                    key={product.id} 
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{ delay: idx % 4 * 0.1 }}
+                    className="flex flex-col items-center text-center group bg-white p-4 rounded-sm border border-gray-100 hover:border-black transition-all duration-500 hover:shadow-xl"
+                  >
+                    <div className="w-full relative overflow-hidden mb-4 md:mb-6 aspect-[4/5]">
+                      <img 
+                        src={product.image} 
+                        alt={product.name} 
+                        className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110 rounded-sm" 
+                      />
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-500" />
+                    </div>
+                    <h4 className="text-sm font-sans font-bold text-black mb-1 md:mb-2 uppercase tracking-widest">{product.name}</h4>
+                    <p className="text-black/60 text-xs font-light mb-3 line-clamp-2 h-8">{product.description}</p>
+                    <p className="text-black font-bold text-base mb-4 md:mb-6">${product.price.toFixed(2)}</p>
+                    <button 
+                      onClick={() => setCheckoutProduct(product)}
+                      className="px-3 md:px-6 py-3 bg-[#62CAC9] text-white text-[10px] md:text-xs hover:bg-[#4FB4B3] transition-all w-full uppercase tracking-[0.2em] font-bold flex items-center justify-center space-x-2 shadow-sm rounded-sm"
+                    >
+                      <MessageCircle size={16} />
+                      <span>Comprar Ahora</span>
+                    </button>
+                  </motion.div>
+                ))
+              ) : (
+                <div className="col-span-full py-24 flex flex-col items-center justify-center bg-gray-50 rounded-lg border border-dashed border-gray-200">
+                  <div className="w-20 h-20 bg-white rounded-full shadow-sm flex items-center justify-center mb-6 text-gray-300">
+                    <ShoppingBag size={40} strokeWidth={1} />
                   </div>
-                  <h4 className="text-sm font-sans font-bold text-black mb-1 md:mb-2 uppercase tracking-widest">{product.name}</h4>
-                  <p className="text-black/60 text-xs font-light mb-3 line-clamp-2 h-8">{product.description}</p>
-                  <p className="text-black font-bold text-base mb-4 md:mb-6">${product.price.toFixed(2)}</p>
-                  <button 
-                    onClick={() => setCheckoutProduct(product)}
-                    className="px-3 md:px-6 py-3 bg-[#62CAC9] text-white text-[10px] md:text-xs hover:bg-[#4FB4B3] transition-all w-full uppercase tracking-[0.2em] font-bold flex items-center justify-center space-x-2 shadow-sm rounded-sm"
-                  >
-                    <MessageCircle size={16} />
-                    <span>Comprar Ahora</span>
-                  </button>
-                </motion.div>
-              ))
-            ) : (
-              <div className="col-span-full py-24 flex flex-col items-center justify-center bg-gray-50 rounded-lg border border-dashed border-gray-200">
-                <div className="w-20 h-20 bg-white rounded-full shadow-sm flex items-center justify-center mb-6 text-gray-300">
-                  <ShoppingBag size={40} strokeWidth={1} />
+                  <h3 className="text-2xl font-serif text-black mb-3">No encontramos resultados</h3>
+                  <p className="text-gray-500 font-light max-w-md mx-auto mb-8 text-center px-4">
+                    No hay productos que coincidan con <span className="font-semibold text-black italic">"{searchQuery || categoryFilter}"</span>. 
+                    Vuelve pronto o descubre nuestro catálogo completo debajo.
+                  </p>
+                  {(searchQuery || categoryFilter) && (
+                    <button 
+                      onClick={() => { setSearchQuery(''); setCategoryFilter(null); }}
+                      className="text-xs uppercase tracking-widest font-bold border-b-2 border-black pb-1 hover:text-gold hover:border-gold transition-colors"
+                    >
+                      Ver Todo el Catálogo
+                    </button>
+                  )}
                 </div>
-                <h3 className="text-2xl font-serif text-black mb-3">No encontramos resultados</h3>
-                <p className="text-gray-500 font-light max-w-md mx-auto mb-8 text-center px-4">
-                  No hay productos que coincidan con <span className="font-semibold text-black italic">"{searchQuery || categoryFilter}"</span>. 
-                  Vuelve pronto o descubre nuestro catálogo completo debajo.
-                </p>
-                {(searchQuery || categoryFilter) && (
-                  <button 
-                    onClick={() => { setSearchQuery(''); setCategoryFilter(null); }}
-                    className="text-xs uppercase tracking-widest font-bold border-b-2 border-black pb-1 hover:text-gold hover:border-gold transition-colors"
-                  >
-                    Ver Todo el Catálogo
-                  </button>
-                )}
-              </div>
-            )}
-          </div>
-        )}
-      </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Gallery Block */}
       <PhotoGallery category={categoryFilter || undefined} />
