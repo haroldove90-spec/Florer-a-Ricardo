@@ -196,7 +196,7 @@ const CheckoutModal = () => {
   const { checkoutProduct, setCheckoutProduct } = useCart();
 
   const handleConfirm = () => {
-    const message = `🌟 *NUEVO PEDIDO - FLORERÍA RICARDO* 🌟\n\n¡Hola! Me gustaría comprar el siguiente producto:\n\n🛍️ *Producto:* ${checkoutProduct?.name}\n💰 *Precio:* $${checkoutProduct?.price.toFixed(2)}\n\n---\n${WHATSAPP_ORDER_TEMPLATE}`;
+    const message = `🌟 *NUEVO PEDIDO - FLORERÍA RICARDO* 🌟\n\n¡Hola! Me gustaría comprar el siguiente producto:\n\n🛍️ *Producto:* ${checkoutProduct?.name}\n💰 *Precio:* $${checkoutProduct?.price.toFixed(2)}`;
     const encodedMessage = encodeURIComponent(message);
     window.open(`https://wa.me/525559623337?text=${encodedMessage}`, '_blank');
     setCheckoutProduct(null);
@@ -1319,11 +1319,11 @@ const CartModal = () => {
   const handleWhatsAppCheckout = () => {
     if (cart.length === 0) return;
     
-    let message = "Hola! Me gustaría realizar el siguiente pedido:\n\n";
+    let message = "🌟 *NUEVO PEDIDO - FLORERÍA RICARDO* 🌟\n\n¡Hola! Me gustaría comprar los siguientes productos:\n\n";
     cart.forEach(item => {
       message += `- ${item.quantity}x ${item.product.name} ($${(item.product.price * item.quantity).toFixed(2)})\n`;
     });
-    message += `\n*Total: $${cartTotal.toFixed(2)}*\n\n${WHATSAPP_ORDER_TEMPLATE}`;
+    message += `\n*Total: $${cartTotal.toFixed(2)}*`;
     
     const encodedMessage = encodeURIComponent(message);
     window.open(`https://wa.me/525559623337?text=${encodedMessage}`, '_blank');
