@@ -196,7 +196,7 @@ const CheckoutModal = () => {
   const { checkoutProduct, setCheckoutProduct } = useCart();
 
   const handleConfirm = () => {
-    const message = `Hola! Me gustaría comprar el siguiente producto:\n\n*Producto:* ${checkoutProduct?.name}\n*Precio:* $${checkoutProduct?.price.toFixed(2)}\n\n${WHATSAPP_ORDER_TEMPLATE}`;
+    const message = `🌟 *NUEVO PEDIDO - FLORERÍA RICARDO* 🌟\n\n¡Hola! Me gustaría comprar el siguiente producto:\n\n🛍️ *Producto:* ${checkoutProduct?.name}\n💰 *Precio:* $${checkoutProduct?.price.toFixed(2)}\n\n---\n${WHATSAPP_ORDER_TEMPLATE}`;
     const encodedMessage = encodeURIComponent(message);
     window.open(`https://wa.me/525545144797?text=${encodedMessage}`, '_blank');
     setCheckoutProduct(null);
@@ -587,12 +587,26 @@ const HeroSlider = ({ customSlides }: { customSlides?: any[] }) => {
 };
 
 const WelcomeSection = () => {
+  const phoneNumber = "525545144797";
+  const message = `Hola! Me gustaría solicitar informes sobre las promociones del mes y arreglos florales.\n\nAtte: [Tu Nombre]`;
+  const encodedMessage = encodeURIComponent(message);
+  const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
+
   return (
     <section className="pt-2 pb-10 px-6 md:px-12 max-w-6xl mx-auto text-center">
-      <div className="bg-[#62CAC9] p-8 md:p-10 rounded-sm shadow-sm">
-        <p className="text-white text-2xl md:text-3xl font-serif leading-relaxed italic font-medium">
+      <div className="bg-[#62CAC9] p-8 md:p-10 rounded-sm shadow-sm flex flex-col md:flex-row items-center justify-between gap-6 transition-all hover:shadow-md">
+        <p className="text-white text-2xl md:text-3xl font-serif leading-relaxed italic font-medium text-left flex-1">
           "Pregunta por nuestras promociones de cada mes"
         </p>
+        <a 
+          href={whatsappUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="bg-white text-[#62CAC9] px-8 py-4 rounded-full font-bold uppercase tracking-widest text-xs hover:bg-black hover:text-white transition-all flex items-center space-x-2 whitespace-nowrap shadow-sm"
+        >
+          <MessageCircle size={18} />
+          <span>Solicitar Informes</span>
+        </a>
       </div>
     </section>
   );
@@ -1706,7 +1720,7 @@ const ProductsPage = () => {
 
 const FloatingWhatsAppButton = () => {
   const phoneNumber = "525545144797";
-  const message = `Hola! Me gustaría solicitar un arreglo floral.\n\n${WHATSAPP_ORDER_TEMPLATE}`;
+  const message = `Hola! Me gustaría solicitar informes sobre sus arreglos florales.\n\nAtte: [Tu Nombre]`;
   const encodedMessage = encodeURIComponent(message);
   const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
 
