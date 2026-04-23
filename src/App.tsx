@@ -198,7 +198,7 @@ const CheckoutModal = () => {
   const handleConfirm = () => {
     const message = `🌟 *NUEVO PEDIDO - FLORERÍA RICARDO* 🌟\n\n¡Hola! Me gustaría comprar el siguiente producto:\n\n🛍️ *Producto:* ${checkoutProduct?.name}\n💰 *Precio:* $${checkoutProduct?.price.toFixed(2)}\n\n---\n${WHATSAPP_ORDER_TEMPLATE}`;
     const encodedMessage = encodeURIComponent(message);
-    window.open(`https://wa.me/525545144797?text=${encodedMessage}`, '_blank');
+    window.open(`https://wa.me/525559623337?text=${encodedMessage}`, '_blank');
     setCheckoutProduct(null);
   };
 
@@ -587,7 +587,7 @@ const HeroSlider = ({ customSlides }: { customSlides?: any[] }) => {
 };
 
 const WelcomeSection = () => {
-  const phoneNumber = "525545144797";
+  const phoneNumber = "525559623337";
   const message = `Hola! Me gustaría solicitar informes sobre las promociones del mes y arreglos florales.\n\nAtte: [Tu Nombre]`;
   const encodedMessage = encodeURIComponent(message);
   const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
@@ -1326,7 +1326,7 @@ const CartModal = () => {
     message += `\n*Total: $${cartTotal.toFixed(2)}*\n\n${WHATSAPP_ORDER_TEMPLATE}`;
     
     const encodedMessage = encodeURIComponent(message);
-    window.open(`https://wa.me/525545144797?text=${encodedMessage}`, '_blank');
+    window.open(`https://wa.me/525559623337?text=${encodedMessage}`, '_blank');
   };
 
   return (
@@ -1431,7 +1431,7 @@ const ContactSection = () => {
               </div>
               <div>
                 <p className="text-sm font-bold text-black">WhatsApp / Teléfono</p>
-                <p className="text-sm font-light">+52 55 4514 4797</p>
+                <p className="text-sm font-light">+52 55 5962 3337</p>
               </div>
             </div>
             <div className="flex items-center space-x-4">
@@ -1719,7 +1719,7 @@ const ProductsPage = () => {
 };
 
 const FloatingWhatsAppButton = () => {
-  const phoneNumber = "525545144797";
+  const phoneNumber = "525559623337";
   const message = `Hola! Me gustaría solicitar informes sobre sus arreglos florales.\n\nAtte: [Tu Nombre]`;
   const encodedMessage = encodeURIComponent(message);
   const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
