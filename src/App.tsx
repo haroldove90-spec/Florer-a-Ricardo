@@ -1104,6 +1104,7 @@ const ProductsSection = ({ customTitles }: { customTitles?: any }) => {
   const { products, loading } = useProducts();
   const scrollRef = React.useRef<HTMLDivElement>(null);
   const [isPaused, setIsPaused] = React.useState(false);
+  const [previewImage, setPreviewImage] = React.useState<string | null>(null);
   
   const specialSelection = products.filter(p => p.isSpecial);
   
@@ -1165,12 +1166,20 @@ const ProductsSection = ({ customTitles }: { customTitles?: any }) => {
                 key={product.id} 
                 className="flex-none w-[280px] md:w-[300px] lg:w-[calc(25%-18px)] snap-start flex flex-col items-center text-center group bg-white p-4 rounded-sm border border-gray-100 hover:shadow-xl transition-all duration-500"
               >
-                <div className="w-full relative overflow-hidden mb-4 md:mb-6 aspect-[4/5]">
+                <div 
+                  className="w-full relative overflow-hidden mb-4 md:mb-6 aspect-[4/5] cursor-zoom-in"
+                  onClick={() => setPreviewImage(product.image)}
+                >
                   <img 
                     src={product.image} 
                     alt={product.name} 
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 rounded-md" 
                   />
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
+                    <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Search size={24} />
+                    </div>
+                  </div>
                   <div className="absolute top-4 left-4 bg-black text-white text-[10px] uppercase tracking-widest px-3 py-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
                     Especial
                   </div>
@@ -1212,6 +1221,43 @@ const ProductsSection = ({ customTitles }: { customTitles?: any }) => {
           No hay productos marcados como especiales en este momento.
         </div>
       )}
+
+      <AnimatePresence>
+        {previewImage && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-12 bg-black/95 backdrop-blur-md"
+            onClick={() => setPreviewImage(null)}
+          >
+            <motion.button
+              initial={{ y: -20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: -20, opacity: 0 }}
+              className="absolute top-6 right-6 text-white hover:text-gold transition-colors p-2 z-[110] bg-white/10 rounded-full backdrop-blur-sm"
+              onClick={() => setPreviewImage(null)}
+            >
+              <X size={32} strokeWidth={1} />
+            </motion.button>
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ type: "spring", damping: 30, stiffness: 300 }}
+              className="relative max-w-full max-h-full flex items-center justify-center p-2"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <img 
+                src={previewImage} 
+                alt="Product Preview" 
+                className="max-w-full max-h-[85vh] object-contain shadow-[0_0_50px_rgba(0,0,0,0.5)] rounded-sm"
+                referrerPolicy="no-referrer"
+              />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </section>
   );
 };
@@ -1589,6 +1635,7 @@ const ProductsPage = () => {
   const rawCategory = categorySlug || searchParams.get('categoria');
   const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
 
   // Helper to normalize text for comparison (removes accents and spaces)
   const normalize = (text: string) => {
@@ -1736,13 +1783,20 @@ const ProductsPage = () => {
                     transition={{ delay: idx % 4 * 0.1 }}
                     className="flex flex-col items-center text-center group bg-white p-4 rounded-sm border border-gray-100 hover:border-black transition-all duration-500 hover:shadow-xl"
                   >
-                    <div className="w-full relative overflow-hidden mb-4 md:mb-6 aspect-[4/5]">
+                    <div 
+                      className="w-full relative overflow-hidden mb-4 md:mb-6 aspect-[4/5] cursor-zoom-in"
+                      onClick={() => setPreviewImage(product.image)}
+                    >
                       <img 
                         src={product.image} 
                         alt={product.name} 
                         className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110 rounded-sm" 
                       />
-                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-500" />
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-500 flex items-center justify-center">
+                        <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Search size={20} />
+                        </div>
+                      </div>
                     </div>
                     <h4 className="text-sm font-sans font-bold text-black mb-1 md:mb-2 uppercase tracking-widest">{product.name}</h4>
                     <p className="text-black/60 text-xs font-light mb-3 line-clamp-2 h-8">{product.description}</p>
@@ -1780,6 +1834,43 @@ const ProductsPage = () => {
           )}
         </div>
       )}
+
+      <AnimatePresence>
+        {previewImage && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-12 bg-black/95 backdrop-blur-md"
+            onClick={() => setPreviewImage(null)}
+          >
+            <motion.button
+              initial={{ y: -20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: -20, opacity: 0 }}
+              className="absolute top-6 right-6 text-white hover:text-gold transition-colors p-2 z-[110] bg-white/10 rounded-full backdrop-blur-sm"
+              onClick={() => setPreviewImage(null)}
+            >
+              <X size={32} strokeWidth={1} />
+            </motion.button>
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ type: "spring", damping: 30, stiffness: 300 }}
+              className="relative max-w-full max-h-full flex items-center justify-center p-2"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <img 
+                src={previewImage} 
+                alt="Product Preview" 
+                className="max-w-full max-h-[85vh] object-contain shadow-[0_0_50px_rgba(0,0,0,0.5)] rounded-sm"
+                referrerPolicy="no-referrer"
+              />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Gallery Block */}
       <PhotoGallery category={categoryFilter || undefined} />
@@ -1819,6 +1910,7 @@ const AllProductsGrid = ({ customTitles }: { customTitles?: any }) => {
 
   const [categoryFilter, setCategoryFilter] = React.useState<string | null>(null);
   const [searchQuery, setSearchQuery] = React.useState('');
+  const [previewImage, setPreviewImage] = React.useState<string | null>(null);
   const { categories } = useProducts();
 
   const normalize = (text: string) => {
@@ -1866,12 +1958,20 @@ const AllProductsGrid = ({ customTitles }: { customTitles?: any }) => {
               key={product.id} 
               className="flex flex-col items-center text-center group bg-white p-4 rounded-sm border border-gray-100 hover:shadow-lg transition-all duration-500"
             >
-              <div className="w-full relative overflow-hidden mb-4 aspect-[4/5]">
+              <div 
+                className="w-full relative overflow-hidden mb-4 aspect-[4/5] cursor-zoom-in"
+                onClick={() => setPreviewImage(product.image)}
+              >
                 <img 
                   src={product.image} 
                   alt={product.name} 
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 rounded-sm" 
                 />
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
+                  <div className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Search size={16} />
+                  </div>
+                </div>
               </div>
               <h4 className="text-sm md:text-base font-serif text-black mb-1 uppercase tracking-wider line-clamp-1">{product.name}</h4>
               <p className="text-black font-bold text-sm mb-4">${product.price.toFixed(2)}</p>
@@ -1886,6 +1986,43 @@ const AllProductsGrid = ({ customTitles }: { customTitles?: any }) => {
           ))}
         </div>
       )}
+
+      <AnimatePresence>
+        {previewImage && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-12 bg-black/95 backdrop-blur-md"
+            onClick={() => setPreviewImage(null)}
+          >
+            <motion.button
+              initial={{ y: -20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: -20, opacity: 0 }}
+              className="absolute top-6 right-6 text-white hover:text-gold transition-colors p-2 z-[110] bg-white/10 rounded-full backdrop-blur-sm"
+              onClick={() => setPreviewImage(null)}
+            >
+              <X size={32} strokeWidth={1} />
+            </motion.button>
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ type: "spring", damping: 30, stiffness: 300 }}
+              className="relative max-w-full max-h-full flex items-center justify-center p-2"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <img 
+                src={previewImage} 
+                alt="Product Preview" 
+                className="max-w-full max-h-[85vh] object-contain shadow-[0_0_50px_rgba(0,0,0,0.5)] rounded-sm"
+                referrerPolicy="no-referrer"
+              />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
       
       <div className="mt-16 text-center">
         <Link 
