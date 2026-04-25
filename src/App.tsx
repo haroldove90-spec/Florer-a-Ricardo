@@ -671,6 +671,39 @@ const PhotoGallery = ({ category }: { category?: string | null }) => {
   const [photos, setPhotos] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedPhoto, setSelectedPhoto] = useState<any>(null);
+  const [selectedIndex, setSelectedIndex] = useState<number>(-1);
+
+  const openPhoto = (photo: any, index: number) => {
+    setSelectedPhoto(photo);
+    setSelectedIndex(index);
+  };
+
+  const nextPhoto = (e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    if (photos.length === 0) return;
+    const nextIdx = (selectedIndex + 1) % photos.length;
+    setSelectedIndex(nextIdx);
+    setSelectedPhoto(photos[nextIdx]);
+  };
+
+  const prevPhoto = (e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    if (photos.length === 0) return;
+    const prevIdx = (selectedIndex - 1 + photos.length) % photos.length;
+    setSelectedIndex(prevIdx);
+    setSelectedPhoto(photos[prevIdx]);
+  };
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!selectedPhoto) return;
+      if (e.key === 'Escape') setSelectedPhoto(null);
+      if (e.key === 'ArrowRight') nextPhoto();
+      if (e.key === 'ArrowLeft') prevPhoto();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [selectedPhoto, selectedIndex, photos]);
 
   useEffect(() => {
     const fetchPhotos = async () => {
@@ -730,7 +763,7 @@ const PhotoGallery = ({ category }: { category?: string | null }) => {
                 whileInView={{ opacity: 1, scale: 1 }}
                 transition={{ delay: idx % 4 * 0.1 }}
                 className="aspect-square overflow-hidden bg-gray-100 rounded-sm relative group cursor-pointer"
-                onClick={() => setSelectedPhoto(photo)}
+                onClick={() => openPhoto(photo, idx)}
               >
                 <img 
                   src={photo.image_url} 
@@ -738,7 +771,15 @@ const PhotoGallery = ({ category }: { category?: string | null }) => {
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                   referrerPolicy="no-referrer"
                 />
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-500" />
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all duration-500 flex items-center justify-center">
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.5 }}
+                    whileHover={{ opacity: 1, scale: 1 }}
+                    className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <Search size={24} />
+                  </motion.div>
+                </div>
               </motion.div>
             ))}
           </div>
@@ -751,33 +792,61 @@ const PhotoGallery = ({ category }: { category?: string | null }) => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/95 backdrop-blur-sm"
+            className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-12 bg-black/95 backdrop-blur-md"
             onClick={() => setSelectedPhoto(null)}
           >
+            <div className="absolute top-6 left-6 flex items-center space-x-2 text-white/50 text-xs tracking-widest uppercase">
+              <span className="font-bold text-white">{selectedIndex + 1}</span>
+              <span>/</span>
+              <span>{photos.length}</span>
+            </div>
+
             <motion.button
               initial={{ y: -20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: -20, opacity: 0 }}
-              className="absolute top-6 right-6 text-white hover:text-gold transition-colors p-2 z-[110]"
+              className="absolute top-6 right-6 text-white hover:text-gold transition-colors p-2 z-[110] bg-white/10 rounded-full backdrop-blur-sm"
               onClick={() => setSelectedPhoto(null)}
             >
-              <X size={40} strokeWidth={1} />
+              <X size={32} strokeWidth={1} />
             </motion.button>
+
+            {photos.length > 1 && (
+              <>
+                <button
+                  onClick={prevPhoto}
+                  className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 text-white/40 hover:text-white transition-all p-4 z-[110] hover:bg-white/5 rounded-full"
+                >
+                  <ChevronLeft size={48} strokeWidth={1} />
+                </button>
+                <button
+                  onClick={nextPhoto}
+                  className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 text-white/40 hover:text-white transition-all p-4 z-[110] hover:bg-white/5 rounded-full"
+                >
+                  <ChevronRight size={48} strokeWidth={1} />
+                </button>
+              </>
+            )}
             
             <motion.div
+              key={selectedPhoto.id}
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
-              transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              className="relative max-w-5xl max-h-[90vh] w-full flex items-center justify-center"
+              transition={{ type: "spring", damping: 30, stiffness: 300 }}
+              className="relative max-w-full max-h-full flex items-center justify-center p-2"
               onClick={(e) => e.stopPropagation()}
             >
               <img 
                 src={selectedPhoto.image_url} 
                 alt="Gallery Preview" 
-                className="max-w-full max-h-[90vh] object-contain shadow-2xl rounded-sm"
+                className="max-w-full max-h-[85vh] object-contain shadow-[0_0_50px_rgba(0,0,0,0.5)] rounded-sm"
                 referrerPolicy="no-referrer"
               />
+              <div className="absolute -bottom-10 left-0 right-0 text-center">
+                <p className="text-white font-serif text-lg tracking-widest uppercase">Florería Ricardo</p>
+                <p className="text-white/40 text-[10px] tracking-[0.3em] mt-2">DISEÑO EXCLUSIVO</p>
+              </div>
             </motion.div>
           </motion.div>
         )}
