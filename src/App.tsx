@@ -1626,13 +1626,13 @@ const ContactSection = () => {
 };
 
 const ProductsPage = () => {
-  const { products, loading, categories: allCategories } = useProducts();
+  const { products, loading, categories: allCategories, homeCategories } = useProducts();
   const { setCheckoutProduct } = useCart();
   const location = useLocation();
   const { categorySlug } = useParams();
   const searchParams = new URLSearchParams(location.search);
   
-  const rawCategory = categorySlug || searchParams.get('categoria');
+  const rawCategoryString = categorySlug || searchParams.get('categoria');
   const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [previewImage, setPreviewImage] = useState<string | null>(null);
@@ -1646,9 +1646,17 @@ const ProductsPage = () => {
   };
 
   useEffect(() => {
-    if (rawCategory && allCategories.length > 0) {
-      const normalizedRaw = normalize(rawCategory);
-      // Try exact match first, then partial match
+    if (rawCategoryString && allCategories.length > 0) {
+      const normalizedRaw = normalize(rawCategoryString);
+      
+      // 1. Try to match by target_link in homeCategories
+      const homeMatch = homeCategories.find(hc => hc.target_link && normalize(hc.target_link) === normalizedRaw);
+      if (homeMatch) {
+        setCategoryFilter(homeMatch.name);
+        return;
+      }
+
+      // 2. Try exact match by normalized name first, then partial match
       let match = allCategories.find(n => normalize(n) === normalizedRaw);
       if (!match) {
         match = allCategories.find(n => {
@@ -1660,12 +1668,12 @@ const ProductsPage = () => {
       if (match) {
         setCategoryFilter(match);
       } else {
-        setCategoryFilter(rawCategory);
+        setCategoryFilter(rawCategoryString);
       }
-    } else if (!rawCategory) {
+    } else if (!rawCategoryString) {
       setCategoryFilter(null);
     }
-  }, [rawCategory, allCategories]);
+  }, [rawCategoryString, allCategories, homeCategories]);
 
   const filteredProducts = products.filter(p => {
     if (!categoryFilter) return !searchQuery || (p.name + p.description).toLowerCase().includes(searchQuery.toLowerCase());
@@ -2082,7 +2090,7 @@ const HomePage = () => {
   const [slides, setSlides] = useState<any[]>([]);
   const [settings, setSettings] = useState<any>({});
   const [loading, setLoading] = useState(true);
-  const { categories: contextCategories } = useProducts();
+  const { homeCategories, loading: productsLoading } = useProducts();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -2109,13 +2117,23 @@ const HomePage = () => {
     fetchData();
   }, []);
 
-  const homeCategories = contextCategories.map(name => ({ name }));
+  const isInitialLoading = loading || productsLoading;
 
   return (
     <>
       <HeroSlider customSlides={slides} />
       <WelcomeSection />
-      <HomeCategories customCategories={homeCategories} />
+      {isInitialLoading ? (
+        <div className="flex justify-center py-20 px-6">
+          <div className="w-full max-w-6xl grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+            {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
+              <div key={i} className="h-14 bg-gray-50 animate-pulse rounded-sm"></div>
+            ))}
+          </div>
+        </div>
+      ) : (
+        <HomeCategories customCategories={homeCategories} />
+      )}
       {/* <ValuesSection /> - Removed per user request */}
       {/* <FeaturedCategories /> - Hidden per user request */}
       <ProductsSection customTitles={settings} />

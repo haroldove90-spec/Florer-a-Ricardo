@@ -12,9 +12,17 @@ export type Product = {
   isSpecial?: boolean;
 };
 
+export type CategoryConfig = {
+  id: number;
+  name: string;
+  target_link?: string;
+  display_order: number;
+};
+
 type ProductContextType = {
   products: Product[];
   categories: string[];
+  homeCategories: CategoryConfig[];
   loading: boolean;
   addProduct: (product: Omit<Product, 'id'>, mainImageFile?: File, secondaryImageFiles?: File[]) => Promise<void>;
   updateProduct: (id: number, product: Partial<Product>, mainImageFile?: File, secondaryImageFiles?: File[]) => Promise<void>;
@@ -34,6 +42,7 @@ export const useProducts = () => {
 export const ProductProvider = ({ children }: { children: React.ReactNode }) => {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
+  const [homeCategories, setHomeCategories] = useState<CategoryConfig[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchProducts = async () => {
@@ -63,15 +72,18 @@ export const ProductProvider = ({ children }: { children: React.ReactNode }) => 
     try {
       const { data, error } = await supabase
         .from('home_categories_config')
-        .select('name')
+        .select('*')
         .order('display_order', { ascending: true });
 
       if (error) throw error;
       
       if (!data) {
         setCategories([]);
+        setHomeCategories([]);
         return;
       }
+
+      setHomeCategories(data);
 
       // De-duplicate case-insensitively while preserving the first instance's casing
       const uniqueNames: string[] = [];
@@ -331,6 +343,7 @@ export const ProductProvider = ({ children }: { children: React.ReactNode }) => 
     <ProductContext.Provider value={{ 
       products, 
       categories, 
+      homeCategories,
       loading,
       addProduct, 
       updateProduct,
