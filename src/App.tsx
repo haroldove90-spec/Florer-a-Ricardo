@@ -1907,83 +1907,125 @@ const FloatingWhatsAppButton = () => {
 const AllProductsGrid = ({ customTitles }: { customTitles?: any }) => {
   const { products, loading } = useProducts();
   const { setCheckoutProduct } = useCart();
-
-  const [categoryFilter, setCategoryFilter] = React.useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = React.useState('');
+  const scrollRef = React.useRef<HTMLDivElement>(null);
+  const [isPaused, setIsPaused] = React.useState(false);
   const [previewImage, setPreviewImage] = React.useState<string | null>(null);
-  const { categories } = useProducts();
 
-  const normalize = (text: string) => {
-    return text.toLowerCase()
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .replace(/\s+/g, '');
+  // Get the 10 newest products
+  const newestProducts = React.useMemo(() => {
+    return [...products]
+      .sort((a, b) => {
+        // Prefer sorting by ID if numeric (typically higher ID = newer)
+        const idA = typeof a.id === 'number' ? a.id : 0;
+        const idB = typeof b.id === 'number' ? b.id : 0;
+        return idB - idA;
+      })
+      .slice(0, 10);
+  }, [products]);
+
+  const scroll = (direction: 'left' | 'right') => {
+    if (scrollRef.current) {
+      const { scrollLeft, clientWidth } = scrollRef.current;
+      const scrollTo = direction === 'left' ? scrollLeft - clientWidth : scrollLeft + clientWidth;
+      scrollRef.current.scrollTo({ left: scrollTo, behavior: 'smooth' });
+    }
   };
 
-  const filteredProducts = products.filter(p => {
-    const matchesSearch = !searchQuery || 
-      p.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-      p.description.toLowerCase().includes(searchQuery.toLowerCase());
-      
-    if (!categoryFilter) return matchesSearch;
+  React.useEffect(() => {
+    if (loading || newestProducts.length <= 4 || isPaused) return;
 
-    const normalizedFilter = normalize(categoryFilter);
-    const normalizedProductCat = p.category ? normalize(p.category) : '';
-    
-    const matchesCategory = normalizedProductCat === normalizedFilter || 
-                           (normalizedProductCat.length > 3 && normalizedFilter.length > 3 && 
-                            (normalizedProductCat.includes(normalizedFilter) || normalizedFilter.includes(normalizedProductCat)));
-                            
-    return matchesCategory && matchesSearch;
-  });
+    const interval = setInterval(() => {
+      if (scrollRef.current) {
+        const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
+        const maxScroll = scrollWidth - clientWidth;
+        
+        if (scrollLeft >= maxScroll - 10) {
+          scrollRef.current.scrollTo({ left: 0, behavior: 'smooth' });
+        } else {
+          scroll('right');
+        }
+      }
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [loading, newestProducts.length, isPaused]);
 
   return (
-    <section className="py-24 px-4 md:px-6 lg:px-12 max-w-[1600px] mx-auto">
+    <section className="py-24 px-4 md:px-6 lg:px-12 max-w-7xl mx-auto overflow-hidden">
       <div className="text-center mb-12 md:mb-16">
-        <h2 className="text-xs uppercase tracking-[0.3em] text-black mb-4 font-semibold">
-          {customTitles?.catalog_title || 'Catálogo Completo'}
+        <h2 className="text-xs uppercase tracking-[0.3em] text-black mb-4 font-semibold italic">
+          {customTitles?.catalog_title || 'Catálogo'}
         </h2>
         <h3 className="text-3xl md:text-4xl font-serif text-black mb-6">
-          {customTitles?.catalog_subtitle || 'Todos Nuestros Productos'}
+          {customTitles?.catalog_subtitle || 'Algunos de nuestros productos'}
         </h3>
         <div className="w-12 h-[2px] bg-black mx-auto" />
       </div>
 
       {loading ? (
-        <div className="py-20 text-center text-black/50 font-light">Cargando catálogo...</div>
+        <div className="py-20 text-center text-black/50 font-light anim-pulse">Cargando catálogo...</div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-6 gap-6 md:gap-8">
-          {filteredProducts.map(product => (
-            <div 
-              key={product.id} 
-              className="flex flex-col items-center text-center group bg-white p-4 rounded-sm border border-gray-100 hover:shadow-lg transition-all duration-500"
-            >
+        <div 
+          className="relative overflow-visible"
+          onMouseEnter={() => setIsPaused(true)}
+          onMouseLeave={() => setIsPaused(false)}
+        >
+          {/* Slider Container */}
+          <div 
+            ref={scrollRef}
+            className={`flex overflow-x-auto snap-x snap-mandatory scrollbar-hide space-x-6 pb-8 ${newestProducts.length <= 4 ? 'lg:justify-center' : ''}`}
+            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+          >
+            {newestProducts.map(product => (
               <div 
-                className="w-full relative overflow-hidden mb-4 aspect-[4/5] cursor-zoom-in"
-                onClick={() => setPreviewImage(product.image)}
+                key={product.id} 
+                className="flex-none w-[280px] md:w-[300px] lg:w-[calc(25%-18px)] snap-start flex flex-col items-center text-center group bg-white p-4 rounded-sm border border-gray-100 hover:shadow-xl transition-all duration-500"
               >
-                <img 
-                  src={product.image} 
-                  alt={product.name} 
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 rounded-sm" 
-                />
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
-                  <div className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Search size={16} />
+                <div 
+                  className="w-full relative overflow-hidden mb-4 md:mb-6 aspect-[4/5] cursor-zoom-in"
+                  onClick={() => setPreviewImage(product.image)}
+                >
+                  <img 
+                    src={product.image} 
+                    alt={product.name} 
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 rounded-sm" 
+                  />
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
+                    <div className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Search size={16} />
+                    </div>
                   </div>
                 </div>
+                <h4 className="text-sm md:text-base font-serif text-black mb-1 uppercase tracking-wider line-clamp-1">{product.name}</h4>
+                <p className="text-black font-bold text-sm mb-4">${product.price.toFixed(2)}</p>
+                <button 
+                  onClick={() => setCheckoutProduct(product)}
+                  className="px-4 py-2 bg-[#62CAC9] text-white text-[10px] md:text-xs hover:bg-[#4FB4B3] transition-colors w-full uppercase tracking-widest font-bold flex items-center justify-center space-x-2"
+                >
+                  <MessageCircle size={14} />
+                  <span>Comprar</span>
+                </button>
               </div>
-              <h4 className="text-sm md:text-base font-serif text-black mb-1 uppercase tracking-wider line-clamp-1">{product.name}</h4>
-              <p className="text-black font-bold text-sm mb-4">${product.price.toFixed(2)}</p>
+            ))}
+          </div>
+
+          {/* Navigation Buttons */}
+          {newestProducts.length > 4 && (
+            <>
               <button 
-                onClick={() => setCheckoutProduct(product)}
-                className="px-4 py-2 bg-[#62CAC9] text-white text-[10px] md:text-xs hover:bg-[#4FB4B3] transition-colors w-full uppercase tracking-widest font-bold flex items-center justify-center space-x-2"
+                onClick={() => scroll('left')}
+                className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 md:-translate-x-6 lg:-translate-x-12 bg-white text-black p-3 rounded-full shadow-lg hover:bg-black hover:text-white z-10 hidden md:block transition-all border border-gray-100"
               >
-                <MessageCircle size={14} />
-                <span>Comprar</span>
+                <ChevronLeft size={24} />
               </button>
-            </div>
-          ))}
+              <button 
+                onClick={() => scroll('right')}
+                className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 md:translate-x-6 lg:translate-x-12 bg-white text-black p-3 rounded-full shadow-lg hover:bg-black hover:text-white z-10 hidden md:block transition-all border border-gray-100"
+              >
+                <ChevronRight size={24} />
+              </button>
+            </>
+          )}
         </div>
       )}
 
@@ -2029,7 +2071,7 @@ const AllProductsGrid = ({ customTitles }: { customTitles?: any }) => {
           to="/productos" 
           className="inline-block px-10 py-4 bg-[#62CAC9] text-white text-xs uppercase tracking-[0.2em] font-bold hover:bg-[#4FB4B3] transition-all duration-500 rounded-sm shadow-md"
         >
-          Ver Todo el Catálogo
+          Catálogo
         </Link>
       </div>
     </section>
